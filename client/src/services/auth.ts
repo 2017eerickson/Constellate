@@ -2,17 +2,16 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import apiClient from '../api/client';
+import { AuthResponse, User } from '../types';
 
-// Call this once at app startup (in App.js)
-export function configureGoogleSignIn() {
+export function configureGoogleSignIn(): void {
   GoogleSignin.configure({
-    webClientId: Constants.expoConfig.extra.webClientId,
-    iosClientId: Constants.expoConfig.extra.iosClientId,
+    webClientId: Constants.expoConfig?.extra?.webClientId,
+    iosClientId: Constants.expoConfig?.extra?.iosClientId,
   });
 }
 
-// Sign in with Google, send token to backend, store JWTs
-export async function signInWithGoogle() {
+export async function signInWithGoogle(): Promise<{ user: User; isNewUser: boolean }> {
   await GoogleSignin.hasPlayServices();
   const response = await GoogleSignin.signIn();
   const idToken = response.data?.idToken;
@@ -21,12 +20,10 @@ export async function signInWithGoogle() {
     throw new Error('No ID token received from Google');
   }
 
-  // Send the Google ID token to your backend for verification
-  const { data } = await apiClient.post('/auth/google/', {
+  const { data } = await apiClient.post<AuthResponse>('/auth/google/', {
     id_token: idToken,
   });
 
-  // Store the JWT pair on the device
   await AsyncStorage.setItem('access_token', data.access);
   await AsyncStorage.setItem('refresh_token', data.refresh);
 
@@ -36,14 +33,12 @@ export async function signInWithGoogle() {
   };
 }
 
-// Complete onboarding (save birthday)
-export async function completeOnboarding(birthday) {
-  const { data } = await apiClient.post('/auth/onboarding/', { birthday });
+export async function completeOnboarding(birthday: string): Promise<User> {
+  const { data } = await apiClient.post<{ user: User }>('/auth/onboarding/', { birthday });
   return data.user;
 }
 
-// Sign out — clear tokens and Google session
-export async function signOut() {
+export async function signOut(): Promise<void> {
   await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
   try {
     await GoogleSignin.signOut();
@@ -52,19 +47,16 @@ export async function signOut() {
   }
 }
 
-// Check if user has stored tokens (used on app startup)
-export async function getStoredAuth() {
+export async function getStoredAuth(): Promise<User | null> {
   const accessToken = await AsyncStorage.getItem('access_token');
   if (!accessToken) {
     return null;
   }
 
-  // Verify the token still works by fetching current user data
   try {
-    const { data } = await apiClient.get('/auth/me/');
+    const { data } = await apiClient.get<{ user: User }>('/auth/me/');
     return data.user;
   } catch {
-    // Token expired and refresh failed — user needs to sign in again
     await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
     return null;
   }

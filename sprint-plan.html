@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Constellate MVP Sprint Plan</title>
   <style>
-    @page { margin: 0.75in; }
+    @page { margin: 0.6in; }
     body {
       font-family: 'Helvetica Neue', Arial, sans-serif;
       color: #1a1a1a;
@@ -23,42 +23,58 @@
       text-align: center;
       color: #666;
       font-size: 14px;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
     }
     .overview {
       background: #f4f4f8;
       border-radius: 8px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      font-size: 14px;
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      font-size: 13px;
     }
     .overview h2 {
       margin-top: 0;
-      font-size: 16px;
+      font-size: 15px;
       color: #2c2c54;
     }
     .overview ul { margin: 6px 0; padding-left: 20px; }
+    .overview li { margin-bottom: 2px; }
+    .post-mvp {
+      background: #fce4ec;
+      border: 1px solid #f48fb1;
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+    .post-mvp h2 {
+      margin-top: 0;
+      font-size: 15px;
+      color: #c62828;
+    }
+    .post-mvp ul { margin: 6px 0; padding-left: 20px; }
+    .post-mvp li { margin-bottom: 2px; }
     .best-practices {
       background: #eef6ff;
       border: 1px solid #b3d4fc;
       border-radius: 8px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      font-size: 13px;
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      font-size: 12px;
     }
     .best-practices h2 {
       margin-top: 0;
-      font-size: 16px;
+      font-size: 15px;
       color: #2c2c54;
     }
     .best-practices ul { margin: 6px 0; padding-left: 20px; }
-    .best-practices li { margin-bottom: 4px; }
+    .best-practices li { margin-bottom: 3px; }
     .size-legend {
       background: #f9f9f9;
       border: 1px solid #ddd;
       border-radius: 8px;
-      padding: 12px 20px;
-      margin-bottom: 30px;
+      padding: 10px 20px;
+      margin-bottom: 24px;
       font-size: 13px;
       display: flex;
       gap: 30px;
@@ -79,7 +95,7 @@
     .size-l { background: #ffcdd2; color: #c62828; }
     .sprint {
       page-break-inside: avoid;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       border: 1px solid #ddd;
       border-radius: 8px;
       overflow: hidden;
@@ -88,12 +104,12 @@
       background: #2c2c54;
       color: white;
       padding: 10px 16px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
     }
     .sprint-header span {
       font-weight: normal;
-      font-size: 13px;
+      font-size: 12px;
       opacity: 0.85;
       float: right;
       margin-top: 2px;
@@ -101,43 +117,43 @@
     .sprint-goal {
       background: #f0eef8;
       padding: 8px 16px;
-      font-size: 13px;
+      font-size: 12px;
       border-bottom: 1px solid #eee;
     }
     .sprint-goal strong { color: #2c2c54; }
     .week {
-      padding: 12px 16px;
+      padding: 10px 16px;
       border-bottom: 1px solid #eee;
     }
     .week:last-child { border-bottom: none; }
     .week h4 {
       margin: 0 0 8px 0;
-      font-size: 14px;
+      font-size: 13px;
       color: #2c2c54;
     }
     .task-group {
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .task-group h5 {
-      margin: 0 0 4px 0;
-      font-size: 13px;
+      margin: 0 0 3px 0;
+      font-size: 12px;
       color: #444;
     }
     .task-group ul {
       margin: 0;
       padding-left: 20px;
-      font-size: 13px;
+      font-size: 12px;
     }
     .task-group li {
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
     .checkbox {
       display: inline-block;
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
       border: 1.5px solid #999;
       border-radius: 2px;
-      margin-right: 6px;
+      margin-right: 5px;
       vertical-align: middle;
       position: relative;
       top: -1px;
@@ -145,22 +161,22 @@
     .review {
       background: #e8f5e9;
       border-left: 3px solid #4caf50;
-      padding: 10px 16px;
-      font-size: 13px;
+      padding: 8px 16px;
+      font-size: 12px;
       margin: 0;
     }
     .review strong { color: #2e7d32; }
     .review ul {
       margin: 4px 0 0;
       padding-left: 20px;
-      font-size: 12px;
+      font-size: 11px;
     }
     .note {
       background: #fff8e1;
       border-left: 3px solid #ffc107;
       padding: 8px 12px;
       font-size: 12px;
-      margin: 8px 16px 12px;
+      margin: 16px 0;
       border-radius: 0 4px 4px 0;
     }
   </style>
@@ -168,32 +184,32 @@
 <body>
 
 <h1>Constellate MVP Sprint Plan</h1>
-<p class="subtitle">Sep 10, 2026 - Dec 12, 2026 | 7 Sprints (2 weeks each)</p>
+<p class="subtitle">Sep 10, 2026 - Dec 12, 2026 | 7 Sprints (2 weeks each) | 4 hrs/day with Claude Code building</p>
 
 <div class="best-practices">
   <h2>Sprint Process (Do This Every Sprint)</h2>
   <ul>
-    <li><strong>Daily standup (5 min):</strong> Ask yourself — What did I do yesterday? What's today? What's blocking me?</li>
-    <li><strong>Sprint planning (Day 1, 30 min):</strong> Review upcoming tasks, adjust based on what you learned last sprint</li>
+    <li><strong>Daily standup (5 min):</strong> What did I do yesterday? What's today? What's blocking me?</li>
+    <li><strong>Sprint planning (Day 1, 30 min):</strong> Review upcoming tasks, adjust based on last sprint</li>
     <li><strong>Sprint review (Last day, 30 min):</strong> Demo what you built, note what's working and what isn't</li>
-    <li><strong>Retrospective (Last day, 15 min):</strong> What went well? What slowed me down? What will I change next sprint?</li>
-    <li><strong>Velocity tracking:</strong> Count completed tasks per sprint — if you're consistently finishing &lt;80%, reduce scope</li>
-    <li><strong>Definition of Done:</strong> A task is done when it works locally, has been manually tested, and has no console errors</li>
+    <li><strong>Retrospective (Last day, 15 min):</strong> What went well? What slowed me down? What will I change?</li>
+    <li><strong>Velocity tracking:</strong> Count completed tasks per sprint — if consistently finishing &lt;80%, reduce scope</li>
+    <li><strong>Definition of Done:</strong> Works locally, manually tested, no console errors</li>
   </ul>
 </div>
 
 <div class="size-legend">
-  <strong>Size Estimates:</strong>
-  <span><span class="size size-s">S</span> = few hours</span>
-  <span><span class="size size-m">M</span> = half day to full day</span>
-  <span><span class="size size-l">L</span> = 1-2 days</span>
+  <strong>Size Estimates (with Claude coding):</strong>
+  <span><span class="size size-s">S</span> = under 1 hr</span>
+  <span><span class="size size-m">M</span> = 1-2 hrs</span>
+  <span><span class="size size-l">L</span> = 2-4 hrs</span>
 </div>
 
 <div class="overview">
   <h2>What's Already Done</h2>
   <ul>
     <li>Google SSO + JWT auth (full backend + frontend flow)</li>
-    <li>All Django models: User, Profile, Partnership, Stardust, Streak, StreakActivity</li>
+    <li>Django models: User, Profile, Partnership, Stardust, Streak, StreakActivity</li>
     <li>Self-partnership (soulmate) signal on user creation</li>
     <li>Frontend screens: SignIn, Onboarding, Home</li>
     <li>Axios interceptors with auto token refresh</li>
@@ -201,9 +217,20 @@
   </ul>
 </div>
 
+<div class="post-mvp">
+  <h2>Post-MVP (Scoped Out)</h2>
+  <ul>
+    <li>Pet accessories/customization (stardust spending on pet)</li>
+    <li>QR code for partner adding</li>
+    <li>Push notifications (lock screen)</li>
+    <li>Full message thread on deep questions</li>
+    <li>Full settings / edit profile</li>
+  </ul>
+</div>
+
 <!-- SPRINT 1 -->
 <div class="sprint">
-  <div class="sprint-header">Sprint 1: Partnerships Backend + Frontend <span>Sep 10 - Sep 24</span></div>
+  <div class="sprint-header">Sprint 1: Partnerships Backend + Connect Flow <span>Sep 10 - Sep 24</span></div>
   <div class="sprint-goal"><strong>Sprint Goal:</strong> Two users can connect via partner codes and see each other in a partners list.</div>
 
   <div class="week">
@@ -233,16 +260,14 @@
       <ul>
         <li><span class="checkbox"></span>Create relationship_app/urls.py and register in main urls.py <span class="size size-s">S</span></li>
         <li><span class="checkbox"></span>Add IsAuthenticated permission classes <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Test all endpoints manually (Postman/curl) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Test all endpoints via Postman/curl <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
       <h5>Day 5: Edge Cases + Tests</h5>
       <ul>
-        <li><span class="checkbox"></span>Handle invalid partner_code (404) <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Handle already-connected partners (400) <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Handle accept/decline permissions <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Handle invalid partner_code, already-connected, permission errors <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>Write Django tests for each endpoint <span class="size size-l">L</span></li>
       </ul>
     </div>
@@ -255,17 +280,16 @@
       <h5>Day 6-7: Partners List Screen</h5>
       <ul>
         <li><span class="checkbox"></span>Create PartnersScreen — fetch and display all partnerships <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Show partner name, status badge, relation type <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Show partner name, "days in orbit", relation type, status badge <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>Pull-to-refresh <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Add bottom tab navigation (Home, Partners, Profile placeholder) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Bottom tab navigation (Constellation, Partners, Settings) <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
       <h5>Day 8: Connect Flow</h5>
       <ul>
-        <li><span class="checkbox"></span>Add "Connect" button on PartnersScreen <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Modal/screen with text input for partner_code <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Add partner screen with text input for partner_code <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>Submit calls connect endpoint, shows success/error <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>Display your own partner_code with copy button <span class="size size-s">S</span></li>
       </ul>
@@ -274,361 +298,309 @@
     <div class="task-group">
       <h5>Day 9: Incoming Requests</h5>
       <ul>
-        <li><span class="checkbox"></span>Show pending partnerships (received) with Accept/Decline buttons <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Accept -> PATCH to active, Decline -> DELETE <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Pending partnerships with Accept/Decline buttons <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>Visual distinction between sent vs received requests <span class="size size-s">S</span></li>
-      </ul>
-    </div>
-
-    <div class="task-group">
-      <h5>Day 10: Polish + Integration Testing</h5>
-      <ul>
-        <li><span class="checkbox"></span>Loading and error states on all new screens <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Empty state ("Share your code to connect!") <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>End-to-end test: share code -> enter code -> accept -> both see active <span class="size size-m">M</span></li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="review">
-    <strong>Sprint 1 Review Checkpoint (Sep 24)</strong>
-    <ul>
-      <li><span class="checkbox"></span>Demo: Can two users connect via partner codes and see each other?</li>
-      <li><span class="checkbox"></span>Retro: What went well? What slowed me down? Adjust Sprint 2 scope if needed.</li>
-      <li><span class="checkbox"></span>Groom Sprint 2: Review tasks, re-prioritize if anything slipped from Sprint 1.</li>
-    </ul>
-  </div>
-</div>
-
-<!-- SPRINT 2 -->
-<div class="sprint">
-  <div class="sprint-header">Sprint 2: Profiles + Partner Views <span>Sep 24 - Oct 8</span></div>
-  <div class="sprint-goal"><strong>Sprint Goal:</strong> Users can edit their profile and view partner details. App has proper tab navigation.</div>
-
-  <div class="week">
-    <h4>Week 1 — Backend + Profile Screen</h4>
-
-    <div class="task-group">
-      <h5>Day 1-2: Profile API</h5>
-      <ul>
-        <li><span class="checkbox"></span>GET /api/v1/profiles/me/ — return current user's profile <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>PUT /api/v1/profiles/me/ — update relationship_style, display info <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>ProfileSerializer with nested user info <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Create profile_app/urls.py, register in main urls.py <span class="size size-s">S</span></li>
-      </ul>
-    </div>
-
-    <div class="task-group">
-      <h5>Day 3-4: Profile Screen (Frontend)</h5>
-      <ul>
-        <li><span class="checkbox"></span>Create ProfileScreen — display user info and relationship style <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Edit mode: dropdown/picker for relationship_style <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Save changes via PUT endpoint <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Wire up Profile tab in bottom navigation <span class="size size-s">S</span></li>
-      </ul>
-    </div>
-
-    <div class="task-group">
-      <h5>Day 5: Auto-Create Profile</h5>
-      <ul>
-        <li><span class="checkbox"></span>Add signal or update auth flow to create Profile on user creation <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Handle existing users without profiles (migration/backfill) <span class="size size-m">M</span></li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="week">
-    <h4>Week 2 — Partner Detail + Navigation</h4>
-
-    <div class="task-group">
-      <h5>Day 6-7: Partner Detail Screen</h5>
-      <ul>
-        <li><span class="checkbox"></span>Create PartnerDetailScreen — tap a partner to see their profile <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>GET /api/v1/relationships/&lt;id&gt;/ — return partnership detail with partner profile <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Show partner's name, relationship_style, relation type, status <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Actions: pause/end partnership from detail screen <span class="size size-m">M</span></li>
-      </ul>
-    </div>
-
-    <div class="task-group">
-      <h5>Day 8-9: Navigation Overhaul</h5>
-      <ul>
-        <li><span class="checkbox"></span>Bottom tab navigator: Home, Partners, Profile <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Stack navigators nested within each tab <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Partners tab: list -> detail flow <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Consistent header styling <span class="size size-s">S</span></li>
       </ul>
     </div>
 
     <div class="task-group">
       <h5>Day 10: Polish</h5>
       <ul>
-        <li><span class="checkbox"></span>Test all navigation flows <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Loading/error states on profile and detail screens <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Fix any layout or data issues <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Loading/error/empty states on all new screens <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>End-to-end test: share code -> enter code -> accept -> both see active <span class="size size-m">M</span></li>
       </ul>
     </div>
   </div>
 
   <div class="review">
-    <strong>Sprint 2 Review Checkpoint (Oct 8)</strong>
+    <strong>Sprint 1 Review (Sep 24)</strong>
     <ul>
-      <li><span class="checkbox"></span>Demo: Can I edit my profile, view a partner's details, and navigate between tabs?</li>
-      <li><span class="checkbox"></span>Retro: Am I on pace? Do I need to cut scope from later sprints?</li>
-      <li><span class="checkbox"></span>Groom Sprint 3: Review gamification tasks + animation learning plan.</li>
+      <li><span class="checkbox"></span>Demo: Two users connect via partner codes and see each other.</li>
+      <li><span class="checkbox"></span>Retro: What went well? What slowed me down? Adjust Sprint 2 if needed.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SPRINT 2 -->
+<div class="sprint">
+  <div class="sprint-header">Sprint 2: Constellation View + Planet Screen + Pet Backend <span>Sep 24 - Oct 8</span></div>
+  <div class="sprint-goal"><strong>Sprint Goal:</strong> Constellation star map navigates to partnership planets. Pet model exists and works via API.</div>
+
+  <div class="week">
+    <h4>Week 1 — Constellation + Planet</h4>
+
+    <div class="task-group">
+      <h5>Day 1-3: Constellation Star Map</h5>
+      <ul>
+        <li><span class="checkbox"></span>Research graphics library (react-native-skia or canvas-based) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Render partnerships as stars on a constellation view <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>Pinch-to-zoom gesture handling <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>Tap/zoom on star transitions to planet screen <span class="size size-l">L</span></li>
+      </ul>
+    </div>
+
+    <div class="task-group">
+      <h5>Day 4-5: Planet Screen (Partnership Hub)</h5>
+      <ul>
+        <li><span class="checkbox"></span>Create PlanetScreen — the main partnership dashboard <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Planet visual rendering (static for now) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Activity buttons grid: Mood, Affection, Questions, Pet <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Display partnership info: names, days in orbit, stardust balance <span class="size size-s">S</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="week">
+    <h4>Week 2 — Pet Backend + Animation Learning</h4>
+
+    <div class="task-group">
+      <h5>Day 6-7: Pet Model + API</h5>
+      <ul>
+        <li><span class="checkbox"></span>Pet model: name, species/type, mood, hunger, happiness, partnership FK <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Auto-create pet when partnership becomes active <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>GET /api/v1/gamification/pet/&lt;partnership_id&gt;/ — view pet state <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>POST /api/v1/gamification/pet/&lt;partnership_id&gt;/feed/ — feed pet, awards stardust <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>POST /api/v1/gamification/pet/&lt;partnership_id&gt;/play/ — play with pet, awards stardust <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Pet state decay logic (hunger/happiness decrease over time) <span class="size size-m">M</span></li>
+      </ul>
+    </div>
+
+    <div class="task-group">
+      <h5>Day 8-10: Animation Learning</h5>
+      <ul>
+        <li><span class="checkbox"></span>Learn React Native Reanimated 3 (worklets, shared values) <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>Explore Lottie for pre-built animations (sparkles, confetti) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Build practice animations: fade, slide, scale bounce <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Install animation libraries into the project <span class="size size-s">S</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="review">
+    <strong>Sprint 2 Review (Oct 8)</strong>
+    <ul>
+      <li><span class="checkbox"></span>Demo: Constellation view -> tap star -> planet screen with activity buttons.</li>
+      <li><span class="checkbox"></span>Demo: Feed/play pet via API and see state change.</li>
+      <li><span class="checkbox"></span>Demo: 2-3 working animation prototypes.</li>
     </ul>
   </div>
 </div>
 
 <!-- SPRINT 3 -->
 <div class="sprint">
-  <div class="sprint-header">Sprint 3: Gamification Backend + Animation Learning <span>Oct 8 - Oct 22</span></div>
-  <div class="sprint-goal"><strong>Sprint Goal:</strong> Gamification API works end-to-end. Animation fundamentals learned and prototyped.</div>
+  <div class="sprint-header">Sprint 3: Pet Frontend + Mood + Affection <span>Oct 8 - Oct 22</span></div>
+  <div class="sprint-goal"><strong>Sprint Goal:</strong> Users can interact with their pet, update mood, and send affection. Stardust earned from all.</div>
 
   <div class="week">
-    <h4>Week 1 — Gamification API</h4>
+    <h4>Week 1 — Pet Screen + Mood</h4>
 
     <div class="task-group">
-      <h5>Day 1-2: Streak Logic</h5>
+      <h5>Day 1-3: Pet Screen</h5>
       <ul>
-        <li><span class="checkbox"></span>POST /api/v1/gamification/streaks/&lt;partnership_id&gt;/check-in/ — daily check-in <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Streak reset logic: if last_completed_at was not yesterday, reset current_count <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Update longest_count when current exceeds it <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Prevent double check-in on same day <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Auto-create Streak when Partnership becomes active <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Create PetScreen — display pet with name, mood, age <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Pet visual (static image or Lottie animation) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Play button — calls play endpoint, animated feedback <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Feed button — calls feed endpoint, animated feedback <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Display pet stats (hunger/happiness bars or indicators) <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
-      <h5>Day 3: Stardust Logic</h5>
+      <h5>Day 4-5: Mood Updater</h5>
       <ul>
-        <li><span class="checkbox"></span>Award stardust on streak check-in (scaling with streak length) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>GET /api/v1/gamification/stardust/&lt;partnership_id&gt;/ — view balances <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Stardust earning rules (define amounts per action) <span class="size size-s">S</span></li>
-      </ul>
-    </div>
-
-    <div class="task-group">
-      <h5>Day 4-5: Activities/Challenges</h5>
-      <ul>
-        <li><span class="checkbox"></span>Create Activity model (title, description, stardust_reward, category) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Seed data: 15-20 starter activities <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>GET /api/v1/gamification/activities/ — list available activities <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>POST /api/v1/gamification/activities/&lt;id&gt;/complete/ — mark complete, award stardust <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Create gamification_app/urls.py, register in main urls.py <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Mood model: user FK, partnership FK, mood_value, timestamp <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>POST /api/v1/gamification/mood/&lt;partnership_id&gt;/ — update mood, awards stardust <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>GET endpoint — view partner's current mood <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Mood picker UI (emoji or mood scale) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Display partner's mood on planet screen <span class="size size-s">S</span></li>
       </ul>
     </div>
   </div>
 
   <div class="week">
-    <h4>Week 2 — Animation Research + Learning</h4>
+    <h4>Week 2 — Affection Sender</h4>
 
     <div class="task-group">
-      <h5>Day 6-7: React Native Animation Fundamentals</h5>
+      <h5>Day 6-8: Affection Backend + Frontend</h5>
       <ul>
-        <li><span class="checkbox"></span>Learn React Native Animated API basics (timing, spring, decay) <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Learn React Native Reanimated 3 library (worklets, shared values) <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Decide: Animated API vs Reanimated vs both <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Install chosen animation library <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Affection model: sender FK, partnership FK, type, message, read, timestamp <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>POST /api/v1/gamification/affection/&lt;partnership_id&gt;/send/ — send affection, awards stardust <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>GET /api/v1/gamification/affection/&lt;partnership_id&gt;/unread/ — check for unread <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Affection type picker (hug, kiss, compliment, custom message) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Send animation (heart/sparkle flying out) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Receive popup on app open if unread affection exists <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
-      <h5>Day 8-9: Animation Prototyping</h5>
+      <h5>Day 9-10: In-App Notification System</h5>
       <ul>
-        <li><span class="checkbox"></span>Build practice animations: fade in, slide up, scale bounce <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Learn gesture-driven animations (swipe, drag) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Explore Lottie for complex pre-built animations (confetti, sparkles) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Plan which app interactions need animation <span class="size size-s">S</span></li>
-      </ul>
-    </div>
-
-    <div class="task-group">
-      <h5>Day 10: Animation Architecture</h5>
-      <ul>
-        <li><span class="checkbox"></span>Create reusable animation components/hooks for the app <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Add screen transition animations to navigation <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Document animation patterns for consistency <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Backend: unread/activity flags per partnership per user <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Red dot badges on activity buttons when new activity exists <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Mark as read when user views the relevant screen <span class="size size-s">S</span></li>
       </ul>
     </div>
   </div>
 
   <div class="review">
-    <strong>Sprint 3 Review Checkpoint (Oct 22)</strong>
+    <strong>Sprint 3 Review (Oct 22)</strong>
     <ul>
-      <li><span class="checkbox"></span>Demo: Can I check in to a streak, earn stardust, and complete an activity via API?</li>
-      <li><span class="checkbox"></span>Demo: Show 2-3 working animation prototypes.</li>
-      <li><span class="checkbox"></span>Retro: Was the animation learning time enough? Adjust Sprint 4 if needed.</li>
-      <li><span class="checkbox"></span>Groom Sprint 4: Decide which animations to prioritize for the gamification UI.</li>
+      <li><span class="checkbox"></span>Demo: Feed/play pet, update mood, send affection — all earn stardust.</li>
+      <li><span class="checkbox"></span>Demo: Receive affection popup on app open. Red dots on new activity.</li>
+      <li><span class="checkbox"></span>Retro: Halfway point — am I on track for Dec 12?</li>
     </ul>
   </div>
 </div>
 
 <!-- SPRINT 4 -->
 <div class="sprint">
-  <div class="sprint-header">Sprint 4: Gamification Frontend + Animations <span>Oct 22 - Nov 5</span></div>
-  <div class="sprint-goal"><strong>Sprint Goal:</strong> Users can see streaks, earn stardust, complete activities, all with polished animations.</div>
+  <div class="sprint-header">Sprint 4: Deep Questions + Streaks + Stardust System <span>Oct 22 - Nov 5</span></div>
+  <div class="sprint-goal"><strong>Sprint Goal:</strong> Deep questions work. All activities earn stardust and count toward streaks.</div>
 
   <div class="week">
-    <h4>Week 1 — Gamification Screens</h4>
+    <h4>Week 1 — Deep Questions</h4>
 
     <div class="task-group">
-      <h5>Day 1-2: Partnership Dashboard</h5>
+      <h5>Day 1-2: Questions Backend</h5>
       <ul>
-        <li><span class="checkbox"></span>Add gamification section to PartnerDetailScreen <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Display streak count with animated flame/fire icon <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Display stardust balance with sparkle animation <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Streak calendar or progress visualization <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>Question model: text, category <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Answer model: user FK, question FK, partnership FK, answer_text, timestamp <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Seed 30-50 deep questions across categories <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>GET /api/v1/gamification/questions/&lt;partnership_id&gt;/daily/ — get today's question <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>POST /api/v1/gamification/questions/&lt;partnership_id&gt;/answer/ — submit answer, awards stardust <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>GET — view both partners' answers (only visible after both answer) <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
-      <h5>Day 3-4: Activity/Challenge Cards</h5>
+      <h5>Day 3-5: Questions Frontend</h5>
       <ul>
-        <li><span class="checkbox"></span>Create ActivitiesScreen — list available daily challenges <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Activity cards with category, description, stardust reward <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Complete button with confirmation <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Animated reward feedback on completion (stardust +10 floating up) <span class="size size-m">M</span></li>
-      </ul>
-    </div>
-
-    <div class="task-group">
-      <h5>Day 5: Streak Check-In Flow</h5>
-      <ul>
-        <li><span class="checkbox"></span>Daily check-in button on partnership dashboard <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Animated celebration on check-in (confetti/sparkle via Lottie) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Show streak milestone messages (7 days, 30 days, etc.) <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Question card screen — display today's question <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Answer input + submit <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Reveal partner's answer after both submit (animated reveal) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Previous questions/answers history list <span class="size size-m">M</span></li>
       </ul>
     </div>
   </div>
 
   <div class="week">
-    <h4>Week 2 — App-Wide Animations + Polish</h4>
+    <h4>Week 2 — Streaks + Stardust Wiring</h4>
 
     <div class="task-group">
-      <h5>Day 6-7: Screen Transition Animations</h5>
+      <h5>Day 6-7: Streak System</h5>
       <ul>
-        <li><span class="checkbox"></span>Custom tab bar transition animations <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Screen enter/exit animations (slide, fade) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Modal animations (connect flow, activity completion) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Streak check-in endpoint — daily check-in per partnership <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Streak reset logic (missed day = reset) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Auto check-in when any activity is completed (mood/affection/question/pet) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Streak display on planet screen (flame icon + count) <span class="size size-s">S</span></li>
       </ul>
     </div>
 
     <div class="task-group">
-      <h5>Day 8-9: Micro-Interactions</h5>
+      <h5>Day 8-9: Stardust Integration</h5>
       <ul>
-        <li><span class="checkbox"></span>Button press feedback animations (scale bounce) <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>List item animations (staggered fade-in on load) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Pull-to-refresh custom animation <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Partnership status change transitions <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Define stardust rewards per activity (mood: 5, affection: 10, question: 15, pet: 5) <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Streak bonus multiplier (longer streak = more stardust) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Stardust balance display on planet screen <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Animated stardust earned feedback (+10 floating up) <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
-      <h5>Day 10: Integration</h5>
+      <h5>Day 10: Integration Testing</h5>
       <ul>
-        <li><span class="checkbox"></span>Test all animations on real device (performance check) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Reduce/remove animations that feel laggy <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Ensure animations don't block user interaction <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Test full loop: do activity -> earn stardust -> streak increments <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Test streak reset after missed day <span class="size size-s">S</span></li>
       </ul>
     </div>
   </div>
 
   <div class="review">
-    <strong>Sprint 4 Review Checkpoint (Nov 5)</strong>
+    <strong>Sprint 4 Review (Nov 5)</strong>
     <ul>
-      <li><span class="checkbox"></span>Demo: Full gamification loop — check in, earn stardust, complete activity, see animations.</li>
-      <li><span class="checkbox"></span>Retro: Core product is done. What's missing for MVP? What can be cut from Sprints 5-6?</li>
-      <li><span class="checkbox"></span>Velocity check: Count total tasks completed in Sprints 1-4. Am I on track for Dec 12?</li>
+      <li><span class="checkbox"></span>Demo: Answer deep question, see partner's answer. All activities earn stardust + streaks.</li>
+      <li><span class="checkbox"></span>Retro: Core engagement loop complete. What needs polish before deploy?</li>
     </ul>
   </div>
 </div>
 
 <!-- SPRINT 5 -->
 <div class="sprint">
-  <div class="sprint-header">Sprint 5: Home Screen + Notifications <span>Nov 5 - Nov 19</span></div>
-  <div class="sprint-goal"><strong>Sprint Goal:</strong> Home screen shows a useful dashboard. Push notifications keep users engaged.</div>
+  <div class="sprint-header">Sprint 5: Planet Customization + Special Dates + Settings <span>Nov 5 - Nov 19</span></div>
+  <div class="sprint-goal"><strong>Sprint Goal:</strong> Users can spend stardust to customize planets. Special dates tracked. Settings functional.</div>
 
   <div class="week">
-    <h4>Week 1 — Home Screen Redesign</h4>
+    <h4>Week 1 — Planet Customization</h4>
 
     <div class="task-group">
-      <h5>Day 1-2: Home Dashboard</h5>
+      <h5>Day 1-2: Customization Backend</h5>
       <ul>
-        <li><span class="checkbox"></span>Redesign HomeScreen as a real dashboard <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Summary cards: active partnerships count, total stardust, active streaks <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Today's suggested activity card <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Quick-access partner avatars/list <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>PlanetStyle model: partnership FK, color/theme, ring_style, background, accessories <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>PlanetShopItem model: name, type, preview, stardust_cost <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Seed shop items (planet colors, ring styles, backgrounds, decorations) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>POST /api/v1/gamification/planet/&lt;partnership_id&gt;/purchase/ — buy item, deduct stardust <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>PUT /api/v1/gamification/planet/&lt;partnership_id&gt;/style/ — apply purchased items <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
-      <h5>Day 3-4: Home Animations</h5>
+      <h5>Day 3-5: Customization Frontend</h5>
       <ul>
-        <li><span class="checkbox"></span>Animated dashboard cards (staggered entrance) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Stardust counter animated number ticker <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Streak flame animation (idle loop) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Greeting animation on first open of the day <span class="size size-s">S</span></li>
-      </ul>
-    </div>
-
-    <div class="task-group">
-      <h5>Day 5: Theming + Visual Polish</h5>
-      <ul>
-        <li><span class="checkbox"></span>Define color palette and typography scale <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Create shared theme/constants file <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Apply consistent styling across all screens <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>Planet customization screen (from Figma designs) <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>Shop grid — display items with stardust cost <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Purchase flow — confirm, deduct stardust, apply to planet <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Planet visual updates based on applied style <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>Owned vs locked item indicators <span class="size size-s">S</span></li>
       </ul>
     </div>
   </div>
 
   <div class="week">
-    <h4>Week 2 — Push Notifications</h4>
+    <h4>Week 2 — Special Dates + Settings</h4>
 
     <div class="task-group">
-      <h5>Day 6-7: Notification Setup</h5>
+      <h5>Day 6-7: Special Dates</h5>
       <ul>
-        <li><span class="checkbox"></span>Install expo-notifications <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Register for push tokens, store on backend (add field to User model) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Backend notification sending utility (Expo Push API) <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>SpecialDate model: partnership FK, label, date (anniversary, birthday, etc.) <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>CRUD endpoints for special dates <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Special dates section on partnership detail/settings screen <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Date picker UI for adding/editing dates <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
-      <h5>Day 8-9: Notification Triggers</h5>
+      <h5>Day 8-9: Settings Screen</h5>
       <ul>
-        <li><span class="checkbox"></span>Partnership request received -> notify partner <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Partnership accepted -> notify initiator <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Daily streak reminder (scheduled, e.g., 8pm if no check-in) <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Streak milestone notifications <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Settings screen: About me (name, email display) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Add a partner shortcut (partner code input) <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Partnership list with "view details" navigation <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Logout functionality <span class="size size-s">S</span></li>
       </ul>
     </div>
 
     <div class="task-group">
-      <h5>Day 10: Error Handling Pass</h5>
+      <h5>Day 10: Animations Pass</h5>
       <ul>
-        <li><span class="checkbox"></span>Audit all screens for error states <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Add user-friendly error messages <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Handle offline/network errors gracefully <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Form validation improvements (onboarding, connect flow) <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Screen transition animations across the app <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Button press micro-interactions (scale bounce) <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Constellation star twinkle / idle animation <span class="size size-m">M</span></li>
       </ul>
     </div>
   </div>
 
   <div class="review">
-    <strong>Sprint 5 Review Checkpoint (Nov 19)</strong>
+    <strong>Sprint 5 Review (Nov 19)</strong>
     <ul>
-      <li><span class="checkbox"></span>Demo: Home dashboard with live data. Receive a push notification.</li>
-      <li><span class="checkbox"></span>Retro: What's the biggest risk for hitting Dec 12? What can I cut?</li>
-      <li><span class="checkbox"></span>Groom Sprint 6: Prioritize bugs by severity. Which are blockers vs nice-to-fix?</li>
+      <li><span class="checkbox"></span>Demo: Buy planet customization with stardust. Add special dates. Settings works.</li>
+      <li><span class="checkbox"></span>Retro: Feature-complete. Remaining sprints are polish + deploy only.</li>
     </ul>
   </div>
 </div>
 
 <!-- SPRINT 6 -->
 <div class="sprint">
-  <div class="sprint-header">Sprint 6: Testing + Bug Fixes <span>Nov 19 - Dec 3</span></div>
-  <div class="sprint-goal"><strong>Sprint Goal:</strong> App is stable, tested, and feels polished. No critical bugs remain.</div>
+  <div class="sprint-header">Sprint 6: Testing + Polish + Animations <span>Nov 19 - Dec 3</span></div>
+  <div class="sprint-goal"><strong>Sprint Goal:</strong> App is stable, animations feel polished, no critical bugs.</div>
 
   <div class="week">
     <h4>Week 1 — Testing</h4>
@@ -637,41 +609,39 @@
       <h5>Day 1-2: Backend Tests</h5>
       <ul>
         <li><span class="checkbox"></span>Auth flow tests (Google token -> JWT -> refresh) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Partnership lifecycle tests (create -> accept -> pause -> end) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Gamification tests (streak logic, stardust awards, double check-in prevention) <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Edge cases: expired tokens, invalid data, permission violations <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Partnership lifecycle tests (connect -> accept -> pause -> end) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Gamification tests (streaks, stardust, pet state, planet purchases) <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>Edge cases: double actions, expired tokens, invalid data <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
       <h5>Day 3-4: Frontend Testing</h5>
       <ul>
-        <li><span class="checkbox"></span>Manual end-to-end testing of all user flows <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Test on iOS simulator + real device <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Test on Android emulator (if targeting Android) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Test with multiple user accounts simultaneously <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Full end-to-end test of all user flows <span class="size size-l">L</span></li>
+        <li><span class="checkbox"></span>Test on real iOS device <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Test with two accounts simultaneously (partnership interactions) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Test constellation view with 1, 3, and 5+ partnerships <span class="size size-s">S</span></li>
       </ul>
     </div>
 
     <div class="task-group">
       <h5>Day 5: Animation Performance</h5>
       <ul>
-        <li><span class="checkbox"></span>Profile animations on real devices (check frame drops) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Optimize or simplify laggy animations <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Test animations on older devices if possible <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Profile all animations on real device (check frame drops) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Optimize or remove laggy animations <span class="size size-m">M</span></li>
       </ul>
     </div>
   </div>
 
   <div class="week">
-    <h4>Week 2 — Bug Fixes + Edge Cases</h4>
+    <h4>Week 2 — Bug Fixes + Polish</h4>
 
     <div class="task-group">
-      <h5>Day 6-7: Bug Fix Sprint</h5>
+      <h5>Day 6-7: Bug Fixes</h5>
       <ul>
         <li><span class="checkbox"></span>Fix all bugs found during testing <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Token expiry edge cases (refresh during active use) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Streak timezone handling (what counts as "today"?) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Streak timezone handling <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>Partnership state consistency (both users see same state) <span class="size size-m">M</span></li>
       </ul>
     </div>
@@ -680,37 +650,35 @@
       <h5>Day 8-9: UX Polish</h5>
       <ul>
         <li><span class="checkbox"></span>Empty states for all screens <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Loading skeletons instead of spinners <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Loading states (skeletons or indicators) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Error states with user-friendly messages <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>Haptic feedback on key actions <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Accessibility basics (font scaling, contrast) <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
       <h5>Day 10: Final QA</h5>
       <ul>
-        <li><span class="checkbox"></span>Full app walkthrough as a new user <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Full app walkthrough as a returning user <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Check all animations feel smooth and intentional <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Verify all API error responses are handled in UI <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Full walkthrough as new user (sign up -> connect -> interact) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Full walkthrough as returning user <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Verify all stardust/streak math is correct <span class="size size-s">S</span></li>
       </ul>
     </div>
   </div>
 
   <div class="review">
-    <strong>Sprint 6 Review Checkpoint (Dec 3)</strong>
+    <strong>Sprint 6 Review (Dec 3)</strong>
     <ul>
-      <li><span class="checkbox"></span>Demo: Full app walkthrough — sign in, connect, check in, earn stardust, navigate everywhere.</li>
-      <li><span class="checkbox"></span>Go/No-Go decision: Is the app stable enough to deploy? Any blockers for Sprint 7?</li>
-      <li><span class="checkbox"></span>Create a prioritized bug list for anything remaining. Only fix blockers in Sprint 7.</li>
+      <li><span class="checkbox"></span>Go/No-Go: Is the app stable enough to deploy?</li>
+      <li><span class="checkbox"></span>Prioritized bug list — only fix blockers in Sprint 7.</li>
     </ul>
   </div>
 </div>
 
 <!-- SPRINT 7 -->
 <div class="sprint">
-  <div class="sprint-header">Sprint 7: Deployment + Launch Prep <span>Dec 3 - Dec 12</span></div>
-  <div class="sprint-goal"><strong>Sprint Goal:</strong> App is deployed to production and accessible via TestFlight or APK.</div>
+  <div class="sprint-header">Sprint 7: Deployment + Launch <span>Dec 3 - Dec 12</span></div>
+  <div class="sprint-goal"><strong>Sprint Goal:</strong> App is live and accessible via TestFlight.</div>
 
   <div class="week">
     <h4>Final Push — Deploy + Ship (9 days)</h4>
@@ -718,9 +686,8 @@
     <div class="task-group">
       <h5>Day 1-2: Backend Deployment</h5>
       <ul>
-        <li><span class="checkbox"></span>Choose hosting (Railway, Render, DigitalOcean, AWS) <span class="size size-s">S</span></li>
-        <li><span class="checkbox"></span>Set up production PostgreSQL database <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Configure production environment variables <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Choose hosting (Railway, Render, or similar) <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Set up production PostgreSQL + environment variables <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>Set up HTTPS + domain <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>Run migrations on production DB <span class="size size-s">S</span></li>
       </ul>
@@ -730,7 +697,7 @@
       <h5>Day 3-4: Production Config</h5>
       <ul>
         <li><span class="checkbox"></span>Django production settings (DEBUG=False, ALLOWED_HOSTS, CORS) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Static files serving (whitenoise or S3) <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Static files serving (whitenoise) <span class="size size-s">S</span></li>
         <li><span class="checkbox"></span>Update frontend API base URL to production <span class="size size-s">S</span></li>
         <li><span class="checkbox"></span>Google OAuth: add production redirect URIs <span class="size size-s">S</span></li>
       </ul>
@@ -741,28 +708,25 @@
       <ul>
         <li><span class="checkbox"></span>EAS Build setup (eas.json config) <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>iOS TestFlight build + submission <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Android APK/AAB build (if targeting Android) <span class="size size-m">M</span></li>
         <li><span class="checkbox"></span>App icons and splash screen <span class="size size-m">M</span></li>
       </ul>
     </div>
 
     <div class="task-group">
-      <h5>Day 7-8: Final Testing on Production</h5>
+      <h5>Day 7-8: Production Testing</h5>
       <ul>
         <li><span class="checkbox"></span>Test full flow against production backend <span class="size size-l">L</span></li>
-        <li><span class="checkbox"></span>Test Google SSO with production OAuth credentials <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Test push notifications in production <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Performance spot-check <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Test Google SSO with production credentials <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Seed initial deep questions on production DB <span class="size size-s">S</span></li>
       </ul>
     </div>
 
     <div class="task-group">
       <h5>Day 9: Launch</h5>
       <ul>
-        <li><span class="checkbox"></span>Final bug fixes from production testing <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Submit to App Store / distribute TestFlight link <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Set up basic monitoring/logging (Sentry or similar) <span class="size size-m">M</span></li>
-        <li><span class="checkbox"></span>Create backup strategy for production DB <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Final blocker bug fixes <span class="size size-m">M</span></li>
+        <li><span class="checkbox"></span>Distribute TestFlight link <span class="size size-s">S</span></li>
+        <li><span class="checkbox"></span>Set up basic monitoring (Sentry) <span class="size size-m">M</span></li>
       </ul>
     </div>
   </div>
@@ -777,16 +741,14 @@
   </div>
 </div>
 
-<div class="note" style="margin: 20px 0; font-size: 13px;">
-  <strong>Priority note:</strong> Sprints 1-4 are the core product. If you fall behind, Sprints 5-6 can be trimmed.
-  Notifications and UX polish are nice-to-haves. The partnership + gamification + animations loop IS the MVP.
-  Test on a real device starting in Sprint 2 — don't wait until Sprint 6.
+<div class="note">
+  <strong>If you fall behind:</strong> Sprints 1-4 are the core product (constellation, planet, pet, mood, affection, questions, stardust).
+  Sprint 5 (planet customization + special dates) can be simplified. Sprint 6 polish can be trimmed. Don't skip Sprint 7 deploy.
 </div>
 
-<div class="note" style="margin: 20px 0; font-size: 13px;">
+<div class="note">
   <strong>Velocity rule of thumb:</strong> Plan to complete ~80% of tasks each sprint. If you're consistently finishing less,
-  reduce scope for the next sprint. If you're finishing everything early, pull tasks forward from the next sprint.
-  Track your S/M/L completions to calibrate your estimates over time.
+  reduce scope. If finishing early, pull tasks forward. Track S/M/L completions to calibrate estimates.
 </div>
 
 </body>

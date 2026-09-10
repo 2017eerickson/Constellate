@@ -1,20 +1,23 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import {
   signInWithGoogle,
   signOut as authSignOut,
   getStoredAuth,
-  completeOnboarding as auth ,
-  CompleteOnboarding,
+  completeOnboarding as authCompleteOnboarding,
 } from '../services/auth';
+import { AuthContextType, User } from '../types';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
 
-  // On app startup, check if user is already signed in
   useEffect(() => {
     async function loadUser() {
       try {
@@ -42,7 +45,7 @@ export function AuthProvider({ children }) {
     setIsNewUser(false);
   }
 
-  async function completeOnboarding(birthday) {
+  async function completeOnboarding(birthday: string) {
     const updatedUser = await authCompleteOnboarding(birthday);
     setUser(updatedUser);
     setIsNewUser(false);
@@ -57,7 +60,7 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');

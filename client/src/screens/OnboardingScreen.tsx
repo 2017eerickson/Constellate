@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   Platform,
@@ -16,7 +16,6 @@ export default function OnboardingScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit() {
-    // Basic validation: expect YYYY-MM-DD format
     if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
       Alert.alert('Invalid Date', 'Please enter your birthday as YYYY-MM-DD');
       return;
@@ -25,8 +24,9 @@ export default function OnboardingScreen() {
     setIsSubmitting(true);
     try {
       await completeOnboarding(birthday);
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Something went wrong');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Something went wrong';
+      Alert.alert('Error', message);
     } finally {
       setIsSubmitting(false);
     }

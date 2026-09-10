@@ -1,3 +1,4 @@
+import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,7 +8,7 @@ export default function HomeScreen() {
   async function handleSignOut() {
     try {
       await signOut();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to sign out');
     }
   }

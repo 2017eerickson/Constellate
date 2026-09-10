@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,8 +10,9 @@ export default function SignInScreen() {
     setIsSigningIn(true);
     try {
       await signIn();
-    } catch (error) {
-      Alert.alert('Sign In Failed', error.message || 'Something went wrong');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Something went wrong';
+      Alert.alert('Sign In Failed', message);
     } finally {
       setIsSigningIn(false);
     }

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { InternalAxiosRequestConfig } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -9,7 +9,7 @@ const apiClient = axios.create({
 });
 
 // Request interceptor: attach JWT access token to every request
-apiClient.interceptors.request.use(async (config) => {
+apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const accessToken = await AsyncStorage.getItem('access_token');
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -33,22 +33,18 @@ apiClient.interceptors.response.use(
       }
 
       try {
-        // Call refresh endpoint directly (not through this interceptor)
         const { data } = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
           refresh: refreshToken,
         });
 
-        // Store the new tokens
         await AsyncStorage.setItem('access_token', data.access);
         if (data.refresh) {
           await AsyncStorage.setItem('refresh_token', data.refresh);
         }
 
-        // Retry the original request with the new access token
         originalRequest.headers.Authorization = `Bearer ${data.access}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed — clear tokens (user needs to sign in again)
         await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
         return Promise.reject(refreshError);
       }
