@@ -17,8 +17,34 @@ from user_app.serializers import (
 
 class GoogleAuthView(APIView):
     """
-    Accepts a Google ID token from the mobile app, verifies it,
-    creates or retrieves the user, and returns a JWT pair.
+    POST /api/auth/google/
+    Authentication: None
+
+    Request body:
+        {
+            "id_token": str  (required) — Google ID token from mobile Google Sign-In
+        }
+
+    Success response (200):
+        {
+            "access": str,        — short-lived JWT access token
+            "refresh": str,       — long-lived JWT refresh token
+            "is_new_user": bool,  — True if user was just created
+            "user": {
+                "id": int,
+                "email": str,
+                "first_name": str,
+                "birthday": str | null,       — "YYYY-MM-DD" or null
+                "partner_code": str,          — 8-char unique code
+                "is_verified": bool,
+                "onboarding_complete": bool,
+                "created_at": str             — ISO 8601 datetime
+            }
+        }
+
+    Error responses:
+        400 — missing or invalid id_token field
+        401 — Google token verification failed (expired, tampered, wrong audience)
     """
     def post(self, request):
         serializer = GoogleAuthSerializer(data=request.data)
@@ -74,7 +100,31 @@ class GoogleAuthView(APIView):
 
 class OnboardingView(APIView):
     """
-    Authenticated endpoint to complete user onboarding (collect birthday).
+    POST /api/auth/onboarding/
+    Authentication: Bearer <access_token>
+
+    Request body:
+        {
+            "birthday": str  (required) — date in "YYYY-MM-DD" format
+        }
+
+    Success response (200):
+        {
+            "user": {
+                "id": int,
+                "email": str,
+                "first_name": str,
+                "birthday": str,              — "YYYY-MM-DD"
+                "partner_code": str,          — 8-char unique code
+                "is_verified": bool,
+                "onboarding_complete": bool,  — will be True
+                "created_at": str             — ISO 8601 datetime
+            }
+        }
+
+    Error responses:
+        400 — missing or invalid birthday field
+        401 — missing or invalid access token
     """
     permission_classes = [IsAuthenticated]
 
@@ -92,8 +142,27 @@ class OnboardingView(APIView):
 
 class MeView(APIView):
     """
-    Returns the current authenticated user's data.
-    Used by the mobile app on startup to verify stored tokens.
+    GET /api/auth/me/
+    Authentication: Bearer <access_token>
+
+    Request body: None
+
+    Success response (200):
+        {
+            "user": {
+                "id": int,
+                "email": str,
+                "first_name": str,
+                "birthday": str | null,       — "YYYY-MM-DD" or null
+                "partner_code": str,          — 8-char unique code
+                "is_verified": bool,
+                "onboarding_complete": bool,
+                "created_at": str             — ISO 8601 datetime
+            }
+        }
+
+    Error responses:
+        401 — missing or invalid access token
     """
     permission_classes = [IsAuthenticated]
 
