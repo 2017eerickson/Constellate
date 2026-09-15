@@ -17,7 +17,7 @@ type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AppNavigator() {
-  const { user, isLoading, isNewUser } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -31,7 +31,7 @@ function AppNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!user ? (
         <Stack.Screen name="SignIn" component={SignInScreen} />
-      ) : isNewUser ? (
+      ) : !user.onboarding_complete ? (
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       ) : (
         <Stack.Screen name="Home" component={HomeScreen} />
