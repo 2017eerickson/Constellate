@@ -18,7 +18,7 @@ from user_app.serializers import (
 class GoogleAuthView(APIView):
     """
     SUMMARY:        Verifies a Google ID token and returns a JWT pair, creating the user if needed.
-    ENDPOINT:       POST /api/auth/google/
+    ENDPOINT:       POST /api/v1/auth/google/
     AUTHENTICATION: None
     REQUEST BODY:
         {
@@ -87,7 +87,7 @@ class GoogleAuthView(APIView):
 class OnboardingView(APIView):
     """
     SUMMARY:        Completes user onboarding by collecting their birthday.
-    ENDPOINT:       POST /api/auth/onboarding/
+    ENDPOINT:       POST /api/v1/auth/onboarding/
     AUTHENTICATION: Bearer <access_token>
     REQUEST BODY:
         {
@@ -115,7 +115,7 @@ class OnboardingView(APIView):
 class MeView(APIView):
     """
     SUMMARY:        Returns the current authenticated user's data.
-    ENDPOINT:       GET /api/auth/me/
+    ENDPOINT:       GET /api/v1/auth/me/
     AUTHENTICATION: Bearer <access_token>
     REQUEST BODY:   None
     RETURN VALUE:

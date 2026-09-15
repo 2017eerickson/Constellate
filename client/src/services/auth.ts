@@ -20,7 +20,7 @@ export async function signInWithGoogle(): Promise<{ user: User; isNewUser: boole
     throw new Error('No ID token received from Google');
   }
 
-  const { data } = await apiClient.post<AuthResponse>('/auth/google/', {
+  const { data } = await apiClient.post<AuthResponse>('/users/auth/google/', {
     id_token: idToken,
   });
 
@@ -34,7 +34,7 @@ export async function signInWithGoogle(): Promise<{ user: User; isNewUser: boole
 }
 
 export async function completeOnboarding(birthday: string): Promise<User> {
-  const { data } = await apiClient.post<{ user: User }>('/auth/onboarding/', { birthday });
+  const { data } = await apiClient.post<{ user: User }>('/users/auth/onboarding/', { birthday });
   return data.user;
 }
 
@@ -54,7 +54,7 @@ export async function getStoredAuth(): Promise<User | null> {
   }
 
   try {
-    const { data } = await apiClient.get<{ user: User }>('/auth/me/');
+    const { data } = await apiClient.get<{ user: User }>('/users/auth/me/');
     return data.user;
   } catch {
     await AsyncStorage.multiRemove(['access_token', 'refresh_token']);

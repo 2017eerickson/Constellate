@@ -1,7 +1,7 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -10,7 +10,7 @@ const apiClient = axios.create({
 
 // Request interceptor: attach JWT access token to every request
 apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  const accessToken = await AsyncStorage.getItem('access_token');
+  const accessToken = await AsyncStorage.getItem('access_token');     
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
