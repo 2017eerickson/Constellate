@@ -30,7 +30,14 @@ module.exports = {
     web: {
       favicon: "./assets/favicon.png",
     },
-    plugins: ["@react-native-google-signin/google-signin"],
+    plugins: [
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          iosUrlScheme: "com.googleusercontent.apps.633915461519-c36um2vqnuqevh6ba2nv829hm9bmlruk",
+        },
+      ],
+    ],
     extra: {
       webClientId: process.env.WEB_CLIENT_ID,
       iosClientId: process.env.IOS_CLIENT_ID,
