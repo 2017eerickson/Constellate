@@ -11,10 +11,6 @@ class PartnershipStatus(models.TextChoices):
 
 class RelationType(models.TextChoices):
     SOULMATE = 'soulmate'
-    ROMANTIC = 'romantic'
-    PLATONIC = 'platonic'
-    METAMOUR = 'metamour'
-    OTHER = 'other'
 
 
 class Partnership(models.Model):
@@ -33,10 +29,7 @@ class Partnership(models.Model):
         choices=PartnershipStatus.choices,
         default=PartnershipStatus.PENDING,
     )
-    relation = models.CharField(
-        max_length=20,
-        choices=RelationType.choices,
-    )
+    relation = models.CharField(max_length=50)
     started_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(null=True, blank=True)
 
