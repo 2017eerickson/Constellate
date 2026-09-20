@@ -123,7 +123,7 @@ class VerifyEmailView(APIView):
                 {'error': 'Verification link has expired'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        except BadSignature:
+        except (BadSignature, ValueError, UnicodeDecodeError):
             return Response(
                 {'error': 'Invalid verification link'},
                 status=status.HTTP_400_BAD_REQUEST,
