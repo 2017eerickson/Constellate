@@ -1,0 +1,74 @@
+from django.conf import settings
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from user_app.models import User
+from user_app.serializers import GoogleAuthSerializer, UserSerializer
+
+
+class GoogleAuthView(APIView):
+    """
+    SUMMARY:        Verifies a Google ID token and returns a JWT pair, creating the user if needed.
+    ENDPOINT:       POST /api/v1/auth/google/
+    AUTHENTICATION: None
+    REQUEST BODY:
+        {
+            "id_token": str  (required) — Google ID token from mobile Google Sign-In
+        }
+    RETURN VALUE:
+        {
+            "access": str,        — short-lived JWT access token
+            "refresh": str,       — long-lived JWT refresh token
+            "is_new_user": bool,  — True if user was just created
+            "user": dict
+        }
+    """
+    def post(self, request):
+        serializer = GoogleAuthSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token = serializer.validated_data['id_token']
+
+        try:
+            payload = google_id_token.verify_oauth2_token(
+                token,
+                google_requests.Request(),
+                settings.GOOGLE_OAUTH_CLIENT_ID,
+            )
+        except ValueError:
+            return Response(
+                {'error': 'Invalid Google token'},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        google_sub = payload['sub']
+        email = payload['email']
+        first_name = payload.get('given_name', '')
+
+        user, created = User.objects.get_or_create(
+            google_sub=google_sub,
+            defaults={
+                'email': email,
+                'username': email,
+                'first_name': first_name,
+                'is_verified': True,
+            },
+        )
+
+        if not created and user.email != email:
+            user.email = email
+            user.username = email
+            user.save(update_fields=['email', 'username'])
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'is_new_user': created,
+            'user': UserSerializer(user).data,
+        })

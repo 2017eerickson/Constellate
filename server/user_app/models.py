@@ -16,15 +16,18 @@ def generate_unique_partner_code():
 
 
 class User(AbstractUser):
-    email = models.EmailField(unique=True)
-    birthday = models.DateField(null=True, blank=True)
+    first_name = models.CharField(max_length=30, default=None)
+    email = models.EmailField(unique=True, default=None)
+    birthday = models.DateField(null=True, blank=True, default=None)
     is_verified = models.BooleanField(default=False)
     partner_code = models.CharField(max_length=8, unique=True, editable=False)
+    google_sub = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    onboarding_complete = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username', 'first_name', 'birthday',]
 
     def save(self, *args, **kwargs):
         if not self.partner_code:

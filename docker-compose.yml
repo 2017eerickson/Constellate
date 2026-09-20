@@ -14,7 +14,7 @@ services:
     container_name: const-django-container
     env_file:
       - .env
-    command: sh -c "gunicorn constellate_proj.wsgi:application --bind 0.0.0.0:8000 --reload"
+    command: sh -c "gunicorn constellate_proj.wsgi:application --bind 0.0.0.0:8000  --timeout 120 --reload" 
     ports:
       - "8000:8000"
     volumes:
