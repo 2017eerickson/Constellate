@@ -162,7 +162,7 @@ class ForgotPasswordView(APIView):
         if user.google_sub:
             return Response({'message': generic_message})
 
-        hash_prefix = user.password[:8]
+        hash_prefix = user.password[-8:]
         signed = signer.sign(f'{user.pk}:{hash_prefix}')
         token = signed.encode().hex()
         reset_url = request.build_absolute_uri(f'/api/v1/users/auth/reset-password/{token}/')
@@ -232,7 +232,7 @@ class ResetPasswordView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        if user.password[:8] != hash_prefix:
+        if user.password[-8:] != hash_prefix:
             return Response(
                 {'error': 'Reset link has already been used'},
                 status=status.HTTP_400_BAD_REQUEST,
