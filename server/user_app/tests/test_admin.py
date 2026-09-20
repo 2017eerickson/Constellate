@@ -3,7 +3,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from user_app.tests.helpers import create_user
+from rest_framework_simplejwt.tokens import AccessToken
+
+from user_app.tests.helpers import create_user, make_expired_jwt
 
 
 class AdminDeleteUserTests(TestCase):
