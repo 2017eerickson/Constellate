@@ -65,20 +65,29 @@ class ConnectView(generics.CreateAPIView):
         existing = Partnership.objects.filter(
             models.Q(initiator=request.user, partner=partner)
             | models.Q(initiator=partner, partner=request.user),
-        ).exclude(status=PartnershipStatus.ENDED).first()
+        ).first()
 
         if existing:
-            return Response(
-                {'error': 'A partnership already exists with this user.'},
-                status=status.HTTP_409_CONFLICT,
-            )
+            if existing.status != PartnershipStatus.ENDED:
+                return Response(
+                    {'error': 'A partnership already exists with this user.'},
+                    status=status.HTTP_409_CONFLICT,
+                )
 
-        partnership = Partnership.objects.create(
-            initiator=request.user,
-            partner=partner,
-            status=PartnershipStatus.PENDING,
-            relation=RelationType.ROMANTIC,
-        )
+            existing.initiator = request.user
+            existing.partner = partner
+            existing.status = PartnershipStatus.PENDING
+            existing.relation = 'romantic'
+            existing.ended_at = None
+            existing.save()
+            partnership = existing
+        else:
+            partnership = Partnership.objects.create(
+                initiator=request.user,
+                partner=partner,
+                status=PartnershipStatus.PENDING,
+                relation='romantic',
+            )
 
         return Response(
             PartnershipSerializer(partnership, context={'request': request}).data,
@@ -163,15 +172,28 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Partnership.objects.filter(
             models.Q(initiator=self.request.user)
             | models.Q(partner=self.request.user),
-        ).exclude(relation=RelationType.SOULMATE)
+        )
 
     def update(self, request, *args, **kwargs):
         partnership = self.get_object()
+
+        if partnership.relation == RelationType.SOULMATE:
+            return Response(
+                {'error': 'Cannot modify soulmate partnership.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         serializer = UpdatePartnershipSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         new_status = serializer.validated_data.get('status')
         new_relation = serializer.validated_data.get('relation')
+
+        if not new_status and not new_relation:
+            return Response(
+                {'error': 'No fields to update.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if new_status:
             # Only the recipient can accept a pending request
@@ -199,8 +221,16 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         partnership = self.get_object()
 
+        if partnership.relation == RelationType.SOULMATE:
+            return Response(
+                {'error': 'Cannot delete soulmate partnership.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         if partnership.status == PartnershipStatus.PENDING:
             partnership.delete()
+        elif partnership.status == PartnershipStatus.ENDED:
+            pass
         else:
             partnership.status = PartnershipStatus.ENDED
             partnership.ended_at = timezone.now()
