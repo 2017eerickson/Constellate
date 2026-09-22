@@ -70,7 +70,10 @@ export default function PartnersScreen() {
 
   function renderPartnership({ item }: { item: Partnership }) {
     return (
-      <View style={styles.card}>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => navigation.navigate('PartnerDetail' as never, { partnershipId: item.id } as never)}
+      >
         <View style={styles.cardHeader}>
           <Text style={styles.name}>{getDisplayName(item)}</Text>
           <View
@@ -99,7 +102,7 @@ export default function PartnersScreen() {
             <Text style={styles.statLabel}>Days in Orbit</Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   }
 

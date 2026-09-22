@@ -11,6 +11,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import PartnersScreen from './src/screens/PartnersScreen';
 import ConstellationScreen from './src/screens/ConstellationScreen';
 import ConnectScreen from './src/screens/ConnectScreen';
+import PartnerDetailScreen from './src/screens/PartnerDetailScreen';
 
 type AuthStackParamList = {
   SignIn: undefined;
@@ -20,6 +21,7 @@ type AuthStackParamList = {
 type MainStackParamList = {
   Tabs: undefined;
   Connect: undefined;
+  PartnerDetail: { partnershipId: number };
 };
 
 type TabParamList = {
@@ -83,6 +85,11 @@ function AppNavigator() {
         name="Connect"
         component={ConnectScreen}
         options={{ presentation: 'modal', headerShown: true, headerTitle: '' }}
+      />
+      <MainStack.Screen
+        name="PartnerDetail"
+        component={PartnerDetailScreen}
+        options={{ headerShown: true, headerTitle: '' }}
       />
     </MainStack.Navigator>
   );

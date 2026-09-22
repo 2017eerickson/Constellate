@@ -1,5 +1,5 @@
 import apiClient from '../api/client';
-import { Partnership } from '../types';
+import { Partnership, SpecialDate } from '../types';
 
 export async function getPartnerships(): Promise<Partnership[]> {
   const { data } = await apiClient.get<Partnership[]>('/relationships/');
@@ -28,4 +28,23 @@ export async function acceptPartnership(id: number): Promise<Partnership> {
 
 export async function deletePartnership(id: number): Promise<void> {
   await apiClient.delete(`/relationships/${id}/`);
+}
+
+export async function getSpecialDates(partnershipId: number): Promise<SpecialDate[]> {
+  const { data } = await apiClient.get<SpecialDate[]>(
+    `/relationships/${partnershipId}/special-dates/`,
+  );
+  return data;
+}
+
+export async function createSpecialDate(
+  partnershipId: number,
+  title: string,
+  date: string,
+): Promise<SpecialDate> {
+  const { data } = await apiClient.post<SpecialDate>(
+    `/relationships/${partnershipId}/special-dates/`,
+    { title, date },
+  );
+  return data;
 }
