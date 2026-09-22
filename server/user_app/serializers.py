@@ -22,10 +22,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 class OnboardingSerializer(serializers.Serializer):
     birthday = serializers.DateField(required=True)
+    first_name = serializers.CharField(required=False)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
+    first_name = serializers.CharField(required=False, default='')
 
     class Meta:
         model = User
@@ -35,7 +37,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return User.objects.create_user(
             email=validated_data['email'],
             username=validated_data['email'],
-            first_name=validated_data['first_name'],
+            first_name=validated_data.get('first_name', ''),
             password=validated_data['password'],
         )
 

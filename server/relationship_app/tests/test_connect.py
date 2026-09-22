@@ -3,7 +3,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from relationship_app.models import Partnership, PartnershipStatus
+from datetime import date
+
+from relationship_app.models import Partnership, PartnershipStatus, SpecialDate
 from relationship_app.tests.helpers import create_partnership, create_user
 
 
@@ -75,6 +77,47 @@ class ConnectTests(TestCase):
         """Missing partner_code returns 400."""
         resp = self.client.post(self.url, {})
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_connect_with_relation_and_anniversary(self):
+        """Custom relation and anniversary are stored on the partnership."""
+        resp = self.client.post(self.url, {
+            'partner_code': self.partner.partner_code,
+            'relation': 'platonic',
+            'anniversary': '2024-06-15',
+        })
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        p = Partnership.objects.get(initiator=self.user, partner=self.partner)
+        self.assertEqual(p.relation, 'platonic')
+        self.assertEqual(p.anniversary, date(2024, 6, 15))
+
+    def test_connect_defaults_relation_to_romantic(self):
+        """Omitting relation defaults to 'romantic'."""
+        resp = self.client.post(self.url, {'partner_code': self.partner.partner_code})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        p = Partnership.objects.get(initiator=self.user, partner=self.partner)
+        self.assertEqual(p.relation, 'romantic')
+
+    def test_connect_anniversary_optional(self):
+        """Partnership is created with anniversary=None when omitted."""
+        resp = self.client.post(self.url, {'partner_code': self.partner.partner_code})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        p = Partnership.objects.get(initiator=self.user, partner=self.partner)
+        self.assertIsNone(p.anniversary)
+
+    def test_reconnect_clears_old_special_dates(self):
+        """Reconnecting after an ended partnership deletes old special dates."""
+        ended = create_partnership(
+            self.user, self.partner, status=PartnershipStatus.ENDED,
+        )
+        SpecialDate.objects.create(
+            partnership=ended, title='Old Date', date=date(2023, 1, 1),
+        )
+        self.assertEqual(ended.special_dates.count(), 1)
+
+        resp = self.client.post(self.url, {'partner_code': self.partner.partner_code})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        ended.refresh_from_db()
+        self.assertEqual(ended.special_dates.count(), 0)
 
     def test_unauthenticated(self):
         """Unauthenticated request returns 401."""

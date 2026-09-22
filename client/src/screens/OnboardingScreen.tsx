@@ -1,21 +1,29 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
 export default function OnboardingScreen() {
   const { user, completeOnboarding } = useAuth();
+  const [firstName, setFirstName] = useState('');
   const [birthday, setBirthday] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const needsName = !user?.first_name;
+
   async function handleSubmit() {
+    if (needsName && !firstName.trim()) {
+      Alert.alert('Missing Name', 'Please enter your first name');
+      return;
+    }
+
     if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
       Alert.alert('Invalid Date', 'Please enter your birthday as YYYY-MM-DD');
       return;
@@ -23,7 +31,7 @@ export default function OnboardingScreen() {
 
     setIsSubmitting(true);
     try {
-      await completeOnboarding(birthday);
+      await completeOnboarding(birthday, needsName ? firstName.trim() : undefined);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Something went wrong';
       Alert.alert('Error', message);
@@ -33,11 +41,25 @@ export default function OnboardingScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome, {user?.first_name}!</Text>
-      <Text style={styles.subtitle}>
-        When is your birthday?
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Text style={styles.title}>
+        {needsName ? 'Welcome!' : `Welcome, ${user?.first_name}!`}
       </Text>
+      <Text style={styles.subtitle}>Let's get to know you</Text>
+
+      {needsName && (
+        <TextInput
+          style={styles.input}
+          placeholder="First Name"
+          value={firstName}
+          onChangeText={setFirstName}
+          autoCapitalize="words"
+          editable={!isSubmitting}
+        />
+      )}
 
       <TextInput
         style={styles.input}
@@ -46,6 +68,7 @@ export default function OnboardingScreen() {
         onChangeText={setBirthday}
         keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
         maxLength={10}
+        editable={!isSubmitting}
       />
 
       <TouchableOpacity
@@ -57,7 +80,7 @@ export default function OnboardingScreen() {
           {isSubmitting ? 'Saving...' : 'Continue'}
         </Text>
       </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -87,13 +110,14 @@ const styles = StyleSheet.create({
     padding: 14,
     fontSize: 18,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   button: {
     backgroundColor: '#4285F4',
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 8,
+    marginTop: 8,
   },
   buttonDisabled: {
     opacity: 0.6,
