@@ -104,7 +104,7 @@ class SpecialDateListCreateTests(TestCase):
         return reverse('special-date-list', args=[partnership_id])
 
     def test_list_special_dates(self):
-        """GET returns all special dates for the partnership."""
+        """GET returns all special dates with correct titles and dates."""
         SpecialDate.objects.create(
             partnership=self.partnership, title='Anniversary', date=date(2022, 12, 25),
         )
@@ -114,20 +114,23 @@ class SpecialDateListCreateTests(TestCase):
         resp = self.client.get(self._url(self.partnership.pk))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(len(resp.data), 2)
+        titles = [d['title'] for d in resp.data]
+        self.assertIn('Anniversary', titles)
+        self.assertIn('First Trip', titles)
 
     def test_create_custom_special_date(self):
-        """POST creates a new special date for the partnership."""
+        """POST creates a new special date linked to the correct partnership."""
         resp = self.client.post(self._url(self.partnership.pk), {
             'title': 'First Date',
             'date': '2023-02-14',
         })
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(resp.data['title'], 'First Date')
-        self.assertTrue(
-            SpecialDate.objects.filter(
-                partnership=self.partnership, title='First Date',
-            ).exists(),
+        self.assertEqual(resp.data['date'], '2023-02-14')
+        sd = SpecialDate.objects.get(
+            partnership=self.partnership, title='First Date',
         )
+        self.assertEqual(sd.date, date(2023, 2, 14))
 
     def test_create_missing_fields(self):
         """POST without required fields returns 400."""
@@ -150,13 +153,27 @@ class SpecialDateListCreateTests(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(len(resp.data), 0)
 
+    def test_partner_can_create(self):
+        """The other partner (bob) can also create special dates."""
+        self.client.force_authenticate(user=self.bob)
+        resp = self.client.post(self._url(self.partnership.pk), {
+            'title': 'Our Song', 'date': '2023-06-01',
+        })
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        sd = SpecialDate.objects.get(
+            partnership=self.partnership, title='Our Song',
+        )
+        self.assertEqual(sd.date, date(2023, 6, 1))
+
     def test_non_member_cannot_create(self):
         """A user not in the partnership cannot create special dates."""
         self.client.force_authenticate(user=self.charlie)
+        count_before = SpecialDate.objects.count()
         resp = self.client.post(self._url(self.partnership.pk), {
             'title': 'Hack', 'date': '2023-01-01',
         })
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(SpecialDate.objects.count(), count_before)
 
     def test_unauthenticated(self):
         """Unauthenticated request returns 401."""
@@ -240,11 +257,41 @@ class SpecialDateDetailTests(TestCase):
 
     # ---------- Access control ----------
 
-    def test_non_member_cannot_access(self):
-        """A user not in the partnership gets 404."""
+    def test_non_member_cannot_retrieve(self):
+        """A user not in the partnership gets 404 on GET."""
         self.client.force_authenticate(user=self.charlie)
         resp = self.client.get(
             self._url(self.partnership.pk, self.special_date.pk),
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_non_member_cannot_update(self):
+        """A user not in the partnership gets 404 on PATCH — data unchanged."""
+        self.client.force_authenticate(user=self.charlie)
+        resp = self.client.patch(
+            self._url(self.partnership.pk, self.special_date.pk),
+            {'title': 'Hacked'},
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.special_date.refresh_from_db()
+        self.assertEqual(self.special_date.title, 'Anniversary')
+
+    def test_non_member_cannot_delete(self):
+        """A user not in the partnership gets 404 on DELETE — date still exists."""
+        self.client.force_authenticate(user=self.charlie)
+        resp = self.client.delete(
+            self._url(self.partnership.pk, self.special_date.pk),
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(SpecialDate.objects.filter(pk=self.special_date.pk).exists())
+
+    def test_wrong_partnership_id_in_url(self):
+        """Special date exists but under a different partnership — returns 404."""
+        other_partnership = create_partnership(
+            self.bob, self.charlie, status=PartnershipStatus.ACTIVE,
+        )
+        resp = self.client.get(
+            self._url(other_partnership.pk, self.special_date.pk),
         )
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 

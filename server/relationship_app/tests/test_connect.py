@@ -29,26 +29,34 @@ class ConnectTests(TestCase):
         )
 
     def test_self_connect(self):
-        """Cannot connect with yourself."""
+        """Cannot connect with yourself — no partnership created."""
+        count_before = Partnership.objects.count()
         resp = self.client.post(self.url, {'partner_code': self.user.partner_code})
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Partnership.objects.count(), count_before)
 
     def test_invalid_partner_code(self):
-        """Non-existent partner code returns 404."""
+        """Non-existent partner code returns 404 — no partnership created."""
+        count_before = Partnership.objects.count()
         resp = self.client.post(self.url, {'partner_code': 'ZZZZZZZZ'})
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(Partnership.objects.count(), count_before)
 
     def test_duplicate_partnership(self):
-        """Cannot create a second partnership with the same user."""
+        """Cannot create a second partnership with the same user — DB unchanged."""
         create_partnership(self.user, self.partner)
+        count_before = Partnership.objects.count()
         resp = self.client.post(self.url, {'partner_code': self.partner.partner_code})
         self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(Partnership.objects.count(), count_before)
 
     def test_duplicate_reverse_direction(self):
-        """Conflict even if the other user initiated first."""
+        """Conflict even if the other user initiated first — DB unchanged."""
         create_partnership(self.partner, self.user)
+        count_before = Partnership.objects.count()
         resp = self.client.post(self.url, {'partner_code': self.partner.partner_code})
         self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(Partnership.objects.count(), count_before)
 
     def test_can_reconnect_after_ended(self):
         """Reconnecting after an ended partnership reactivates the existing row."""
@@ -118,6 +126,21 @@ class ConnectTests(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         ended.refresh_from_db()
         self.assertEqual(ended.special_dates.count(), 0)
+
+    def test_reconnect_updates_relation_and_anniversary(self):
+        """Reconnecting sets the new relation and anniversary on the reactivated row."""
+        ended = create_partnership(
+            self.user, self.partner, status=PartnershipStatus.ENDED,
+        )
+        resp = self.client.post(self.url, {
+            'partner_code': self.partner.partner_code,
+            'relation': 'platonic',
+            'anniversary': '2025-01-01',
+        })
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        ended.refresh_from_db()
+        self.assertEqual(ended.relation, 'platonic')
+        self.assertEqual(ended.anniversary, date(2025, 1, 1))
 
     def test_unauthenticated(self):
         """Unauthenticated request returns 401."""

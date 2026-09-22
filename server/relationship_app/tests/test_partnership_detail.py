@@ -56,12 +56,14 @@ class PartnershipDetailTests(TestCase):
         self.assertEqual(self.partnership.status, PartnershipStatus.ACTIVE)
 
     def test_initiator_cannot_accept(self):
-        """Initiator cannot accept their own pending request."""
+        """Initiator cannot accept their own pending request — status stays pending."""
         resp = self.client.patch(
             self._url(self.partnership.pk),
             {'status': 'active'},
         )
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        self.partnership.refresh_from_db()
+        self.assertEqual(self.partnership.status, PartnershipStatus.PENDING)
 
     def test_update_relation(self):
         """Can update the relation label."""
@@ -87,6 +89,30 @@ class PartnershipDetailTests(TestCase):
         self.assertEqual(self.partnership.status, PartnershipStatus.ENDED)
         self.assertIsNotNone(self.partnership.ended_at)
 
+    def test_pause_partnership(self):
+        """Can pause an active partnership."""
+        self.partnership.status = PartnershipStatus.ACTIVE
+        self.partnership.save()
+        resp = self.client.patch(
+            self._url(self.partnership.pk),
+            {'status': 'paused'},
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.partnership.refresh_from_db()
+        self.assertEqual(self.partnership.status, PartnershipStatus.PAUSED)
+
+    def test_update_status_and_relation_together(self):
+        """PATCH with both status and relation updates both fields."""
+        self.client.force_authenticate(user=self.bob)
+        resp = self.client.patch(
+            self._url(self.partnership.pk),
+            {'status': 'active', 'relation': 'metamour'},
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.partnership.refresh_from_db()
+        self.assertEqual(self.partnership.status, PartnershipStatus.ACTIVE)
+        self.assertEqual(self.partnership.relation, 'metamour')
+
     # ---------- DELETE ----------
 
     def test_delete_pending_hard_deletes(self):
@@ -99,6 +125,27 @@ class PartnershipDetailTests(TestCase):
     def test_delete_active_soft_deletes(self):
         """Deleting an active partnership sets status to ended."""
         self.partnership.status = PartnershipStatus.ACTIVE
+        self.partnership.save()
+        resp = self.client.delete(self._url(self.partnership.pk))
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.partnership.refresh_from_db()
+        self.assertEqual(self.partnership.status, PartnershipStatus.ENDED)
+        self.assertIsNotNone(self.partnership.ended_at)
+
+    def test_delete_active_as_recipient(self):
+        """Recipient can also soft-delete an active partnership."""
+        self.partnership.status = PartnershipStatus.ACTIVE
+        self.partnership.save()
+        self.client.force_authenticate(user=self.bob)
+        resp = self.client.delete(self._url(self.partnership.pk))
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.partnership.refresh_from_db()
+        self.assertEqual(self.partnership.status, PartnershipStatus.ENDED)
+        self.assertIsNotNone(self.partnership.ended_at)
+
+    def test_delete_paused_soft_deletes(self):
+        """Deleting a paused partnership sets status to ended."""
+        self.partnership.status = PartnershipStatus.PAUSED
         self.partnership.save()
         resp = self.client.delete(self._url(self.partnership.pk))
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
@@ -136,17 +183,21 @@ class PartnershipDetailTests(TestCase):
         self.assertEqual(resp.data['relation'], RelationType.SOULMATE)
 
     def test_cannot_update_soulmate(self):
-        """Cannot modify a soulmate partnership."""
+        """Cannot modify a soulmate partnership — relation stays unchanged."""
         soulmate = Partnership.objects.get(
             initiator=self.alice, relation=RelationType.SOULMATE,
         )
         resp = self.client.patch(self._url(soulmate.pk), {'status': 'ended'})
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        soulmate.refresh_from_db()
+        self.assertEqual(soulmate.relation, RelationType.SOULMATE)
+        self.assertNotEqual(soulmate.status, PartnershipStatus.ENDED)
 
     def test_cannot_delete_soulmate(self):
-        """Cannot delete a soulmate partnership."""
+        """Cannot delete a soulmate partnership — still exists in DB."""
         soulmate = Partnership.objects.get(
             initiator=self.alice, relation=RelationType.SOULMATE,
         )
         resp = self.client.delete(self._url(soulmate.pk))
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Partnership.objects.filter(pk=soulmate.pk).exists())
