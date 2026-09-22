@@ -48,3 +48,35 @@ export async function createSpecialDate(
   );
   return data;
 }
+
+export async function updateSpecialDate(
+  partnershipId: number,
+  dateId: number,
+  fields: { title?: string; date?: string },
+): Promise<SpecialDate> {
+  const { data } = await apiClient.patch<SpecialDate>(
+    `/relationships/${partnershipId}/special-dates/${dateId}/`,
+    fields,
+  );
+  return data;
+}
+
+export async function deleteSpecialDate(
+  partnershipId: number,
+  dateId: number,
+): Promise<void> {
+  await apiClient.delete(
+    `/relationships/${partnershipId}/special-dates/${dateId}/`,
+  );
+}
+
+export async function updatePartnership(
+  id: number,
+  fields: { relation?: string; status?: string },
+): Promise<Partnership> {
+  const { data } = await apiClient.patch<Partnership>(
+    `/relationships/${id}/`,
+    fields,
+  );
+  return data;
+}

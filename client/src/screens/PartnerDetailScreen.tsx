@@ -13,10 +13,16 @@ import { useRoute } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import {
   createSpecialDate,
+  deleteSpecialDate,
   getPartnerships,
   getSpecialDates,
+  updatePartnership,
+  updateSpecialDate,
 } from '../services/partnerships';
 import { Partnership, SpecialDate } from '../types';
+
+type EditingMode = 'none' | 'partnership' | number;
+
 
 export default function PartnerDetailScreen() {
   const { user } = useAuth();
@@ -26,9 +32,22 @@ export default function PartnerDetailScreen() {
   const [partnership, setPartnership] = useState<Partnership | null>(null);
   const [specialDates, setSpecialDates] = useState<SpecialDate[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Add special date form
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [adding, setAdding] = useState(false);
+
+  // Edit mode — 'none', 'partnership', or a special date ID
+  const [editingMode, setEditingMode] = useState<EditingMode>('none');
+
+  // Edit partnership fields
+  const [editRelation, setEditRelation] = useState('');
+  const [editStatus, setEditStatus] = useState('');
+
+  // Edit special date fields
+  const [editTitle, setEditTitle] = useState('');
+  const [editDate, setEditDate] = useState('');
 
   const fetchData = useCallback(async () => {
     try {
@@ -55,6 +74,83 @@ export default function PartnerDetailScreen() {
     fetchData();
   }
 
+  function cancelEditing() {
+    setEditingMode('none');
+  }
+
+  // --- Partnership edit ---
+
+  function startEditPartnership() {
+    if (!partnership) return;
+    setEditRelation(partnership.relation);
+    setEditStatus(partnership.status);
+    setEditingMode('partnership');
+  }
+
+  async function handleSavePartnership() {
+    if (!partnership) return;
+    const fields: { relation?: string; status?: string } = {};
+    if (editRelation.trim() !== partnership.relation) {
+      fields.relation = editRelation.trim();
+    }
+    if (editStatus !== partnership.status) {
+      fields.status = editStatus;
+    }
+    if (Object.keys(fields).length === 0) {
+      cancelEditing();
+      return;
+    }
+    try {
+      await updatePartnership(partnershipId, fields);
+      setEditingMode('none');
+      fetchData();
+    } catch (e: any) {
+      Alert.alert('Error', e.response?.data?.error || 'Failed to update');
+    }
+  }
+
+  // --- Special date edit ---
+
+  function startEditDate(sd: SpecialDate) {
+    setEditTitle(sd.title);
+    setEditDate(sd.date);
+    setEditingMode(sd.id);
+  }
+
+  async function handleSaveDate(dateId: number) {
+    try {
+      await updateSpecialDate(partnershipId, dateId, {
+        title: editTitle.trim(),
+        date: editDate.trim(),
+      });
+      setEditingMode('none');
+      fetchData();
+    } catch (e: any) {
+      Alert.alert('Error', e.response?.data?.error || 'Failed to update');
+    }
+  }
+
+  async function handleDeleteDate(dateId: number) {
+    Alert.alert('Delete', 'Are you sure you want to delete this date?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteSpecialDate(partnershipId, dateId);
+            setEditingMode('none');
+            fetchData();
+          } catch (e: any) {
+            Alert.alert('Error', e.response?.data?.error || 'Failed to delete');
+          }
+        },
+      },
+    ]);
+  }
+
+  // --- Add special date ---
+
   async function handleAddDate() {
     if (!title.trim() || !date.trim()) return;
     setAdding(true);
@@ -70,9 +166,10 @@ export default function PartnerDetailScreen() {
     }
   }
 
+  // --- Helpers ---
+
   function getDisplayName(p: Partnership): string {
-    const other =
-      p.initiator.id === user?.id ? p.partner : p.initiator;
+    const other = p.initiator.id === user?.id ? p.partner : p.initiator;
     return other.first_name;
   }
 
@@ -82,6 +179,8 @@ export default function PartnerDetailScreen() {
     const now = new Date();
     return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   }
+
+  const isEditing = editingMode !== 'none';
 
   if (!partnership) {
     return (
@@ -114,35 +213,131 @@ export default function PartnerDetailScreen() {
                 </View>
               </View>
 
-              <Text style={styles.relation}>{partnership.relation}</Text>
-
-              <View style={styles.stats}>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>
-                    {partnership.streak?.current_count ?? 0}
-                  </Text>
-                  <Text style={styles.statLabel}>Streak</Text>
-                </View>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{partnership.stardust}</Text>
-                  <Text style={styles.statLabel}>Stardust</Text>
-                </View>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{getDaysInOrbit(partnership)}</Text>
-                  <Text style={styles.statLabel}>Days in Orbit</Text>
-                </View>
-              </View>
+              {editingMode === 'partnership' ? (
+                <>
+                  <TextInput
+                    style={styles.editInput}
+                    value={editRelation}
+                    onChangeText={setEditRelation}
+                    placeholder="Relation"
+                  />
+                  <View style={styles.statusRow}>
+                    {['active', 'paused', 'ended'].map((s) => (
+                      <TouchableOpacity
+                        key={s}
+                        style={[
+                          styles.statusOption,
+                          editStatus === s && styles.statusOptionSelected,
+                        ]}
+                        onPress={() => setEditStatus(s)}
+                      >
+                        <Text
+                          style={[
+                            styles.statusOptionText,
+                            editStatus === s && styles.statusOptionTextSelected,
+                          ]}
+                        >
+                          {s}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <View style={styles.editActions}>
+                    <TouchableOpacity style={styles.saveButton} onPress={handleSavePartnership}>
+                      <Text style={styles.saveText}>Save</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.cancelButton} onPress={cancelEditing}>
+                      <Text style={styles.cancelText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.relation}>{partnership.relation}</Text>
+                  <View style={styles.stats}>
+                    <View style={styles.stat}>
+                      <Text style={styles.statValue}>
+                        {partnership.streak?.current_count ?? 0}
+                      </Text>
+                      <Text style={styles.statLabel}>Streak</Text>
+                    </View>
+                    <View style={styles.stat}>
+                      <Text style={styles.statValue}>{partnership.stardust}</Text>
+                      <Text style={styles.statLabel}>Stardust</Text>
+                    </View>
+                    <View style={styles.stat}>
+                      <Text style={styles.statValue}>{getDaysInOrbit(partnership)}</Text>
+                      <Text style={styles.statLabel}>Days in Orbit</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.editButton, isEditing && styles.buttonDisabled]}
+                    onPress={startEditPartnership}
+                    disabled={isEditing}
+                  >
+                    <Text style={styles.editButtonText}>Edit</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
 
             <Text style={styles.sectionTitle}>Special Dates</Text>
           </>
         }
-        renderItem={({ item }) => (
-          <View style={styles.dateCard}>
-            <Text style={styles.dateTitle}>{item.title}</Text>
-            <Text style={styles.dateValue}>{item.date}</Text>
-          </View>
-        )}
+        renderItem={({ item }) => {
+          if (editingMode === item.id) {
+            return (
+              <View style={styles.dateCard}>
+                <TextInput
+                  style={styles.editInput}
+                  value={editTitle}
+                  onChangeText={setEditTitle}
+                  placeholder="Title"
+                />
+                <TextInput
+                  style={styles.editInput}
+                  value={editDate}
+                  onChangeText={setEditDate}
+                  placeholder="YYYY-MM-DD"
+                  keyboardType="numbers-and-punctuation"
+                />
+                <View style={styles.editActions}>
+                  <TouchableOpacity
+                    style={styles.saveButton}
+                    onPress={() => handleSaveDate(item.id)}
+                  >
+                    <Text style={styles.saveText}>Save</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.cancelButton} onPress={cancelEditing}>
+                    <Text style={styles.cancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteDate(item.id)}
+                  >
+                    <Text style={styles.deleteText}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          }
+
+          return (
+            <View style={styles.dateCard}>
+              <View style={styles.dateRow}>
+                <Text style={styles.dateTitle}>{item.title}</Text>
+                <Text style={styles.dateValue}>{item.date}</Text>
+              </View>
+              <TouchableOpacity
+                style={[styles.editButton, isEditing && styles.buttonDisabled]}
+                onPress={() => startEditDate(item)}
+                disabled={isEditing}
+              >
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
+          );
+        }}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No special dates yet</Text>
         }
@@ -227,6 +422,7 @@ const styles = StyleSheet.create({
   stats: {
     flexDirection: 'row',
     gap: 24,
+    marginBottom: 12,
   },
   stat: {
     alignItems: 'center',
@@ -251,9 +447,12 @@ const styles = StyleSheet.create({
     padding: 14,
     marginHorizontal: 20,
     marginBottom: 8,
+  },
+  dateRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
   dateTitle: {
     fontSize: 16,
@@ -268,6 +467,86 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     paddingVertical: 16,
+  },
+  editInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 15,
+    marginBottom: 8,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  statusOption: {
+    flex: 1,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#e0e0e0',
+    alignItems: 'center',
+  },
+  statusOptionSelected: {
+    backgroundColor: '#000',
+  },
+  statusOptionText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
+    textTransform: 'capitalize',
+  },
+  statusOptionTextSelected: {
+    color: '#fff',
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  editButton: {
+    alignSelf: 'flex-end',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 6,
+  },
+  editButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: '#000',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  saveText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  cancelText: {
+    color: '#333',
+    fontWeight: '600',
+  },
+  deleteButton: {
+    flex: 1,
+    backgroundColor: '#F44336',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  deleteText: {
+    color: '#fff',
+    fontWeight: '600',
   },
   addForm: {
     marginTop: 24,
