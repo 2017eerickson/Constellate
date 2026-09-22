@@ -33,8 +33,42 @@ export async function signInWithGoogle(): Promise<{ user: User; isNewUser: boole
   };
 }
 
-export async function completeOnboarding(birthday: string): Promise<User> {
-  const { data } = await apiClient.post<{ user: User }>('/users/auth/onboarding/', { birthday });
+export async function signInWithEmail(
+  email: string,
+  password: string,
+): Promise<{ user: User; isNewUser: boolean }> {
+  const { data } = await apiClient.post<AuthResponse>('/users/auth/login/', {
+    email,
+    password,
+  });
+
+  await AsyncStorage.setItem('access_token', data.access);
+  await AsyncStorage.setItem('refresh_token', data.refresh);
+
+  return { user: data.user, isNewUser: false };
+}
+
+export async function registerWithEmail(
+  email: string,
+  password: string,
+  firstName: string,
+): Promise<{ user: User; isNewUser: boolean }> {
+  const { data } = await apiClient.post<AuthResponse>('/users/auth/register/', {
+    email,
+    password,
+    first_name: firstName,
+  });
+
+  await AsyncStorage.setItem('access_token', data.access);
+  await AsyncStorage.setItem('refresh_token', data.refresh);
+
+  return { user: data.user, isNewUser: true };
+}
+
+export async function completeOnboarding(birthday: string, firstName?: string): Promise<User> {
+  const body: { birthday: string; first_name?: string } = { birthday };
+  if (firstName) body.first_name = firstName;
+  const { data } = await apiClient.post<{ user: User }>('/users/auth/onboarding/', body);
   return data.user;
 }
 
