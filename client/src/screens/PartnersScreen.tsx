@@ -5,21 +5,22 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { getPartnerships } from '../services/partnerships';
 import { Partnership } from '../types';
 
 const STATUS_COLORS: Record<string, string> = {
   active: '#4CAF50',
-  pending: '#FF9800',
   paused: '#9E9E9E',
-  ended: '#F44336',
 };
 
 export default function PartnersScreen() {
   const { user } = useAuth();
+  const navigation = useNavigation();
   const [partnerships, setPartnerships] = useState<Partnership[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -47,10 +48,12 @@ export default function PartnersScreen() {
     fetchPartnerships();
   }
 
+  const soulmate = partnerships.find((p) => p.relation === 'soulmate');
+  const active = partnerships.filter(
+    (p) => p.relation !== 'soulmate' && (p.status === 'active' || p.status === 'paused'),
+  );
+
   function getDisplayName(partnership: Partnership): string {
-    if (partnership.relation === 'soulmate') {
-      return 'You';
-    }
     const other =
       partnership.initiator.id === user?.id
         ? partnership.partner
@@ -58,9 +61,14 @@ export default function PartnersScreen() {
     return other.first_name;
   }
 
-  function renderPartnership({ item }: { item: Partnership }) {
-    const isSoulmate = item.relation === 'soulmate';
+  function getDaysInOrbit(partnership: Partnership): number {
+    const dateStr = partnership.anniversary || partnership.started_at;
+    const start = new Date(dateStr);
+    const now = new Date();
+    return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  }
 
+  function renderPartnership({ item }: { item: Partnership }) {
     return (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
@@ -78,25 +86,19 @@ export default function PartnersScreen() {
         <Text style={styles.relation}>{item.relation}</Text>
 
         <View style={styles.stats}>
-          {item.streak && (
-            <View style={styles.stat}>
-              <Text style={styles.statValue}>{item.streak.current_count}</Text>
-              <Text style={styles.statLabel}>Streak</Text>
-            </View>
-          )}
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>{item.streak?.current_count ?? 0}</Text>
+            <Text style={styles.statLabel}>Streak</Text>
+          </View>
           <View style={styles.stat}>
             <Text style={styles.statValue}>{item.stardust}</Text>
             <Text style={styles.statLabel}>Stardust</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statValue}>{item.streak?.current_count || 0}</Text>
-            <Text style={styles.statLabel}>Streak</Text>
+            <Text style={styles.statValue}>{getDaysInOrbit(item)}</Text>
+            <Text style={styles.statLabel}>Days in Orbit</Text>
           </View>
         </View>
-
-        {isSoulmate && (
-          <Text style={styles.soulmateHint}>Your personal journey</Text>
-        )}
       </View>
     );
   }
@@ -120,20 +122,44 @@ export default function PartnersScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Partners</Text>
+
       <FlatList
-        data={partnerships}
+        data={active}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderPartnership}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
-        ListEmptyComponent={
-          <View style={styles.centered}>
-            <Text style={styles.emptyText}>No partnerships yet</Text>
-          </View>
+        ListHeaderComponent={
+          soulmate ? (
+            <View style={styles.soulmateCard}>
+              <Text style={styles.soulmateName}>You</Text>
+              <Text style={styles.soulmateHint}>Your personal journey</Text>
+              <View style={styles.stats}>
+                <View style={styles.stat}>
+                  <Text style={styles.statValue}>{soulmate.streak?.current_count ?? 0}</Text>
+                  <Text style={styles.statLabel}>Streak</Text>
+                </View>
+                <View style={styles.stat}>
+                  <Text style={styles.statValue}>{soulmate.stardust}</Text>
+                  <Text style={styles.statLabel}>Stardust</Text>
+                </View>
+              </View>
+            </View>
+          ) : null
         }
-        contentContainerStyle={
-          partnerships.length === 0 ? styles.emptyList : undefined
+        ListFooterComponent={
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('Connect' as never)}
+          >
+            <Text style={styles.addButtonText}>+ Add a Partner</Text>
+          </TouchableOpacity>
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No active partnerships yet</Text>
+          </View>
         }
       />
     </View>
@@ -157,6 +183,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingHorizontal: 20,
     marginBottom: 20,
+  },
+  soulmateCard: {
+    backgroundColor: '#f0e6ff',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 20,
+    marginBottom: 12,
+  },
+  soulmateName: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  soulmateHint: {
+    fontSize: 12,
+    color: '#7c4dff',
+    fontStyle: 'italic',
+    marginBottom: 12,
   },
   card: {
     backgroundColor: '#f5f5f5',
@@ -207,21 +251,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
   },
-  soulmateHint: {
-    fontSize: 12,
-    color: '#999',
-    fontStyle: 'italic',
+  addButton: {
+    backgroundColor: '#000',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 20,
     marginTop: 8,
+    marginBottom: 20,
+    alignItems: 'center',
   },
-  errorText: {
-    color: '#F44336',
+  addButtonText: {
+    color: '#fff',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
   },
   emptyText: {
     color: '#999',
     fontSize: 16,
   },
-  emptyList: {
-    flex: 1,
+  errorText: {
+    color: '#F44336',
+    fontSize: 16,
   },
 });

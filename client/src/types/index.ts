@@ -22,6 +22,12 @@ export interface Streak {
   last_completed_at: string | null;
 }
 
+export interface SpecialDate {
+  id: number;
+  title: string;
+  date: string;
+}
+
 export interface Partnership {
   id: number;
   initiator: User;
@@ -32,6 +38,8 @@ export interface Partnership {
   stardust: number;
   started_at: string;
   ended_at: string | null;
+  anniversary: string | null;
+  special_dates: SpecialDate[];
 }
 
 export interface AuthContextType {

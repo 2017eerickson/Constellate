@@ -10,10 +10,16 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import PartnersScreen from './src/screens/PartnersScreen';
 import ConstellationScreen from './src/screens/ConstellationScreen';
+import ConnectScreen from './src/screens/ConnectScreen';
 
 type AuthStackParamList = {
   SignIn: undefined;
   Onboarding: undefined;
+};
+
+type MainStackParamList = {
+  Tabs: undefined;
+  Connect: undefined;
 };
 
 type TabParamList = {
@@ -23,6 +29,7 @@ type TabParamList = {
 };
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
+const MainStack = createNativeStackNavigator<MainStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 function MainTabs() {
@@ -69,7 +76,16 @@ function AppNavigator() {
     );
   }
 
-  return <MainTabs />;
+  return (
+    <MainStack.Navigator screenOptions={{ headerShown: false }}>
+      <MainStack.Screen name="Tabs" component={MainTabs} />
+      <MainStack.Screen
+        name="Connect"
+        component={ConnectScreen}
+        options={{ presentation: 'modal', headerShown: true, headerTitle: '' }}
+      />
+    </MainStack.Navigator>
+  );
 }
 
 export default function App() {

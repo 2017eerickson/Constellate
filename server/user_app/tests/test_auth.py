@@ -19,7 +19,7 @@ class RegisterTests(TestCase):
         self.valid_data = {
             'email': 'new@example.com',
             'first_name': 'New',
-            'password': 'SecurePass123!',
+            'password': 'testing',
         }
 
     def test_success(self):
