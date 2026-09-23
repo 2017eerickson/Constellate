@@ -18,7 +18,9 @@ import {
   StatDisplay,
   StatusBadge,
 } from '../components';
-import { scale, moderateScale, verticalScale } from '../styles/scale';
+import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
+import { commonStyles } from '../styles/common';
 
 export default function PartnersScreen() {
   const { user } = useAuth();
@@ -73,12 +75,12 @@ export default function PartnersScreen() {
   function renderPartnership({ item }: { item: Partnership }) {
     return (
       <Card onPress={() => navigation.navigate('PartnerDetail' as never, { partnershipId: item.id } as never)}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.name}>{getDisplayName(item)}</Text>
+        <View style={[commonStyles.rowSpaceBetween, styles.cardHeaderSpacing]}>
+          <Text style={commonStyles.nameText}>{getDisplayName(item)}</Text>
           <StatusBadge status={item.status} />
         </View>
 
-        <Text style={styles.relation}>{item.relation}</Text>
+        <Text style={commonStyles.relationText}>{item.relation}</Text>
 
         <StatDisplay stats={[
           { value: item.streak?.current_count ?? 0, label: 'Streak' },
@@ -91,8 +93,8 @@ export default function PartnersScreen() {
 
   return (
     <LoadingState loading={loading} error={error}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Partners</Text>
+      <View style={commonStyles.screenList}>
+        <Text style={commonStyles.listScreenTitle}>Partners</Text>
 
         <FlatList
           data={active}
@@ -130,17 +132,6 @@ export default function PartnersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: verticalScale(60),
-  },
-  title: {
-    fontSize: moderateScale(28),
-    fontWeight: 'bold',
-    paddingHorizontal: scale(20),
-    marginBottom: scale(20),
-  },
   soulmateName: {
     fontSize: moderateScale(18),
     fontWeight: '600',
@@ -148,25 +139,12 @@ const styles = StyleSheet.create({
   },
   soulmateHint: {
     fontSize: moderateScale(12),
-    color: '#7c4dff',
+    color: colors.soulmateAccent,
     fontStyle: 'italic',
     marginBottom: scale(12),
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  cardHeaderSpacing: {
     marginBottom: scale(4),
-  },
-  name: {
-    fontSize: moderateScale(18),
-    fontWeight: '600',
-  },
-  relation: {
-    fontSize: moderateScale(14),
-    color: '#666',
-    textTransform: 'capitalize',
-    marginBottom: scale(12),
   },
   addButton: {
     borderRadius: scale(12),

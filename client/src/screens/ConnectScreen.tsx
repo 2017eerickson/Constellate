@@ -17,7 +17,9 @@ import {
 } from '../services/partnerships';
 import { Partnership } from '../types';
 import { ActionButton, Card, EmptyState, SectionHeader } from '../components';
-import { scale, moderateScale, verticalScale } from '../styles/scale';
+import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
+import { commonStyles } from '../styles/common';
 
 export default function ConnectScreen() {
   const { user } = useAuth();
@@ -104,9 +106,9 @@ export default function ConnectScreen() {
 
     return (
       <Card>
-        <View style={styles.pendingHeader}>
-          <Text style={styles.pendingName}>{getOtherName(item)}</Text>
-          <Text style={styles.pendingRelation}>{item.relation}</Text>
+        <View style={[commonStyles.rowSpaceBetween, styles.pendingHeaderSpacing]}>
+          <Text style={commonStyles.nameText}>{getOtherName(item)}</Text>
+          <Text style={[commonStyles.relationText, styles.pendingRelationOverride]}>{item.relation}</Text>
         </View>
         <Text style={styles.pendingCode}>
           Code: {item.initiator.id === user?.id
@@ -145,12 +147,12 @@ export default function ConnectScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Connect</Text>
+    <View style={commonStyles.screenList}>
+      <Text style={commonStyles.listScreenTitle}>Connect</Text>
 
       <Card style={styles.formCard}>
         <TextInput
-          style={styles.input}
+          style={commonStyles.input}
           placeholder="Partner code"
           value={partnerCode}
           onChangeText={setPartnerCode}
@@ -158,14 +160,14 @@ export default function ConnectScreen() {
           maxLength={8}
         />
         <TextInput
-          style={styles.input}
+          style={commonStyles.input}
           placeholder="romantic, platonic, metamour..."
           value={relation}
           onChangeText={setRelation}
           autoCapitalize="none"
         />
         <TextInput
-          style={styles.input}
+          style={commonStyles.input}
           placeholder="Anniversary YYYY-MM-DD (optional)"
           value={anniversary}
           onChangeText={setAnniversary}
@@ -182,7 +184,7 @@ export default function ConnectScreen() {
 
       <SectionHeader title="Pending" />
       {fetchError && (
-        <Text style={styles.errorText}>Something went wrong. Pull down to refresh.</Text>
+        <Text style={[commonStyles.errorText, styles.errorSpacing]}>Something went wrong. Pull down to refresh.</Text>
       )}
 
       <FlatList
@@ -202,54 +204,27 @@ export default function ConnectScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: verticalScale(60),
-  },
-  title: {
-    fontSize: moderateScale(28),
-    fontWeight: 'bold',
-    paddingHorizontal: scale(20),
-    marginBottom: scale(20),
-  },
   formCard: {
     marginBottom: scale(24),
-  },
-  input: {
-    backgroundColor: '#fff',
-    borderRadius: scale(8),
-    padding: scale(12),
-    fontSize: moderateScale(16),
-    marginBottom: scale(10),
   },
   connectButton: {
     marginTop: scale(4),
   },
-  pendingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  pendingHeaderSpacing: {
     marginBottom: scale(4),
   },
-  pendingName: {
-    fontSize: moderateScale(18),
-    fontWeight: '600',
-  },
-  pendingRelation: {
-    fontSize: moderateScale(14),
-    color: '#666',
-    textTransform: 'capitalize',
+  pendingRelationOverride: {
+    marginBottom: 0,
   },
   pendingCode: {
     fontSize: moderateScale(13),
-    color: '#666',
+    color: colors.textSecondary,
     letterSpacing: 2,
     marginBottom: scale(4),
   },
   pendingRole: {
     fontSize: moderateScale(13),
-    color: '#999',
+    color: colors.textMuted,
     marginBottom: scale(12),
   },
   pendingActions: {
@@ -263,10 +238,7 @@ const styles = StyleSheet.create({
   emptyList: {
     flex: 1,
   },
-  errorText: {
-    color: '#F44336',
-    fontSize: moderateScale(14),
-    textAlign: 'center',
+  errorSpacing: {
     marginBottom: scale(12),
   },
 });
