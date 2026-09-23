@@ -22,6 +22,18 @@ import {
   updateSpecialDate,
 } from '../services/partnerships';
 import { Partnership, SpecialDate } from '../types';
+import {
+  ActionButton,
+  Card,
+  EmptyState,
+  LoadingState,
+  SectionHeader,
+  StatDisplay,
+  StatusBadge,
+} from '../components';
+import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
+import { commonStyles } from '../styles/common';
 
 type EditingMode = 'none' | 'partnership' | 'dates';
 
@@ -39,6 +51,7 @@ export default function PartnerDetailScreen() {
   const [partnership, setPartnership] = useState<Partnership | null>(null);
   const [specialDates, setSpecialDates] = useState<SpecialDate[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   // Add special date form
   const [title, setTitle] = useState('');
@@ -70,8 +83,9 @@ export default function PartnerDetailScreen() {
       const found = partnerships.find((p) => p.id === partnershipId);
       if (found) setPartnership(found);
       setSpecialDates(dates);
+      setFetchError(false);
     } catch {
-      // silent — pull to refresh
+      setFetchError(true);
     } finally {
       setRefreshing(false);
     }
@@ -209,318 +223,243 @@ export default function PartnerDetailScreen() {
 
   if (!partnership) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.emptyText}>Loading...</Text>
-      </View>
+      <LoadingState
+        loading={!partnership}
+        error={fetchError ? 'Something went wrong. Pull down to refresh.' : null}
+      >
+        <></>
+      </LoadingState>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={specialDates}
-        keyExtractor={(item) => item.id.toString()}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-        ListHeaderComponent={
-          <>
-            {/* Partnership card */}
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.name}>{getDisplayName(partnership)}</Text>
-                {editingMode === 'partnership' ? (
-                  <View style={styles.headerActions}>
-                    <TouchableOpacity
-                      style={styles.cancelIcon}
-                      onPress={cancelEditing}
-                    >
-                      <MaterialIcons name="close" size={20} color="#666" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.saveIcon}
-                      onPress={handleSavePartnership}
-                    >
-                      <MaterialIcons name="save" size={20} color="#fff" />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    onPress={startEditPartnership}
-                    disabled={isEditing}
-                    style={isEditing ? styles.iconDisabled : undefined}
-                  >
-                    <MaterialIcons name="edit" size={22} color="#666" />
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              {editingMode === 'partnership' ? (
-                <>
-                  <TextInput
-                    style={styles.editInput}
-                    value={editRelation}
-                    onChangeText={setEditRelation}
-                    placeholder={partnership.relation}
-                  />
-                  <DropDownPicker
-                    open={statusOpen}
-                    value={editStatus}
-                    items={statusItems}
-                    setOpen={setStatusOpen}
-                    setValue={setEditStatus}
-                    setItems={setStatusItems}
-                    style={styles.dropdown}
-                    dropDownContainerStyle={styles.dropdownContainer}
-                    listMode="SCROLLVIEW"
-                  />
-                </>
-              ) : (
-                <Text style={styles.relation}>{partnership.relation}</Text>
-              )}
-
-              <View style={styles.bottomRow}>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>
-                    {partnership.streak?.current_count ?? 0}
-                  </Text>
-                  <Text style={styles.statLabel}>Streak</Text>
-                </View>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{partnership.stardust}</Text>
-                  <Text style={styles.statLabel}>Stardust</Text>
-                </View>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{getDaysInOrbit(partnership)}</Text>
-                  <Text style={styles.statLabel}>Days in Orbit</Text>
-                </View>
-                {editingMode !== 'partnership' && (
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      { backgroundColor: partnership.status === 'active' ? '#4CAF50' : '#9E9E9E' },
-                    ]}
-                  >
-                    <Text style={styles.statusText}>{partnership.status}</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-
-            {/* Special Dates header */}
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Special Dates</Text>
-              {editingMode !== 'dates' && (
-                <TouchableOpacity
-                  onPress={startEditDates}
-                  disabled={isEditing}
-                  style={isEditing ? styles.iconDisabled : undefined}
-                >
-                  <MaterialIcons name="edit" size={20} color="#666" />
-                </TouchableOpacity>
-              )}
-            </View>
-          </>
-        }
-        renderItem={({ item }) => {
-          if (editingMode === 'dates') {
-            const edit = dateEdits.find((d) => d.id === item.id);
-            if (!edit) return null;
-            return (
-              <View style={styles.dateCard}>
-                <View style={styles.dateEditRow}>
-                  <TextInput
-                    style={styles.dateEditInput}
-                    value={edit.title}
-                    onChangeText={(v) => updateDateEdit(item.id, 'title', v)}
-                    placeholder={item.title}
-                  />
-                  <TextInput
-                    style={styles.dateEditInputSmall}
-                    value={edit.date}
-                    onChangeText={(v) => updateDateEdit(item.id, 'date', v)}
-                    placeholder={item.date}
-                    keyboardType="numbers-and-punctuation"
-                  />
-                  <TouchableOpacity onPress={() => handleDeleteDate(item.id)}>
-                    <MaterialIcons name="delete" size={22} color="#F44336" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            );
+    <View style={commonStyles.screenBase}>
+        <FlatList
+          data={specialDates}
+          keyExtractor={(item) => item.id.toString()}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
+          ListHeaderComponent={
+            <>
+              {/* Partnership card */}
+              <Card style={styles.topCard}>
+                <View style={[commonStyles.rowSpaceBetween, styles.cardHeaderSpacing]}>
+                  <Text style={commonStyles.nameText}>{getDisplayName(partnership)}</Text>
+                  {editingMode === 'partnership' ? (
+                    <View style={styles.headerActions}>
+                      <TouchableOpacity
+                        style={styles.cancelIcon}
+                        onPress={cancelEditing}
+                      >
+                        <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.saveIcon}
+                        onPress={handleSavePartnership}
+                      >
+                        <MaterialIcons name="save" size={scale(20)} color={colors.white} />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={startEditPartnership}
+                      disabled={isEditing}
+                      style={isEditing ? styles.iconDisabled : undefined}
+                    >
+                      <MaterialIcons name="edit" size={scale(22)} color={colors.textSecondary} />
+                    </TouchableOpacity>
+                  )}
+                </View>
 
-          return (
-            <View style={styles.dateCard}>
-              <View style={styles.dateRow}>
-                <Text style={styles.dateTitle}>{item.title}</Text>
-                <Text style={styles.dateValue}>{item.date}</Text>
-              </View>
-            </View>
-          );
-        }}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No special dates yet</Text>
-        }
-        ListFooterComponent={
-          <>
-            {editingMode === 'dates' && (
-              <View style={styles.dateActions}>
-                <TouchableOpacity style={styles.cancelIcon} onPress={cancelEditing}>
-                  <MaterialIcons name="close" size={20} color="#666" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.saveIcon} onPress={handleSaveDates}>
-                  <MaterialIcons name="save" size={20} color="#fff" />
-                </TouchableOpacity>
-              </View>
-            )}
+                {editingMode === 'partnership' ? (
+                  <>
+                    <TextInput
+                      style={styles.editInput}
+                      value={editRelation}
+                      onChangeText={setEditRelation}
+                      placeholder={partnership.relation}
+                    />
+                    <DropDownPicker
+                      open={statusOpen}
+                      value={editStatus}
+                      items={statusItems}
+                      setOpen={setStatusOpen}
+                      setValue={setEditStatus}
+                      setItems={setStatusItems}
+                      style={styles.dropdown}
+                      dropDownContainerStyle={styles.dropdownContainer}
+                      listMode="SCROLLVIEW"
+                    />
+                  </>
+                ) : (
+                  <Text style={commonStyles.relationText}>{partnership.relation}</Text>
+                )}
 
-            <View style={styles.addForm}>
-              <Text style={styles.sectionTitle}>Add a Special Date</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Title (e.g. First Trip)"
-                value={title}
-                onChangeText={setTitle}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Date YYYY-MM-DD"
-                value={date}
-                onChangeText={setDate}
-                keyboardType="numbers-and-punctuation"
-              />
-              <TouchableOpacity
-                style={[styles.addButton, adding && styles.buttonDisabled]}
-                onPress={handleAddDate}
-                disabled={adding}
-              >
-                <Text style={styles.addButtonText}>
-                  {adding ? 'Adding...' : 'Add Date'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        }
-      />
-    </View>
+                <View style={styles.bottomRow}>
+                  <StatDisplay
+                    stats={[
+                      { value: partnership.streak?.current_count ?? 0, label: 'Streak' },
+                      { value: partnership.stardust, label: 'Stardust' },
+                      { value: getDaysInOrbit(partnership), label: 'Days in Orbit' },
+                    ]}
+                    style={{ gap: scale(20) }}
+                  />
+                  {editingMode !== 'partnership' && (
+                    <StatusBadge
+                      status={partnership.status}
+                      style={{ marginLeft: 'auto' }}
+                    />
+                  )}
+                </View>
+              </Card>
+
+              {/* Special Dates header */}
+              {editingMode === 'dates' ? (
+                <SectionHeader title="Special Dates" />
+              ) : (
+                <SectionHeader
+                  title="Special Dates"
+                  onEdit={startEditDates}
+                  editDisabled={isEditing}
+                />
+              )}
+            </>
+          }
+          renderItem={({ item }) => {
+            if (editingMode === 'dates') {
+              const edit = dateEdits.find((d) => d.id === item.id);
+              if (!edit) return null;
+              return (
+                <Card style={styles.dateCard}>
+                  <View style={styles.dateEditRow}>
+                    <TextInput
+                      style={styles.dateEditInput}
+                      value={edit.title}
+                      onChangeText={(v) => updateDateEdit(item.id, 'title', v)}
+                      placeholder={item.title}
+                    />
+                    <TextInput
+                      style={styles.dateEditInputSmall}
+                      value={edit.date}
+                      onChangeText={(v) => updateDateEdit(item.id, 'date', v)}
+                      placeholder={item.date}
+                      keyboardType="numbers-and-punctuation"
+                    />
+                    <TouchableOpacity onPress={() => handleDeleteDate(item.id)}>
+                      <MaterialIcons name="delete" size={scale(22)} color={colors.error} />
+                    </TouchableOpacity>
+                  </View>
+                </Card>
+              );
+            }
+
+            return (
+              <Card style={styles.dateCard}>
+                <View style={styles.dateRow}>
+                  <Text style={styles.dateTitle}>{item.title}</Text>
+                  <Text style={styles.dateValue}>{item.date}</Text>
+                </View>
+              </Card>
+            );
+          }}
+          ListEmptyComponent={
+            <EmptyState message="No special dates yet" />
+          }
+          ListFooterComponent={
+            <>
+              {editingMode === 'dates' && (
+                <View style={styles.dateActions}>
+                  <TouchableOpacity style={styles.cancelIcon} onPress={cancelEditing}>
+                    <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.saveIcon} onPress={handleSaveDates}>
+                    <MaterialIcons name="save" size={scale(20)} color={colors.white} />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              <View style={styles.addForm}>
+                <SectionHeader title="Add a Special Date" style={{ paddingHorizontal: 0 }} />
+                <TextInput
+                  style={commonStyles.input}
+                  placeholder="Title (e.g. First Trip)"
+                  value={title}
+                  onChangeText={setTitle}
+                />
+                <TextInput
+                  style={commonStyles.input}
+                  placeholder="Date YYYY-MM-DD"
+                  value={date}
+                  onChangeText={setDate}
+                  keyboardType="numbers-and-punctuation"
+                />
+                <ActionButton
+                  onPress={handleAddDate}
+                  text="Add Date"
+                  loadingText="Adding..."
+                  loading={adding}
+                  style={styles.addButton}
+                />
+              </View>
+            </>
+          }
+        />
+      </View>
   );
 }
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
+  topCard: {
+    marginTop: scale(20),
+    marginBottom: scale(24),
   },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  card: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 24,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+  cardHeaderSpacing: {
+    marginBottom: scale(8),
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: scale(8),
   },
   cancelIcon: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 6,
-    padding: 6,
+    backgroundColor: colors.secondary,
+    borderRadius: scale(6),
+    padding: scale(6),
   },
   saveIcon: {
-    backgroundColor: '#000',
-    borderRadius: 6,
-    padding: 6,
+    backgroundColor: colors.primary,
+    borderRadius: scale(6),
+    padding: scale(6),
   },
   iconDisabled: {
     opacity: 0.3,
   },
-  name: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
   editInput: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 15,
-    marginBottom: 8,
+    backgroundColor: colors.background,
+    borderRadius: scale(8),
+    padding: scale(10),
+    fontSize: moderateScale(15),
+    marginBottom: scale(8),
   },
   dropdown: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderColor: '#e0e0e0',
-    marginBottom: 8,
+    backgroundColor: colors.background,
+    borderRadius: scale(8),
+    borderColor: colors.borderMedium,
+    marginBottom: scale(8),
   },
   dropdownContainer: {
-    backgroundColor: '#fff',
-    borderColor: '#e0e0e0',
-    borderRadius: 8,
-  },
-  relation: {
-    fontSize: 14,
-    color: '#666',
-    textTransform: 'capitalize',
-    marginBottom: 12,
+    backgroundColor: colors.background,
+    borderColor: colors.borderMedium,
+    borderRadius: scale(8),
   },
   bottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
-  },
-  stat: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#999',
-  },
-  statusBadge: {
-    marginLeft: 'auto',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
   },
   dateCard: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    padding: 14,
-    marginHorizontal: 20,
-    marginBottom: 8,
+    borderRadius: scale(10),
+    padding: scale(14),
+    marginBottom: scale(8),
   },
   dateRow: {
     flexDirection: 'row',
@@ -530,69 +469,44 @@ const styles = StyleSheet.create({
   dateEditRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: scale(8),
   },
   dateEditInput: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    padding: 8,
-    fontSize: 14,
+    backgroundColor: colors.background,
+    borderRadius: scale(6),
+    padding: scale(8),
+    fontSize: moderateScale(14),
   },
   dateEditInputSmall: {
-    width: 110,
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    padding: 8,
-    fontSize: 14,
+    width: scale(110),
+    backgroundColor: colors.background,
+    borderRadius: scale(6),
+    padding: scale(8),
+    fontSize: moderateScale(14),
   },
   dateTitle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '500',
   },
   dateValue: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: moderateScale(14),
+    color: colors.textSecondary,
   },
   dateActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 8,
-    paddingHorizontal: 20,
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  emptyText: {
-    color: '#999',
-    fontSize: 14,
-    textAlign: 'center',
-    paddingVertical: 16,
+    gap: scale(8),
+    paddingHorizontal: scale(20),
+    marginTop: scale(8),
+    marginBottom: scale(8),
   },
   addForm: {
-    marginTop: 24,
-    marginBottom: 40,
-    paddingHorizontal: 20,
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 10,
+    marginTop: scale(24),
+    marginBottom: scale(40),
+    paddingHorizontal: scale(20),
   },
   addButton: {
-    backgroundColor: '#000',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    marginTop: scale(4),
   },
 });

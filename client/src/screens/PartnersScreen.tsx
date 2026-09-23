@@ -1,22 +1,26 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { getPartnerships } from '../services/partnerships';
 import { Partnership } from '../types';
-
-const STATUS_COLORS: Record<string, string> = {
-  active: '#4CAF50',
-  paused: '#9E9E9E',
-};
+import {
+  ActionButton,
+  Card,
+  EmptyState,
+  LoadingState,
+  StatDisplay,
+  StatusBadge,
+} from '../components';
+import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
+import { commonStyles } from '../styles/common';
 
 export default function PartnersScreen() {
   const { user } = useAuth();
@@ -70,214 +74,83 @@ export default function PartnersScreen() {
 
   function renderPartnership({ item }: { item: Partnership }) {
     return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => navigation.navigate('PartnerDetail' as never, { partnershipId: item.id } as never)}
-      >
-        <View style={styles.cardHeader}>
-          <Text style={styles.name}>{getDisplayName(item)}</Text>
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: STATUS_COLORS[item.status] || '#9E9E9E' },
-            ]}
-          >
-            <Text style={styles.statusText}>{item.status}</Text>
-          </View>
+      <Card onPress={() => navigation.navigate('PartnerDetail' as never, { partnershipId: item.id } as never)}>
+        <View style={[commonStyles.rowSpaceBetween, styles.cardHeaderSpacing]}>
+          <Text style={commonStyles.nameText}>{getDisplayName(item)}</Text>
+          <StatusBadge status={item.status} />
         </View>
 
-        <Text style={styles.relation}>{item.relation}</Text>
+        <Text style={commonStyles.relationText}>{item.relation}</Text>
 
-        <View style={styles.stats}>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{item.streak?.current_count ?? 0}</Text>
-            <Text style={styles.statLabel}>Streak</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{item.stardust}</Text>
-            <Text style={styles.statLabel}>Stardust</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{getDaysInOrbit(item)}</Text>
-            <Text style={styles.statLabel}>Days in Orbit</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  }
-
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
+        <StatDisplay stats={[
+          { value: item.streak?.current_count ?? 0, label: 'Streak' },
+          { value: item.stardust, label: 'Stardust' },
+          { value: getDaysInOrbit(item), label: 'Days in Orbit' },
+        ]} />
+      </Card>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Partners</Text>
+    <LoadingState loading={loading} error={error}>
+      <View style={commonStyles.screenList}>
+        <Text style={commonStyles.listScreenTitle}>Partners</Text>
 
-      <FlatList
-        data={active}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderPartnership}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-        ListHeaderComponent={
-          soulmate ? (
-            <View style={styles.soulmateCard}>
-              <Text style={styles.soulmateName}>You</Text>
-              <Text style={styles.soulmateHint}>Your personal journey</Text>
-              <View style={styles.stats}>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{soulmate.streak?.current_count ?? 0}</Text>
-                  <Text style={styles.statLabel}>Streak</Text>
-                </View>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{soulmate.stardust}</Text>
-                  <Text style={styles.statLabel}>Stardust</Text>
-                </View>
-              </View>
-            </View>
-          ) : null
-        }
-        ListFooterComponent={
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => navigation.navigate('Connect' as never)}
-          >
-            <Text style={styles.addButtonText}>+ Add a Partner</Text>
-          </TouchableOpacity>
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No active partnerships yet</Text>
-          </View>
-        }
-      />
-    </View>
+        <FlatList
+          data={active}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderPartnership}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+          ListHeaderComponent={
+            soulmate ? (
+              <Card variant="soulmate">
+                <Text style={styles.soulmateName}>You</Text>
+                <Text style={styles.soulmateHint}>Your personal journey</Text>
+                <StatDisplay stats={[
+                  { value: soulmate.streak?.current_count ?? 0, label: 'Streak' },
+                  { value: soulmate.stardust, label: 'Stardust' },
+                ]} />
+              </Card>
+            ) : null
+          }
+          ListFooterComponent={
+            <ActionButton
+              onPress={() => navigation.navigate('Connect' as never)}
+              text="+ Add a Partner"
+              style={styles.addButton}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyState message="No active partnerships yet" />
+          }
+        />
+      </View>
+    </LoadingState>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 60,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  soulmateCard: {
-    backgroundColor: '#f0e6ff',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 20,
-    marginBottom: 12,
-  },
   soulmateName: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600',
-    marginBottom: 2,
+    marginBottom: scale(2),
   },
   soulmateHint: {
-    fontSize: 12,
-    color: '#7c4dff',
+    fontSize: moderateScale(12),
+    color: colors.soulmateAccent,
     fontStyle: 'italic',
-    marginBottom: 12,
+    marginBottom: scale(12),
   },
-  card: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 20,
-    marginBottom: 12,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
-  relation: {
-    fontSize: 14,
-    color: '#666',
-    textTransform: 'capitalize',
-    marginBottom: 12,
-  },
-  stats: {
-    flexDirection: 'row',
-    gap: 24,
-  },
-  stat: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#999',
+  cardHeaderSpacing: {
+    marginBottom: scale(4),
   },
   addButton: {
-    backgroundColor: '#000',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 20,
-    marginTop: 8,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  emptyText: {
-    color: '#999',
-    fontSize: 16,
-  },
-  errorText: {
-    color: '#F44336',
-    fontSize: 16,
+    borderRadius: scale(12),
+    padding: scale(16),
+    marginHorizontal: scale(20),
+    marginTop: scale(8),
+    marginBottom: scale(20),
   },
 });
