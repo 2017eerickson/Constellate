@@ -100,7 +100,7 @@ export default function SignInScreen() {
       )}
 
       <TextInput
-        style={styles.input}
+        style={commonStyles.inputBordered}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
@@ -111,7 +111,7 @@ export default function SignInScreen() {
       />
 
       <TextInput
-        style={styles.input}
+        style={commonStyles.inputBordered}
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
