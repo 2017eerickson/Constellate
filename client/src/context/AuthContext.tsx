@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import {
   signInWithGoogle,
+  signInWithEmail as authSignInWithEmail,
+  registerWithEmail,
   signOut as authSignOut,
   getStoredAuth,
   completeOnboarding as authCompleteOnboarding,
@@ -39,21 +41,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsNewUser(result.isNewUser);
   }
 
+  async function signInWithEmail(email: string, password: string) {
+    const result = await authSignInWithEmail(email, password);
+    setUser(result.user);
+    setIsNewUser(result.isNewUser);
+  }
+
+  async function register(email: string, password: string, firstName: string) {
+    const result = await registerWithEmail(email, password, firstName);
+    setUser(result.user);
+    setIsNewUser(result.isNewUser);
+  }
+
   async function signOut() {
     await authSignOut();
     setUser(null);
     setIsNewUser(false);
   }
 
-  async function completeOnboarding(birthday: string) {
-    const updatedUser = await authCompleteOnboarding(birthday);
+  async function completeOnboarding(birthday: string, firstName?: string) {
+    const updatedUser = await authCompleteOnboarding(birthday, firstName);
     setUser(updatedUser);
     setIsNewUser(false);
   }
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isNewUser, signIn, signOut, completeOnboarding }}
+      value={{ user, isLoading, isNewUser, signIn, signInWithEmail, register, signOut, completeOnboarding }}
     >
       {children}
     </AuthContext.Provider>

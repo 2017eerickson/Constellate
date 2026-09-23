@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from user_app.tests.helpers import create_user
+from user_app.tests.helpers import create_user, make_expired_jwt
 
 
 # ---------- Onboarding ----------
@@ -25,6 +25,14 @@ class OnboardingTests(TestCase):
     def test_unauthenticated(self):
         """Unauthenticated request returns 401."""
         self.client.force_authenticate(user=None)
+        resp = self.client.post(self.url, {'birthday': '1995-06-15'})
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_expired_token(self):
+        """Expired JWT returns 401."""
+        self.client.force_authenticate(user=None)
+        expired = make_expired_jwt(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {expired}')
         resp = self.client.post(self.url, {'birthday': '1995-06-15'})
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -80,5 +88,21 @@ class MeTests(TestCase):
     def test_delete_unauthenticated(self):
         """Unauthenticated DELETE returns 401."""
         self.client.force_authenticate(user=None)
+        resp = self.client.delete(self.url, {'password': 'SecurePass123!'})
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_expired_token(self):
+        """Expired JWT on GET returns 401."""
+        self.client.force_authenticate(user=None)
+        expired = make_expired_jwt(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {expired}')
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_expired_token(self):
+        """Expired JWT on DELETE returns 401."""
+        self.client.force_authenticate(user=None)
+        expired = make_expired_jwt(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {expired}')
         resp = self.client.delete(self.url, {'password': 'SecurePass123!'})
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)

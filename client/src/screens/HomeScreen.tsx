@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useAuth } from '../context/AuthContext';
 
 export default function HomeScreen() {
   const { user, signOut } = useAuth();
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    if (user?.partner_code) {
+      await Clipboard.setStringAsync(user.partner_code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
 
   async function handleSignOut() {
     try {
@@ -19,8 +29,13 @@ export default function HomeScreen() {
 
       <View style={styles.card}>
         <Text style={styles.label}>Your Partner Code</Text>
-        <Text style={styles.code}>{user?.partner_code}</Text>
+        <View style={styles.codeRow}>
+          <Text style={styles.code}>{user?.partner_code}</Text>
+        </View>
         <Text style={styles.hint}>Share this code to connect with a partner</Text>
+        <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
+            <Text style={styles.copyText}>{copied ? 'Copied!' : 'Copy'}</Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
@@ -56,14 +71,31 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 8,
   },
+  codeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   code: {
     fontSize: 32,
     fontWeight: 'bold',
     letterSpacing: 4,
-    marginBottom: 8,
+  },
+  copyButton: {
+    marginLeft: 12,
+    backgroundColor: '#e0e0e0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  copyText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
   },
   hint: {
     fontSize: 12,
+    paddingBottom: 8,
     color: '#999',
   },
   signOutButton: {

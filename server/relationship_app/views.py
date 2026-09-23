@@ -4,13 +4,39 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from relationship_app.models import Partnership, PartnershipStatus, RelationType
+from datetime import date
+
+from relationship_app.models import Partnership, PartnershipStatus, RelationType, SpecialDate
 from relationship_app.serializers import (
     ConnectSerializer,
+    CreateSpecialDateSerializer,
     PartnershipSerializer,
+    SpecialDateSerializer,
     UpdatePartnershipSerializer,
 )
 from user_app.models import User
+
+
+def create_default_special_dates(partnership):
+    """Create default special dates (anniversary + birthdays) for a partnership."""
+    dates_to_create = [
+        SpecialDate(
+            partnership=partnership,
+            title='Anniversary',
+            date=partnership.anniversary or date.today(),
+        ),
+    ]
+
+    for user, label in [
+        (partnership.initiator, f"{partnership.initiator.first_name}'s Birthday"),
+        (partnership.partner, f"{partnership.partner.first_name}'s Birthday"),
+    ]:
+        if user.birthday:
+            dates_to_create.append(
+                SpecialDate(partnership=partnership, title=label, date=user.birthday)
+            )
+
+    SpecialDate.objects.bulk_create(dates_to_create)
 
 
 class ConnectView(generics.CreateAPIView):
@@ -47,6 +73,8 @@ class ConnectView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         partner_code = serializer.validated_data['partner_code']
+        relation = serializer.validated_data.get('relation', 'romantic')
+        anniversary = serializer.validated_data.get('anniversary')
 
         try:
             partner = User.objects.get(partner_code=partner_code)
@@ -65,20 +93,32 @@ class ConnectView(generics.CreateAPIView):
         existing = Partnership.objects.filter(
             models.Q(initiator=request.user, partner=partner)
             | models.Q(initiator=partner, partner=request.user),
-        ).exclude(status=PartnershipStatus.ENDED).first()
+        ).first()
 
         if existing:
-            return Response(
-                {'error': 'A partnership already exists with this user.'},
-                status=status.HTTP_409_CONFLICT,
-            )
+            if existing.status != PartnershipStatus.ENDED:
+                return Response(
+                    {'error': 'A partnership already exists with this user.'},
+                    status=status.HTTP_409_CONFLICT,
+                )
 
-        partnership = Partnership.objects.create(
-            initiator=request.user,
-            partner=partner,
-            status=PartnershipStatus.PENDING,
-            relation=RelationType.ROMANTIC,
-        )
+            existing.initiator = request.user
+            existing.partner = partner
+            existing.status = PartnershipStatus.PENDING
+            existing.relation = relation
+            existing.anniversary = anniversary
+            existing.ended_at = None
+            existing.save()
+            existing.special_dates.all().delete()
+            partnership = existing
+        else:
+            partnership = Partnership.objects.create(
+                initiator=request.user,
+                partner=partner,
+                status=PartnershipStatus.PENDING,
+                relation=relation,
+                anniversary=anniversary,
+            )
 
         return Response(
             PartnershipSerializer(partnership, context={'request': request}).data,
@@ -104,6 +144,7 @@ class PartnershipListView(generics.ListAPIView):
                 "stardust": int,
                 "started_at": str,
                 "ended_at": str | null
+                "special_dates": list,  — list of special dates (e.g. anniversaries, birthdays) in ISO 8601 format
             }
         ]
     """
@@ -136,6 +177,7 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
             "stardust": int,
             "started_at": str,
             "ended_at": str | null
+            "special_dates": list,  — list of special dates (e.g. anniversaries, birthdays) in ISO 8601 format
         }
 
     PATCH — Update partnership status and/or relation
@@ -163,15 +205,28 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Partnership.objects.filter(
             models.Q(initiator=self.request.user)
             | models.Q(partner=self.request.user),
-        ).exclude(relation=RelationType.SOULMATE)
+        )
 
     def update(self, request, *args, **kwargs):
         partnership = self.get_object()
+
+        if partnership.relation == RelationType.SOULMATE:
+            return Response(
+                {'error': 'Cannot modify soulmate partnership.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         serializer = UpdatePartnershipSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         new_status = serializer.validated_data.get('status')
         new_relation = serializer.validated_data.get('relation')
+
+        if not new_status and not new_relation:
+            return Response(
+                {'error': 'No fields to update.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if new_status:
             # Only the recipient can accept a pending request
@@ -185,7 +240,12 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
+            was_pending = partnership.status == PartnershipStatus.PENDING
             partnership.status = new_status
+
+            if new_status == PartnershipStatus.ACTIVE and was_pending:
+                create_default_special_dates(partnership)
+
             if new_status == PartnershipStatus.ENDED:
                 partnership.ended_at = timezone.now()
 
@@ -199,11 +259,88 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         partnership = self.get_object()
 
+        if partnership.relation == RelationType.SOULMATE:
+            return Response(
+                {'error': 'Cannot delete soulmate partnership.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         if partnership.status == PartnershipStatus.PENDING:
             partnership.delete()
+        elif partnership.status == PartnershipStatus.ENDED:
+            pass
         else:
             partnership.status = PartnershipStatus.ENDED
             partnership.ended_at = timezone.now()
             partnership.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SpecialDateListCreateView(generics.ListCreateAPIView):
+    """
+    SUMMARY:        List or create special dates for a partnership.
+    ENDPOINTS:
+        GET  /api/v1/relationships/<partnership_id>/special-dates/
+        POST /api/v1/relationships/<partnership_id>/special-dates/
+    AUTHENTICATION: Bearer <access_token>
+    POST REQUEST BODY:
+        {
+            "title": str   (required),
+            "date": str    (required) — "YYYY-MM-DD"
+        }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get_partnership(self):
+        return Partnership.objects.filter(
+            models.Q(initiator=self.request.user)
+            | models.Q(partner=self.request.user),
+            pk=self.kwargs['partnership_id'],
+        ).first()
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateSpecialDateSerializer
+        return SpecialDateSerializer
+
+    def get_queryset(self):
+        partnership = self.get_partnership()
+        if not partnership:
+            return SpecialDate.objects.none()
+        return partnership.special_dates.all()
+
+    def create(self, request, *args, **kwargs):
+        partnership = self.get_partnership()
+        if not partnership:
+            return Response(
+                {'error': 'Partnership not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = CreateSpecialDateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(partnership=partnership)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class SpecialDateDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    SUMMARY:        Retrieve, update, or delete a special date.
+    ENDPOINT:       GET/PATCH/DELETE /api/v1/relationships/<partnership_id>/special-dates/<id>/
+    AUTHENTICATION: Bearer <access_token>
+    PATCH REQUEST BODY:
+        {
+            "title": str   (optional),
+            "date": str    (optional) — "YYYY-MM-DD"
+        }
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = SpecialDateSerializer
+
+    def get_queryset(self):
+        return SpecialDate.objects.filter(
+            partnership_id=self.kwargs['partnership_id'],
+        ).filter(
+            models.Q(partnership__initiator=self.request.user)
+            | models.Q(partnership__partner=self.request.user),
+        )

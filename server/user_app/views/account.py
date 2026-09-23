@@ -54,7 +54,14 @@ class OnboardingView(APIView):
         user = request.user
         user.birthday = serializer.validated_data['birthday']
         user.onboarding_complete = True
-        user.save(update_fields=['birthday', 'onboarding_complete'])
+        update_fields = ['birthday', 'onboarding_complete']
+
+        first_name = serializer.validated_data.get('first_name')
+        if first_name:
+            user.first_name = first_name
+            update_fields.append('first_name')
+
+        user.save(update_fields=update_fields)
 
         return Response({'user': UserSerializer(user).data})
 
