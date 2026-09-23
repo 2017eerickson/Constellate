@@ -12,6 +12,8 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { ActionButton } from '../components';
 import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
+import { commonStyles } from '../styles/common';
 
 export default function SignInScreen() {
   const { signIn, signInWithEmail, register } = useAuth();
@@ -64,11 +66,11 @@ export default function SignInScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={commonStyles.screenCentered}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Text style={styles.title}>Constellate</Text>
-      <Text style={styles.subtitle}>Your relationships, gamified</Text>
+      <Text style={[commonStyles.subtitle, styles.subtitleSpacing]}>Your relationships, gamified</Text>
 
       <ActionButton
         variant="google"
@@ -88,7 +90,7 @@ export default function SignInScreen() {
 
       {isRegisterMode && (
         <TextInput
-          style={styles.input}
+          style={commonStyles.inputBordered}
           placeholder="First Name"
           value={firstName}
           onChangeText={setFirstName}
@@ -141,21 +143,12 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: scale(20),
-  },
   title: {
     fontSize: moderateScale(36),
     fontWeight: 'bold',
     marginBottom: moderateScale(8),
   },
-  subtitle: {
-    fontSize: moderateScale(16),
-    color: '#666',
+  subtitleSpacing: {
     marginBottom: scale(40),
   },
   googleButton: {
@@ -173,21 +166,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: colors.borderLight,
   },
   dividerText: {
     marginHorizontal: scale(12),
-    color: '#999',
+    color: colors.textMuted,
     fontSize: moderateScale(14),
-  },
-  input: {
-    width: '80%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: scale(8),
-    padding: scale(14),
-    fontSize: moderateScale(16),
-    marginBottom: scale(12),
   },
   emailButton: {
     width: '80%',
@@ -198,7 +182,7 @@ const styles = StyleSheet.create({
     padding: undefined,
   },
   toggleText: {
-    color: '#4285F4',
+    color: colors.googleBlue,
     fontSize: moderateScale(14),
   },
 });

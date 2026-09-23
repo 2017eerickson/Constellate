@@ -10,6 +10,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { ActionButton } from '../components';
 import { scale, moderateScale } from '../styles/scale';
+import { commonStyles } from '../styles/common';
 
 export default function OnboardingScreen() {
   const { user, completeOnboarding } = useAuth();
@@ -43,17 +44,17 @@ export default function OnboardingScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={commonStyles.screenCentered}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>
+      <Text style={[commonStyles.screenTitle, styles.titleSpacing]}>
         {needsName ? 'Welcome!' : `Welcome, ${user?.first_name}!`}
       </Text>
-      <Text style={styles.subtitle}>Let's get to know you</Text>
+      <Text style={[commonStyles.subtitle, styles.subtitleSpacing]}>Let's get to know you</Text>
 
       {needsName && (
         <TextInput
-          style={styles.input}
+          style={[commonStyles.inputBordered, styles.inputOverride]}
           placeholder="First Name"
           value={firstName}
           onChangeText={setFirstName}
@@ -63,7 +64,7 @@ export default function OnboardingScreen() {
       )}
 
       <TextInput
-        style={styles.input}
+        style={[commonStyles.inputBordered, styles.inputOverride]}
         placeholder="YYYY-MM-DD"
         value={birthday}
         onChangeText={setBirthday}
@@ -85,29 +86,13 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: scale(20),
-  },
-  title: {
-    fontSize: moderateScale(28),
-    fontWeight: 'bold',
+  titleSpacing: {
     marginBottom: moderateScale(8),
   },
-  subtitle: {
-    fontSize: moderateScale(16),
-    color: '#666',
+  subtitleSpacing: {
     marginBottom: scale(30),
   },
-  input: {
-    width: '80%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: scale(8),
-    padding: scale(14),
+  inputOverride: {
     fontSize: moderateScale(18),
     textAlign: 'center',
     marginBottom: scale(16),
