@@ -32,6 +32,8 @@ import {
   StatusBadge,
 } from '../components';
 import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
+import { commonStyles } from '../styles/common';
 
 type EditingMode = 'none' | 'partnership' | 'dates';
 
@@ -231,7 +233,7 @@ export default function PartnerDetailScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.screenBase}>
         <FlatList
           data={specialDates}
           keyExtractor={(item) => item.id.toString()}
@@ -242,21 +244,21 @@ export default function PartnerDetailScreen() {
             <>
               {/* Partnership card */}
               <Card style={styles.topCard}>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.name}>{getDisplayName(partnership)}</Text>
+                <View style={[commonStyles.rowSpaceBetween, styles.cardHeaderSpacing]}>
+                  <Text style={commonStyles.nameText}>{getDisplayName(partnership)}</Text>
                   {editingMode === 'partnership' ? (
                     <View style={styles.headerActions}>
                       <TouchableOpacity
                         style={styles.cancelIcon}
                         onPress={cancelEditing}
                       >
-                        <MaterialIcons name="close" size={scale(20)} color="#666" />
+                        <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.saveIcon}
                         onPress={handleSavePartnership}
                       >
-                        <MaterialIcons name="save" size={scale(20)} color="#fff" />
+                        <MaterialIcons name="save" size={scale(20)} color={colors.white} />
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -265,7 +267,7 @@ export default function PartnerDetailScreen() {
                       disabled={isEditing}
                       style={isEditing ? styles.iconDisabled : undefined}
                     >
-                      <MaterialIcons name="edit" size={scale(22)} color="#666" />
+                      <MaterialIcons name="edit" size={scale(22)} color={colors.textSecondary} />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -291,7 +293,7 @@ export default function PartnerDetailScreen() {
                     />
                   </>
                 ) : (
-                  <Text style={styles.relation}>{partnership.relation}</Text>
+                  <Text style={commonStyles.relationText}>{partnership.relation}</Text>
                 )}
 
                 <View style={styles.bottomRow}>
@@ -345,7 +347,7 @@ export default function PartnerDetailScreen() {
                       keyboardType="numbers-and-punctuation"
                     />
                     <TouchableOpacity onPress={() => handleDeleteDate(item.id)}>
-                      <MaterialIcons name="delete" size={scale(22)} color="#F44336" />
+                      <MaterialIcons name="delete" size={scale(22)} color={colors.error} />
                     </TouchableOpacity>
                   </View>
                 </Card>
@@ -369,10 +371,10 @@ export default function PartnerDetailScreen() {
               {editingMode === 'dates' && (
                 <View style={styles.dateActions}>
                   <TouchableOpacity style={styles.cancelIcon} onPress={cancelEditing}>
-                    <MaterialIcons name="close" size={scale(20)} color="#666" />
+                    <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.saveIcon} onPress={handleSaveDates}>
-                    <MaterialIcons name="save" size={scale(20)} color="#fff" />
+                    <MaterialIcons name="save" size={scale(20)} color={colors.white} />
                   </TouchableOpacity>
                 </View>
               )}
@@ -380,13 +382,13 @@ export default function PartnerDetailScreen() {
               <View style={styles.addForm}>
                 <SectionHeader title="Add a Special Date" style={{ paddingHorizontal: 0 }} />
                 <TextInput
-                  style={styles.input}
+                  style={commonStyles.input}
                   placeholder="Title (e.g. First Trip)"
                   value={title}
                   onChangeText={setTitle}
                 />
                 <TextInput
-                  style={styles.input}
+                  style={commonStyles.input}
                   placeholder="Date YYYY-MM-DD"
                   value={date}
                   onChangeText={setDate}
@@ -408,18 +410,11 @@ export default function PartnerDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
   topCard: {
     marginTop: scale(20),
     marginBottom: scale(24),
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  cardHeaderSpacing: {
     marginBottom: scale(8),
   },
   headerActions: {
@@ -427,45 +422,35 @@ const styles = StyleSheet.create({
     gap: scale(8),
   },
   cancelIcon: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.secondary,
     borderRadius: scale(6),
     padding: scale(6),
   },
   saveIcon: {
-    backgroundColor: '#000',
+    backgroundColor: colors.primary,
     borderRadius: scale(6),
     padding: scale(6),
   },
   iconDisabled: {
     opacity: 0.3,
   },
-  name: {
-    fontSize: moderateScale(18),
-    fontWeight: '600',
-  },
   editInput: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     borderRadius: scale(8),
     padding: scale(10),
     fontSize: moderateScale(15),
     marginBottom: scale(8),
   },
   dropdown: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     borderRadius: scale(8),
-    borderColor: '#e0e0e0',
+    borderColor: colors.borderMedium,
     marginBottom: scale(8),
   },
   dropdownContainer: {
-    backgroundColor: '#fff',
-    borderColor: '#e0e0e0',
+    backgroundColor: colors.background,
+    borderColor: colors.borderMedium,
     borderRadius: scale(8),
-  },
-  relation: {
-    fontSize: moderateScale(14),
-    color: '#666',
-    textTransform: 'capitalize',
-    marginBottom: scale(12),
   },
   bottomRow: {
     flexDirection: 'row',
@@ -488,14 +473,14 @@ const styles = StyleSheet.create({
   },
   dateEditInput: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     borderRadius: scale(6),
     padding: scale(8),
     fontSize: moderateScale(14),
   },
   dateEditInputSmall: {
     width: scale(110),
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     borderRadius: scale(6),
     padding: scale(8),
     fontSize: moderateScale(14),
@@ -506,7 +491,7 @@ const styles = StyleSheet.create({
   },
   dateValue: {
     fontSize: moderateScale(14),
-    color: '#666',
+    color: colors.textSecondary,
   },
   dateActions: {
     flexDirection: 'row',
@@ -520,13 +505,6 @@ const styles = StyleSheet.create({
     marginTop: scale(24),
     marginBottom: scale(40),
     paddingHorizontal: scale(20),
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: scale(8),
-    padding: scale(12),
-    fontSize: moderateScale(16),
-    marginBottom: scale(10),
   },
   addButton: {
     marginTop: scale(4),

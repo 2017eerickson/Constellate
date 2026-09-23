@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle, StyleProp } from 'react-native';
 import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
 
 interface Stat {
   value: string | number;
@@ -39,6 +40,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: moderateScale(12),
-    color: '#999',
+    color: colors.textMuted,
   },
 });

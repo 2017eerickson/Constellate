@@ -1,11 +1,12 @@
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle, StyleProp } from 'react-native';
 import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
 
 const STATUS_COLORS: Record<string, string> = {
-  active: '#4CAF50',
-  paused: '#9E9E9E',
-  ended: '#9E9E9E',
+  active: colors.success,
+  paused: colors.neutral,
+  ended: colors.neutral,
 };
 
 interface StatusBadgeProps {
@@ -18,7 +19,7 @@ export default function StatusBadge({ status, style }: StatusBadgeProps) {
     <View
       style={[
         styles.badge,
-        { backgroundColor: STATUS_COLORS[status] || '#9E9E9E' },
+        { backgroundColor: STATUS_COLORS[status] || colors.neutral },
         style,
       ]}
     >
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
     borderRadius: scale(12),
   },
   text: {
-    color: '#fff',
+    color: colors.white,
     fontSize: moderateScale(12),
     fontWeight: '600',
     textTransform: 'capitalize',

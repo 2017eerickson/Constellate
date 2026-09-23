@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
 import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
 
 interface ActionButtonProps {
   onPress: () => void;
@@ -47,26 +48,26 @@ export default function ActionButton({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#000',
+    backgroundColor: colors.primary,
     borderRadius: scale(8),
     padding: scale(14),
     alignItems: 'center',
   },
   secondary: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.secondary,
   },
   google: {
-    backgroundColor: '#4285F4',
+    backgroundColor: colors.googleBlue,
   },
   disabled: {
     opacity: 0.5,
   },
   text: {
-    color: '#fff',
+    color: colors.white,
     fontSize: moderateScale(16),
     fontWeight: '600',
   },
   secondaryText: {
-    color: '#333',
+    color: colors.textPrimary,
   },
 });

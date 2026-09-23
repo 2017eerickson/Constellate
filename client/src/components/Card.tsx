@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, ViewStyle, StyleProp } from 'react-native';
 import { scale } from '../styles/scale';
+import { colors } from '../styles/colors';
 
 interface CardProps {
   children: React.ReactNode;
@@ -29,13 +30,13 @@ export default function Card({ children, variant = 'default', onPress, style }: 
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.cardBg,
     borderRadius: scale(12),
     padding: scale(16),
     marginHorizontal: scale(20),
     marginBottom: scale(12),
   },
   soulmate: {
-    backgroundColor: '#f0e6ff',
+    backgroundColor: colors.soulmateBg,
   },
 });

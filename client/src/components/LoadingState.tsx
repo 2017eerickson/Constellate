@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
 
 interface LoadingStateProps {
   loading: boolean;
@@ -33,10 +34,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   errorText: {
-    color: '#F44336',
+    color: colors.error,
     fontSize: moderateScale(16),
   },
 });
