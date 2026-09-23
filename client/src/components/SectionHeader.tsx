@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, ViewStyle, StyleProp } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
 
 interface SectionHeaderProps {
   title: string;
@@ -20,7 +21,7 @@ export default function SectionHeader({ title, onEdit, editDisabled = false, sty
           disabled={editDisabled}
           style={editDisabled ? styles.disabled : undefined}
         >
-          <MaterialIcons name="edit" size={scale(20)} color="#666" />
+          <MaterialIcons name="edit" size={scale(20)} color={colors.textSecondary} />
         </TouchableOpacity>
       )}
     </View>
