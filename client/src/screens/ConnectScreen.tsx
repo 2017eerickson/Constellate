@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
@@ -17,6 +16,8 @@ import {
   getPartnerships,
 } from '../services/partnerships';
 import { Partnership } from '../types';
+import { ActionButton, Card, EmptyState, SectionHeader } from '../components';
+import { scale, moderateScale, verticalScale } from '../styles/scale';
 
 export default function ConnectScreen() {
   const { user } = useAuth();
@@ -102,7 +103,7 @@ export default function ConnectScreen() {
     const recipient = isRecipient(item);
 
     return (
-      <View style={styles.pendingCard}>
+      <Card>
         <View style={styles.pendingHeader}>
           <Text style={styles.pendingName}>{getOtherName(item)}</Text>
           <Text style={styles.pendingRelation}>{item.relation}</Text>
@@ -118,29 +119,28 @@ export default function ConnectScreen() {
         <View style={styles.pendingActions}>
           {recipient ? (
             <>
-              <TouchableOpacity
-                style={styles.acceptButton}
+              <ActionButton
                 onPress={() => handleAccept(item.id)}
-              >
-                <Text style={styles.acceptText}>Accept</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.declineButton}
+                text="Accept"
+                style={styles.actionBtn}
+              />
+              <ActionButton
+                variant="secondary"
                 onPress={() => handleDecline(item.id)}
-              >
-                <Text style={styles.declineText}>Decline</Text>
-              </TouchableOpacity>
+                text="Decline"
+                style={styles.actionBtn}
+              />
             </>
           ) : (
-            <TouchableOpacity
-              style={styles.declineButton}
+            <ActionButton
+              variant="secondary"
               onPress={() => handleDecline(item.id)}
-            >
-              <Text style={styles.declineText}>Cancel</Text>
-            </TouchableOpacity>
+              text="Cancel"
+              style={styles.actionBtn}
+            />
           )}
         </View>
-      </View>
+      </Card>
     );
   }
 
@@ -148,7 +148,7 @@ export default function ConnectScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Connect</Text>
 
-      <View style={styles.formCard}>
+      <Card style={styles.formCard}>
         <TextInput
           style={styles.input}
           placeholder="Partner code"
@@ -171,18 +171,16 @@ export default function ConnectScreen() {
           onChangeText={setAnniversary}
           keyboardType="numbers-and-punctuation"
         />
-        <TouchableOpacity
-          style={[styles.connectButton, connecting && styles.buttonDisabled]}
+        <ActionButton
           onPress={handleConnect}
-          disabled={connecting}
-        >
-          <Text style={styles.connectText}>
-            {connecting ? 'Sending...' : 'Connect'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+          text="Connect"
+          loadingText="Sending..."
+          loading={connecting}
+          style={styles.connectButton}
+        />
+      </Card>
 
-      <Text style={styles.sectionTitle}>Pending</Text>
+      <SectionHeader title="Pending" />
       {fetchError && (
         <Text style={styles.errorText}>Something went wrong. Pull down to refresh.</Text>
       )}
@@ -195,7 +193,7 @@ export default function ConnectScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No pending requests</Text>
+          <EmptyState message="No pending requests" />
         }
         contentContainerStyle={pending.length === 0 ? styles.emptyList : undefined}
       />
@@ -207,121 +205,68 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 60,
+    paddingTop: verticalScale(60),
   },
   title: {
-    fontSize: 28,
+    fontSize: moderateScale(28),
     fontWeight: 'bold',
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: scale(20),
+    marginBottom: scale(20),
   },
   formCard: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 20,
-    marginBottom: 24,
+    marginBottom: scale(24),
   },
   input: {
     backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 10,
+    borderRadius: scale(8),
+    padding: scale(12),
+    fontSize: moderateScale(16),
+    marginBottom: scale(10),
   },
   connectButton: {
-    backgroundColor: '#000',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  connectText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    paddingHorizontal: 20,
-    marginBottom: 12,
-  },
-  pendingCard: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 20,
-    marginBottom: 12,
+    marginTop: scale(4),
   },
   pendingHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
   pendingName: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: '600',
   },
   pendingRelation: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: '#666',
     textTransform: 'capitalize',
   },
   pendingCode: {
-    fontSize: 13,
+    fontSize: moderateScale(13),
     color: '#666',
     letterSpacing: 2,
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
   pendingRole: {
-    fontSize: 13,
+    fontSize: moderateScale(13),
     color: '#999',
-    marginBottom: 12,
+    marginBottom: scale(12),
   },
   pendingActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: scale(12),
   },
-  acceptButton: {
+  actionBtn: {
     flex: 1,
-    backgroundColor: '#000',
-    borderRadius: 8,
-    padding: 10,
-    alignItems: 'center',
-  },
-  acceptText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  declineButton: {
-    flex: 1,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 8,
-    padding: 10,
-    alignItems: 'center',
-  },
-  declineText: {
-    color: '#333',
-    fontWeight: '600',
-  },
-  emptyText: {
-    color: '#999',
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 20,
+    padding: scale(10),
   },
   emptyList: {
     flex: 1,
   },
   errorText: {
     color: '#F44336',
-    fontSize: 14,
+    fontSize: moderateScale(14),
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: scale(12),
   },
 });
