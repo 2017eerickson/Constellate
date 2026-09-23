@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import {
   createSpecialDate,
@@ -21,8 +23,13 @@ import {
 } from '../services/partnerships';
 import { Partnership, SpecialDate } from '../types';
 
-type EditingMode = 'none' | 'partnership' | number;
+type EditingMode = 'none' | 'partnership' | 'dates';
 
+interface DateEdit {
+  id: number;
+  title: string;
+  date: string;
+}
 
 export default function PartnerDetailScreen() {
   const { user } = useAuth();
@@ -38,16 +45,21 @@ export default function PartnerDetailScreen() {
   const [date, setDate] = useState('');
   const [adding, setAdding] = useState(false);
 
-  // Edit mode — 'none', 'partnership', or a special date ID
+  // Edit mode
   const [editingMode, setEditingMode] = useState<EditingMode>('none');
 
   // Edit partnership fields
   const [editRelation, setEditRelation] = useState('');
   const [editStatus, setEditStatus] = useState('');
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [statusItems, setStatusItems] = useState([
+    { label: 'Active', value: 'active' },
+    { label: 'Paused', value: 'paused' },
+    { label: 'Ended', value: 'ended' },
+  ]);
 
-  // Edit special date fields
-  const [editTitle, setEditTitle] = useState('');
-  const [editDate, setEditDate] = useState('');
+  // Edit special dates fields (all at once)
+  const [dateEdits, setDateEdits] = useState<DateEdit[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -78,6 +90,8 @@ export default function PartnerDetailScreen() {
     setEditingMode('none');
   }
 
+  const isEditing = editingMode !== 'none';
+
   // --- Partnership edit ---
 
   function startEditPartnership() {
@@ -90,10 +104,10 @@ export default function PartnerDetailScreen() {
   async function handleSavePartnership() {
     if (!partnership) return;
     const fields: { relation?: string; status?: string } = {};
-    if (editRelation.trim() !== partnership.relation) {
+    if (editRelation.trim() && editRelation.trim() !== partnership.relation) {
       fields.relation = editRelation.trim();
     }
-    if (editStatus !== partnership.status) {
+    if (editStatus && editStatus !== partnership.status) {
       fields.status = editStatus;
     }
     if (Object.keys(fields).length === 0) {
@@ -109,24 +123,37 @@ export default function PartnerDetailScreen() {
     }
   }
 
-  // --- Special date edit ---
+  // --- Special dates edit ---
 
-  function startEditDate(sd: SpecialDate) {
-    setEditTitle(sd.title);
-    setEditDate(sd.date);
-    setEditingMode(sd.id);
+  function startEditDates() {
+    setDateEdits(
+      specialDates.map((sd) => ({ id: sd.id, title: sd.title, date: sd.date })),
+    );
+    setEditingMode('dates');
   }
 
-  async function handleSaveDate(dateId: number) {
+  function updateDateEdit(id: number, field: 'title' | 'date', value: string) {
+    setDateEdits((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, [field]: value } : d)),
+    );
+  }
+
+  async function handleSaveDates() {
     try {
-      await updateSpecialDate(partnershipId, dateId, {
-        title: editTitle.trim(),
-        date: editDate.trim(),
+      const promises = dateEdits.map((edit) => {
+        const original = specialDates.find((sd) => sd.id === edit.id);
+        if (!original) return null;
+        const fields: { title?: string; date?: string } = {};
+        if (edit.title.trim() !== original.title) fields.title = edit.title.trim();
+        if (edit.date.trim() !== original.date) fields.date = edit.date.trim();
+        if (Object.keys(fields).length === 0) return null;
+        return updateSpecialDate(partnershipId, edit.id, fields);
       });
+      await Promise.all(promises.filter(Boolean));
       setEditingMode('none');
       fetchData();
     } catch (e: any) {
-      Alert.alert('Error', e.response?.data?.error || 'Failed to update');
+      Alert.alert('Error', e.response?.data?.error || 'Failed to save');
     }
   }
 
@@ -139,7 +166,7 @@ export default function PartnerDetailScreen() {
         onPress: async () => {
           try {
             await deleteSpecialDate(partnershipId, dateId);
-            setEditingMode('none');
+            setDateEdits((prev) => prev.filter((d) => d.id !== dateId));
             fetchData();
           } catch (e: any) {
             Alert.alert('Error', e.response?.data?.error || 'Failed to delete');
@@ -180,8 +207,6 @@ export default function PartnerDetailScreen() {
     return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  const isEditing = editingMode !== 'none';
-
   if (!partnership) {
     return (
       <View style={styles.centered}>
@@ -200,17 +225,34 @@ export default function PartnerDetailScreen() {
         }
         ListHeaderComponent={
           <>
+            {/* Partnership card */}
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <Text style={styles.name}>{getDisplayName(partnership)}</Text>
-                <View
-                  style={[
-                    styles.statusBadge,
-                    { backgroundColor: partnership.status === 'active' ? '#4CAF50' : '#9E9E9E' },
-                  ]}
-                >
-                  <Text style={styles.statusText}>{partnership.status}</Text>
-                </View>
+                {editingMode === 'partnership' ? (
+                  <View style={styles.headerActions}>
+                    <TouchableOpacity
+                      style={styles.cancelIcon}
+                      onPress={cancelEditing}
+                    >
+                      <MaterialIcons name="close" size={20} color="#666" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.saveIcon}
+                      onPress={handleSavePartnership}
+                    >
+                      <MaterialIcons name="save" size={20} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    onPress={startEditPartnership}
+                    disabled={isEditing}
+                    style={isEditing ? styles.iconDisabled : undefined}
+                  >
+                    <MaterialIcons name="edit" size={22} color="#666" />
+                  </TouchableOpacity>
+                )}
               </View>
 
               {editingMode === 'partnership' ? (
@@ -219,103 +261,89 @@ export default function PartnerDetailScreen() {
                     style={styles.editInput}
                     value={editRelation}
                     onChangeText={setEditRelation}
-                    placeholder="Relation"
+                    placeholder={partnership.relation}
                   />
-                  <View style={styles.statusRow}>
-                    {['active', 'paused', 'ended'].map((s) => (
-                      <TouchableOpacity
-                        key={s}
-                        style={[
-                          styles.statusOption,
-                          editStatus === s && styles.statusOptionSelected,
-                        ]}
-                        onPress={() => setEditStatus(s)}
-                      >
-                        <Text
-                          style={[
-                            styles.statusOptionText,
-                            editStatus === s && styles.statusOptionTextSelected,
-                          ]}
-                        >
-                          {s}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                  <View style={styles.editActions}>
-                    <TouchableOpacity style={styles.saveButton} onPress={handleSavePartnership}>
-                      <Text style={styles.saveText}>Save</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.cancelButton} onPress={cancelEditing}>
-                      <Text style={styles.cancelText}>Cancel</Text>
-                    </TouchableOpacity>
-                  </View>
+                  <DropDownPicker
+                    open={statusOpen}
+                    value={editStatus}
+                    items={statusItems}
+                    setOpen={setStatusOpen}
+                    setValue={setEditStatus}
+                    setItems={setStatusItems}
+                    style={styles.dropdown}
+                    dropDownContainerStyle={styles.dropdownContainer}
+                    listMode="SCROLLVIEW"
+                  />
                 </>
               ) : (
-                <>
-                  <Text style={styles.relation}>{partnership.relation}</Text>
-                  <View style={styles.stats}>
-                    <View style={styles.stat}>
-                      <Text style={styles.statValue}>
-                        {partnership.streak?.current_count ?? 0}
-                      </Text>
-                      <Text style={styles.statLabel}>Streak</Text>
-                    </View>
-                    <View style={styles.stat}>
-                      <Text style={styles.statValue}>{partnership.stardust}</Text>
-                      <Text style={styles.statLabel}>Stardust</Text>
-                    </View>
-                    <View style={styles.stat}>
-                      <Text style={styles.statValue}>{getDaysInOrbit(partnership)}</Text>
-                      <Text style={styles.statLabel}>Days in Orbit</Text>
-                    </View>
-                  </View>
-                  <TouchableOpacity
-                    style={[styles.editButton, isEditing && styles.buttonDisabled]}
-                    onPress={startEditPartnership}
-                    disabled={isEditing}
-                  >
-                    <Text style={styles.editButtonText}>Edit</Text>
-                  </TouchableOpacity>
-                </>
+                <Text style={styles.relation}>{partnership.relation}</Text>
               )}
+
+              <View style={styles.bottomRow}>
+                <View style={styles.stat}>
+                  <Text style={styles.statValue}>
+                    {partnership.streak?.current_count ?? 0}
+                  </Text>
+                  <Text style={styles.statLabel}>Streak</Text>
+                </View>
+                <View style={styles.stat}>
+                  <Text style={styles.statValue}>{partnership.stardust}</Text>
+                  <Text style={styles.statLabel}>Stardust</Text>
+                </View>
+                <View style={styles.stat}>
+                  <Text style={styles.statValue}>{getDaysInOrbit(partnership)}</Text>
+                  <Text style={styles.statLabel}>Days in Orbit</Text>
+                </View>
+                {editingMode !== 'partnership' && (
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: partnership.status === 'active' ? '#4CAF50' : '#9E9E9E' },
+                    ]}
+                  >
+                    <Text style={styles.statusText}>{partnership.status}</Text>
+                  </View>
+                )}
+              </View>
             </View>
 
-            <Text style={styles.sectionTitle}>Special Dates</Text>
+            {/* Special Dates header */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Special Dates</Text>
+              {editingMode !== 'dates' && (
+                <TouchableOpacity
+                  onPress={startEditDates}
+                  disabled={isEditing}
+                  style={isEditing ? styles.iconDisabled : undefined}
+                >
+                  <MaterialIcons name="edit" size={20} color="#666" />
+                </TouchableOpacity>
+              )}
+            </View>
           </>
         }
         renderItem={({ item }) => {
-          if (editingMode === item.id) {
+          if (editingMode === 'dates') {
+            const edit = dateEdits.find((d) => d.id === item.id);
+            if (!edit) return null;
             return (
               <View style={styles.dateCard}>
-                <TextInput
-                  style={styles.editInput}
-                  value={editTitle}
-                  onChangeText={setEditTitle}
-                  placeholder="Title"
-                />
-                <TextInput
-                  style={styles.editInput}
-                  value={editDate}
-                  onChangeText={setEditDate}
-                  placeholder="YYYY-MM-DD"
-                  keyboardType="numbers-and-punctuation"
-                />
-                <View style={styles.editActions}>
-                  <TouchableOpacity
-                    style={styles.saveButton}
-                    onPress={() => handleSaveDate(item.id)}
-                  >
-                    <Text style={styles.saveText}>Save</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.cancelButton} onPress={cancelEditing}>
-                    <Text style={styles.cancelText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleDeleteDate(item.id)}
-                  >
-                    <Text style={styles.deleteText}>Delete</Text>
+                <View style={styles.dateEditRow}>
+                  <TextInput
+                    style={styles.dateEditInput}
+                    value={edit.title}
+                    onChangeText={(v) => updateDateEdit(item.id, 'title', v)}
+                    placeholder={item.title}
+                  />
+                  <TextInput
+                    style={styles.dateEditInputSmall}
+                    value={edit.date}
+                    onChangeText={(v) => updateDateEdit(item.id, 'date', v)}
+                    placeholder={item.date}
+                    keyboardType="numbers-and-punctuation"
+                  />
+                  <TouchableOpacity onPress={() => handleDeleteDate(item.id)}>
+                    <MaterialIcons name="delete" size={22} color="#F44336" />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -328,13 +356,6 @@ export default function PartnerDetailScreen() {
                 <Text style={styles.dateTitle}>{item.title}</Text>
                 <Text style={styles.dateValue}>{item.date}</Text>
               </View>
-              <TouchableOpacity
-                style={[styles.editButton, isEditing && styles.buttonDisabled]}
-                onPress={() => startEditDate(item)}
-                disabled={isEditing}
-              >
-                <Text style={styles.editButtonText}>Edit</Text>
-              </TouchableOpacity>
             </View>
           );
         }}
@@ -342,37 +363,49 @@ export default function PartnerDetailScreen() {
           <Text style={styles.emptyText}>No special dates yet</Text>
         }
         ListFooterComponent={
-          <View style={styles.addForm}>
-            <Text style={styles.sectionTitle}>Add a Special Date</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Title (e.g. First Trip)"
-              value={title}
-              onChangeText={setTitle}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Date YYYY-MM-DD"
-              value={date}
-              onChangeText={setDate}
-              keyboardType="numbers-and-punctuation"
-            />
-            <TouchableOpacity
-              style={[styles.addButton, adding && styles.buttonDisabled]}
-              onPress={handleAddDate}
-              disabled={adding}
-            >
-              <Text style={styles.addButtonText}>
-                {adding ? 'Adding...' : 'Add Date'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <>
+            {editingMode === 'dates' && (
+              <View style={styles.dateActions}>
+                <TouchableOpacity style={styles.cancelIcon} onPress={cancelEditing}>
+                  <MaterialIcons name="close" size={20} color="#666" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveIcon} onPress={handleSaveDates}>
+                  <MaterialIcons name="save" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <View style={styles.addForm}>
+              <Text style={styles.sectionTitle}>Add a Special Date</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Title (e.g. First Trip)"
+                value={title}
+                onChangeText={setTitle}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Date YYYY-MM-DD"
+                value={date}
+                onChangeText={setDate}
+                keyboardType="numbers-and-punctuation"
+              />
+              <TouchableOpacity
+                style={[styles.addButton, adding && styles.buttonDisabled]}
+                onPress={handleAddDate}
+                disabled={adding}
+              >
+                <Text style={styles.addButtonText}>
+                  {adding ? 'Adding...' : 'Add Date'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
         }
       />
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -396,22 +429,46 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  cancelIcon: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 6,
+    padding: 6,
+  },
+  saveIcon: {
+    backgroundColor: '#000',
+    borderRadius: 6,
+    padding: 6,
+  },
+  iconDisabled: {
+    opacity: 0.3,
   },
   name: {
     fontSize: 18,
     fontWeight: '600',
   },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+  editInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 15,
+    marginBottom: 8,
   },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'capitalize',
+  dropdown: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderColor: '#e0e0e0',
+    marginBottom: 8,
+  },
+  dropdownContainer: {
+    backgroundColor: '#fff',
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
   },
   relation: {
     fontSize: 14,
@@ -419,10 +476,10 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
     marginBottom: 12,
   },
-  stats: {
+  bottomRow: {
     flexDirection: 'row',
-    gap: 24,
-    marginBottom: 12,
+    alignItems: 'center',
+    gap: 20,
   },
   stat: {
     alignItems: 'center',
@@ -435,11 +492,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
   },
+  statusBadge: {
+    marginLeft: 'auto',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    paddingHorizontal: 20,
-    marginBottom: 12,
   },
   dateCard: {
     backgroundColor: '#f5f5f5',
@@ -452,7 +526,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+  },
+  dateEditRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dateEditInput: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    padding: 8,
+    fontSize: 14,
+  },
+  dateEditInputSmall: {
+    width: 110,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    padding: 8,
+    fontSize: 14,
   },
   dateTitle: {
     fontSize: 16,
@@ -462,109 +554,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
+  dateActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    paddingHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 8,
+  },
   emptyText: {
     color: '#999',
     fontSize: 14,
     textAlign: 'center',
     paddingVertical: 16,
   },
-  editInput: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 15,
-    marginBottom: 8,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  statusOption: {
-    flex: 1,
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#e0e0e0',
-    alignItems: 'center',
-  },
-  statusOptionSelected: {
-    backgroundColor: '#000',
-  },
-  statusOptionText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
-    textTransform: 'capitalize',
-  },
-  statusOptionTextSelected: {
-    color: '#fff',
-  },
-  editActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  editButton: {
-    alignSelf: 'flex-end',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 6,
-  },
-  editButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
-  },
-  saveButton: {
-    flex: 1,
-    backgroundColor: '#000',
-    borderRadius: 8,
-    padding: 10,
-    alignItems: 'center',
-  },
-  saveText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 8,
-    padding: 10,
-    alignItems: 'center',
-  },
-  cancelText: {
-    color: '#333',
-    fontWeight: '600',
-  },
-  deleteButton: {
-    flex: 1,
-    backgroundColor: '#F44336',
-    borderRadius: 8,
-    padding: 10,
-    alignItems: 'center',
-  },
-  deleteText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
   addForm: {
     marginTop: 24,
     marginBottom: 40,
+    paddingHorizontal: 20,
   },
   input: {
     backgroundColor: '#f5f5f5',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    marginHorizontal: 20,
     marginBottom: 10,
   },
   addButton: {
     backgroundColor: '#000',
     borderRadius: 8,
     padding: 14,
-    marginHorizontal: 20,
     alignItems: 'center',
     marginTop: 4,
   },
