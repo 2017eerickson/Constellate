@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { moderateScale } from '../styles/scale';
 
 export default function ConstellationScreen() {
   return (
@@ -18,12 +19,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 28,
+    fontSize: moderateScale(28),
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: moderateScale(8),
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: '#999',
   },
 });
