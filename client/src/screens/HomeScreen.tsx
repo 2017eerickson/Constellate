@@ -4,6 +4,8 @@ import * as Clipboard from 'expo-clipboard';
 import { useAuth } from '../context/AuthContext';
 import { Card, ActionButton } from '../components';
 import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
+import { commonStyles } from '../styles/common';
 
 export default function HomeScreen() {
   const { user, signOut } = useAuth();
@@ -26,7 +28,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.screenCentered}>
       <Text style={styles.greeting}>Hey, {user?.first_name}!</Text>
 
       <Card style={styles.card}>
@@ -54,13 +56,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: scale(20),
-  },
   greeting: {
     fontSize: moderateScale(28),
     fontWeight: 'bold',
@@ -74,7 +69,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: moderateScale(14),
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: scale(8),
   },
   codeRow: {
@@ -90,7 +85,7 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: moderateScale(12),
     paddingBottom: scale(8),
-    color: '#999',
+    color: colors.textMuted,
   },
   copyButton: {
     marginLeft: scale(12),
