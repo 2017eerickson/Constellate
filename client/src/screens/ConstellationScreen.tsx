@@ -1,29 +1,20 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
+import { commonStyles } from '../styles/common';
 
 export default function ConstellationScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Constellation</Text>
-      <Text style={styles.subtitle}>Coming soon</Text>
+    <View style={commonStyles.screenCentered}>
+      <Text style={[commonStyles.screenTitle, styles.titleSpacing]}>Constellation</Text>
+      <Text style={[commonStyles.subtitle, { color: colors.textMuted }]}>Coming soon</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#999',
+  titleSpacing: {
+    marginBottom: moderateScale(8),
   },
 });
