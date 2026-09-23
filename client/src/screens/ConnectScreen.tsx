@@ -26,13 +26,15 @@ export default function ConnectScreen() {
   const [connecting, setConnecting] = useState(false);
   const [pending, setPending] = useState<Partnership[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   const fetchPending = useCallback(async () => {
     try {
       const data = await getPartnerships();
       setPending(data.filter((p) => p.status === 'pending'));
+      setFetchError(false);
     } catch {
-      // silent — pull to refresh to retry
+      setFetchError(true);
     } finally {
       setRefreshing(false);
     }
@@ -181,6 +183,9 @@ export default function ConnectScreen() {
       </View>
 
       <Text style={styles.sectionTitle}>Pending</Text>
+      {fetchError && (
+        <Text style={styles.errorText}>Something went wrong. Pull down to refresh.</Text>
+      )}
 
       <FlatList
         data={pending}
@@ -312,5 +317,11 @@ const styles = StyleSheet.create({
   },
   emptyList: {
     flex: 1,
+  },
+  errorText: {
+    color: '#F44336',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 12,
   },
 });

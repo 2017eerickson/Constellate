@@ -39,6 +39,7 @@ export default function PartnerDetailScreen() {
   const [partnership, setPartnership] = useState<Partnership | null>(null);
   const [specialDates, setSpecialDates] = useState<SpecialDate[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   // Add special date form
   const [title, setTitle] = useState('');
@@ -70,8 +71,9 @@ export default function PartnerDetailScreen() {
       const found = partnerships.find((p) => p.id === partnershipId);
       if (found) setPartnership(found);
       setSpecialDates(dates);
+      setFetchError(false);
     } catch {
-      // silent — pull to refresh
+      setFetchError(true);
     } finally {
       setRefreshing(false);
     }
@@ -210,7 +212,9 @@ export default function PartnerDetailScreen() {
   if (!partnership) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.emptyText}>Loading...</Text>
+        <Text style={styles.emptyText}>
+          {fetchError ? 'Something went wrong. Pull down to refresh.' : 'Loading...'}
+        </Text>
       </View>
     );
   }
