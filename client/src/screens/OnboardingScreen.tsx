@@ -6,9 +6,10 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { ActionButton } from '../components';
+import { scale, moderateScale } from '../styles/scale';
 
 export default function OnboardingScreen() {
   const { user, completeOnboarding } = useAuth();
@@ -71,15 +72,14 @@ export default function OnboardingScreen() {
         editable={!isSubmitting}
       />
 
-      <TouchableOpacity
-        style={[styles.button, isSubmitting && styles.buttonDisabled]}
+      <ActionButton
+        variant="google"
         onPress={handleSubmit}
-        disabled={isSubmitting}
-      >
-        <Text style={styles.buttonText}>
-          {isSubmitting ? 'Saving...' : 'Continue'}
-        </Text>
-      </TouchableOpacity>
+        text="Continue"
+        loadingText="Saving..."
+        loading={isSubmitting}
+        style={styles.button}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -90,41 +90,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    padding: 20,
+    padding: scale(20),
   },
   title: {
-    fontSize: 28,
+    fontSize: moderateScale(28),
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: moderateScale(8),
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: '#666',
-    marginBottom: 30,
+    marginBottom: scale(30),
   },
   input: {
     width: '80%',
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 14,
-    fontSize: 18,
+    borderRadius: scale(8),
+    padding: scale(14),
+    fontSize: moderateScale(18),
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: scale(16),
   },
   button: {
-    backgroundColor: '#4285F4',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    paddingHorizontal: scale(32),
+    paddingVertical: scale(14),
+    marginTop: scale(8),
+    padding: undefined,
   },
 });
