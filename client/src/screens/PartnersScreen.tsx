@@ -74,7 +74,7 @@ export default function PartnersScreen() {
 
   function renderPartnership({ item }: { item: Partnership }) {
     return (
-      <Card onPress={() => navigation.navigate('PartnerDetail' as never, { partnershipId: item.id } as never)}>
+      <Card testID="partner-card" onPress={() => navigation.navigate('PartnerDetail' as never, { partnershipId: item.id } as never)}>
         <View style={[commonStyles.rowSpaceBetween, styles.cardHeaderSpacing]}>
           <Text style={commonStyles.nameText}>{getDisplayName(item)}</Text>
           <StatusBadge status={item.status} />
@@ -105,7 +105,7 @@ export default function PartnersScreen() {
           }
           ListHeaderComponent={
             soulmate ? (
-              <Card variant="soulmate">
+              <Card variant="soulmate" testID="soulmate-card">
                 <Text style={styles.soulmateName}>You</Text>
                 <Text style={styles.soulmateHint}>Your personal journey</Text>
                 <StatDisplay stats={[
@@ -119,6 +119,7 @@ export default function PartnersScreen() {
             <ActionButton
               onPress={() => navigation.navigate('Connect' as never)}
               text="+ Add a Partner"
+              testID="add-partner-button"
               style={styles.addButton}
             />
           }

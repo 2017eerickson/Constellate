@@ -124,12 +124,14 @@ export default function ConnectScreen() {
               <ActionButton
                 onPress={() => handleAccept(item.id)}
                 text="Accept"
+                testID="accept-button"
                 style={styles.actionBtn}
               />
               <ActionButton
                 variant="secondary"
                 onPress={() => handleDecline(item.id)}
                 text="Decline"
+                testID="decline-button"
                 style={styles.actionBtn}
               />
             </>
@@ -138,6 +140,7 @@ export default function ConnectScreen() {
               variant="secondary"
               onPress={() => handleDecline(item.id)}
               text="Cancel"
+              testID="cancel-request-button"
               style={styles.actionBtn}
             />
           )}
@@ -154,6 +157,7 @@ export default function ConnectScreen() {
         <TextInput
           style={commonStyles.input}
           placeholder="Partner code"
+          testID="partner-code-input"
           value={partnerCode}
           onChangeText={setPartnerCode}
           autoCapitalize="characters"
@@ -162,6 +166,7 @@ export default function ConnectScreen() {
         <TextInput
           style={commonStyles.input}
           placeholder="romantic, platonic, metamour..."
+          testID="relation-input"
           value={relation}
           onChangeText={setRelation}
           autoCapitalize="none"
@@ -169,6 +174,7 @@ export default function ConnectScreen() {
         <TextInput
           style={commonStyles.input}
           placeholder="Anniversary YYYY-MM-DD (optional)"
+          testID="anniversary-input"
           value={anniversary}
           onChangeText={setAnniversary}
           keyboardType="numbers-and-punctuation"
@@ -176,6 +182,7 @@ export default function ConnectScreen() {
         <ActionButton
           onPress={handleConnect}
           text="Connect"
+          testID="connect-button"
           loadingText="Sending..."
           loading={connecting}
           style={styles.connectButton}

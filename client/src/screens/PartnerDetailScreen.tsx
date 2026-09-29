@@ -255,6 +255,7 @@ export default function PartnerDetailScreen() {
                         <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
                       </TouchableOpacity>
                       <TouchableOpacity
+                        testID="save-partnership-button"
                         style={styles.saveIcon}
                         onPress={handleSavePartnership}
                       >
@@ -263,6 +264,7 @@ export default function PartnerDetailScreen() {
                     </View>
                   ) : (
                     <TouchableOpacity
+                      testID="edit-partnership-button"
                       onPress={startEditPartnership}
                       disabled={isEditing}
                       style={isEditing ? styles.iconDisabled : undefined}
@@ -275,6 +277,7 @@ export default function PartnerDetailScreen() {
                 {editingMode === 'partnership' ? (
                   <>
                     <TextInput
+                      testID="edit-relation-input"
                       style={styles.editInput}
                       value={editRelation}
                       onChangeText={setEditRelation}
@@ -384,12 +387,14 @@ export default function PartnerDetailScreen() {
                 <TextInput
                   style={commonStyles.input}
                   placeholder="Title (e.g. First Trip)"
+                  testID="add-date-title-input"
                   value={title}
                   onChangeText={setTitle}
                 />
                 <TextInput
                   style={commonStyles.input}
                   placeholder="Date YYYY-MM-DD"
+                  testID="add-date-input"
                   value={date}
                   onChangeText={setDate}
                   keyboardType="numbers-and-punctuation"
@@ -397,6 +402,7 @@ export default function PartnerDetailScreen() {
                 <ActionButton
                   onPress={handleAddDate}
                   text="Add Date"
+                  testID="add-date-button"
                   loadingText="Adding..."
                   loading={adding}
                   style={styles.addButton}
