@@ -1,0 +1,62 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    text: "Home"
+- tapOn:
+    id: "sign-out-button"
+- tapOn:
+    id: "email-input"
+- inputText: "userA@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- assertVisible: "Partners"
+- tapOn:
+    id: "add-partner-button"
+- tapOn:
+    id: "partner-code-input"
+- inputText: "${PARTNER_C_CODE}"
+- tapOn:
+    id: "relation-input"
+- inputText: "platonic"
+- tapOn:
+    id: "connect-button"
+- assertVisible: "Sent!"
+- tapOn:
+    text: "OK"
+- tapOn:
+    text: "Home"
+- tapOn:
+    id: "sign-out-button"
+- tapOn:
+    id: "email-input"
+- inputText: "userC@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- assertVisible: "Partners"
+- tapOn:
+    id: "add-partner-button"
+- assertVisible: "Wants to connect with you"
+- tapOn:
+    id: "accept-button"
+- tapOn:
+    text: "Home"
+- tapOn:
+    id: "sign-out-button"
+- tapOn:
+    id: "email-input"
+- inputText: "userA@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- assertVisible: "Partners"
+- assertVisible: "PartnerB"
+- assertVisible: "PartnerC"
