@@ -10,7 +10,7 @@ appId: com.constellate.app
 - tapOn:
     id: "email-submit-button"
 - tapOn: "Not Now"
-- assertVisible: "Hey, TestUserA!"
+- assertVisible: "Hey, PartnerA!"
 - tapOn: 
     id: 'partners-tab' 
 - tapOn:

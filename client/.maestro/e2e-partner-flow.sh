@@ -12,7 +12,7 @@ User.objects.filter(email__in=['userA@test.com', 'userB@test.com', 'userC@test.c
 # --- Seed all 3 users (with onboarding complete + known passwords) ---
 PARTNER_A_CODE=$(docker exec "$CONTAINER" python manage.py shell -c "
 from user_app.models import User
-u = User.objects.create_user(username='userA@test.com', email='userA@test.com', password='testpassword123', first_name='TestUserA', onboarding_complete=True)
+u = User.objects.create_user(username='userA@test.com', email='userA@test.com', password='testpassword123', first_name='PartnerA', onboarding_complete=True)
 print(u.partner_code)
 " | tail -1 | tr -d '\r\n')
 
