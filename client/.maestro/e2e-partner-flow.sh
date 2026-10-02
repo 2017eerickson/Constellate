@@ -14,19 +14,19 @@ PARTNER_A_CODE=$(docker exec "$CONTAINER" python manage.py shell -c "
 from user_app.models import User
 u = User.objects.create_user(username='userA@test.com', email='userA@test.com', password='testpassword123', first_name='TestUserA', onboarding_complete=True)
 print(u.partner_code)
-")
+" | tail -1 | tr -d '\r\n')
 
 PARTNER_B_CODE=$(docker exec "$CONTAINER" python manage.py shell -c "
 from user_app.models import User
 u = User.objects.create_user(username='userB@test.com', email='userB@test.com', password='testpassword123', first_name='PartnerB', onboarding_complete=True)
 print(u.partner_code)
-")
+" | tail -1 | tr -d '\r\n')
 
 PARTNER_C_CODE=$(docker exec "$CONTAINER" python manage.py shell -c "
 from user_app.models import User
 u = User.objects.create_user(username='userC@test.com', email='userC@test.com', password='testpassword123', first_name='PartnerC', onboarding_complete=True)
 print(u.partner_code)
-")
+" | tail -1 | tr -d '\r\n')
 
 export PARTNER_A_CODE PARTNER_B_CODE PARTNER_C_CODE
 

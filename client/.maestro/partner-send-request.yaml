@@ -9,12 +9,15 @@ appId: com.constellate.app
 - inputText: "testpassword123"
 - tapOn:
     id: "email-submit-button"
-- assertVisible: "Partners"
+- tapOn: "Not Now"
+- assertVisible: "Hey, TestUserA!"
+- tapOn: 
+    id: 'partners-tab' 
 - tapOn:
     id: "add-partner-button"
 - tapOn:
     id: "partner-code-input"
-- inputText: "${PARTNER_B_CODE}"
+- inputText: ${PARTNER_B_CODE}
 - tapOn:
     id: "relation-input"
 - inputText: "romantic"

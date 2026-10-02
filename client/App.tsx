@@ -46,7 +46,7 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Constellation" component={ConstellationScreen} />
-      <Tab.Screen name="Partners" component={PartnersScreen} />
+      <Tab.Screen name="Partners" component={PartnersScreen} options={{ tabBarButtonTestID: 'partners-tab' }}   />
     </Tab.Navigator>
   );
 }
