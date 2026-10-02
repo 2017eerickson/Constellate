@@ -48,6 +48,7 @@ export default function HomeScreen() {
       <ActionButton
         variant="secondary"
         onPress={handleSignOut}
+        testID="sign-out-button"
         text="Sign Out"
         style={styles.signOutButton}
       />
