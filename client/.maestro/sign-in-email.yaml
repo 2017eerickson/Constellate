@@ -1,0 +1,12 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    id: "email-input"
+- inputText: "testuser@example.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- assertVisible: "Partners"
