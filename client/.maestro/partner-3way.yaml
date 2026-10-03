@@ -27,8 +27,10 @@ appId: com.constellate.app
 - assertVisible: "Sent!"
 - tapOn:
     text: "OK"
+- swipe:
+    direction: DOWN
 - tapOn:
-    text: "Home"
+    id: "home-tab"
 - tapOn:
     id: "sign-out-button"
 - tapOn:
@@ -39,6 +41,9 @@ appId: com.constellate.app
 - inputText: "testpassword123"
 - tapOn:
     id: "email-submit-button"
+- tapOn: "Not Now"
+- tapOn:
+    id: "partners-tab"
 - assertVisible: "Partners"
 - tapOn:
     id: "add-partner-button"
@@ -59,6 +64,7 @@ appId: com.constellate.app
 - inputText: "testpassword123"
 - tapOn:
     id: "email-submit-button"
+- tapOn: "Not Now"
 - assertVisible: "Partners"
 - assertVisible: 
     id: "partner-name-PartnerC"
