@@ -13,6 +13,7 @@ import PartnersScreen from './src/screens/PartnersScreen';
 import ConstellationScreen from './src/screens/ConstellationScreen';
 import ConnectScreen from './src/screens/ConnectScreen';
 import PartnerDetailScreen from './src/screens/PartnerDetailScreen';
+import PlanetScreen from './src/screens/PlanetScreen';
 
 type AuthStackParamList = {
   SignIn: undefined;
