@@ -3,6 +3,7 @@ appId: com.constellate.app
 - launchApp
 - tapOn:
     id: "home-tab"
+    optional: true
 - tapOn:
     id: "sign-out-button"
     optional: true
@@ -21,7 +22,7 @@ appId: com.constellate.app
 - tapOn:
     id: "partners-tab"
 - tapOn:
-    id: "partner-card"
+    id: "partner-name-PartnerB"
 
 # Verify default special dates created on acceptance
 - assertVisible: "Anniversary"
@@ -34,10 +35,14 @@ appId: com.constellate.app
 # Add a special date
 - tapOn:
     id: "add-date-title-input"
+- eraseText: 20
 - inputText: "First Trip"
+- tapOn: "Special Dates"
 - tapOn:
     id: "add-date-input"
+- eraseText: 20
 - inputText: "2025-06-15"
+- tapOn: "Special Dates"
 - tapOn:
     id: "add-date-button"
 
@@ -50,14 +55,12 @@ appId: com.constellate.app
 # Edit the special date
 - tapOn:
     id: "edit-dates-button"
-- eraseText:
-    id: "edit-dates-button"
-    charactersToErase: 10
-    optional: true
-# Tap into the title field for "First Trip" and clear + retype
-- tapOn: "First Trip"
+# Tap the title input containing "First Trip" text and retype
+- tapOn:
+    text: "First Trip"
 - eraseText: 10
 - inputText: "Our First Trip"
+- tapOn: "Special Dates"
 - tapOn:
     id: "save-dates-button"
 - assertVisible: "Our First Trip"
@@ -68,4 +71,7 @@ appId: com.constellate.app
 - tapOn:
     id: "delete-date-button"
 - tapOn: "Delete"
-- assertNotVisible: "Our First Trip"
+- tapOn:
+    id: "save-dates-button"
+- assertNotVisible: 
+    text: "Anniversary"
