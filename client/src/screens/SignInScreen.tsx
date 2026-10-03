@@ -76,6 +76,7 @@ export default function SignInScreen() {
         variant="google"
         onPress={handleGoogleSignIn}
         text="Sign in with Google"
+        testID="google-signin-button"
         loadingText="Signing in..."
         loading={isGoogleSigningIn}
         disabled={busy}
@@ -92,6 +93,7 @@ export default function SignInScreen() {
         <TextInput
           style={commonStyles.inputBordered}
           placeholder="First Name"
+          testID="first-name-input"
           value={firstName}
           onChangeText={setFirstName}
           autoCapitalize="words"
@@ -100,8 +102,9 @@ export default function SignInScreen() {
       )}
 
       <TextInput
-        style={styles.input}
+        style={commonStyles.inputBordered}
         placeholder="Email"
+        testID="email-input"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -111,8 +114,9 @@ export default function SignInScreen() {
       />
 
       <TextInput
-        style={styles.input}
+        style={commonStyles.inputBordered}
         placeholder="Password"
+        testID="password-input"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -122,6 +126,7 @@ export default function SignInScreen() {
       <ActionButton
         onPress={handleEmailSubmit}
         text={isRegisterMode ? 'Create Account' : 'Sign In'}
+        testID="email-submit-button"
         loadingText={isRegisterMode ? 'Creating account...' : 'Signing in...'}
         loading={isSubmitting}
         disabled={busy}
@@ -129,6 +134,7 @@ export default function SignInScreen() {
       />
 
       <TouchableOpacity
+        testID="toggle-auth-mode"
         onPress={() => setIsRegisterMode(!isRegisterMode)}
         disabled={busy}
       >

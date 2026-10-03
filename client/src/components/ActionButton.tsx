@@ -11,6 +11,7 @@ interface ActionButtonProps {
   disabled?: boolean;
   variant?: 'primary' | 'secondary' | 'google';
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }
 
 export default function ActionButton({
@@ -21,9 +22,11 @@ export default function ActionButton({
   disabled = false,
   variant = 'primary',
   style,
+  testID,
 }: ActionButtonProps) {
   return (
     <TouchableOpacity
+      testID={testID}
       style={[
         styles.button,
         variant === 'secondary' && styles.secondary,

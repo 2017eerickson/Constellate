@@ -56,6 +56,7 @@ export default function OnboardingScreen() {
         <TextInput
           style={[commonStyles.inputBordered, styles.inputOverride]}
           placeholder="First Name"
+          testID="onboarding-name-input"
           value={firstName}
           onChangeText={setFirstName}
           autoCapitalize="words"
@@ -66,6 +67,7 @@ export default function OnboardingScreen() {
       <TextInput
         style={[commonStyles.inputBordered, styles.inputOverride]}
         placeholder="YYYY-MM-DD"
+        testID="onboarding-birthday-input"
         value={birthday}
         onChangeText={setBirthday}
         keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
@@ -77,6 +79,7 @@ export default function OnboardingScreen() {
         variant="google"
         onPress={handleSubmit}
         text="Continue"
+        testID="onboarding-submit-button"
         loadingText="Saving..."
         loading={isSubmitting}
         style={styles.button}

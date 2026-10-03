@@ -8,10 +8,11 @@ interface SectionHeaderProps {
   title: string;
   onEdit?: () => void;
   editDisabled?: boolean;
+  editTestID?: string;
   style?: StyleProp<ViewStyle>;
 }
 
-export default function SectionHeader({ title, onEdit, editDisabled = false, style }: SectionHeaderProps) {
+export default function SectionHeader({ title, onEdit, editDisabled = false, editTestID, style }: SectionHeaderProps) {
   return (
     <View style={[styles.container, style]}>
       <Text style={styles.title}>{title}</Text>
@@ -19,6 +20,7 @@ export default function SectionHeader({ title, onEdit, editDisabled = false, sty
         <TouchableOpacity
           onPress={onEdit}
           disabled={editDisabled}
+          testID={editTestID}
           style={editDisabled ? styles.disabled : undefined}
         >
           <MaterialIcons name="edit" size={scale(20)} color={colors.textSecondary} />
