@@ -16,4 +16,13 @@ export const colors = {
   success: '#4CAF50',
   neutral: '#9E9E9E',
   white: '#fff',
+  // Constellation screen
+  skyDark: '#0a0a1a',
+  skyPurple: '#1a1030',
+  starGlow: '#e8d5ff',
+  starCore: '#ffffff',
+  soulmateGlow: '#b388ff',
+  lineMuted: 'rgba(180, 160, 220, 0.35)',
+  lineGlow: 'rgba(180, 160, 220, 0.15)',
+  tooltipBg: 'rgba(20, 15, 40, 0.9)',
 };
