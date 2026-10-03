@@ -172,7 +172,7 @@ export default function PartnerDetailScreen() {
   }
 
   async function handleDeleteDate(dateId: number) {
-    Alert.alert('Delete', 'Are you sure you want to delete this date?', [
+    Alert.alert('Confirm', 'Are you sure you want to delete this date?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
