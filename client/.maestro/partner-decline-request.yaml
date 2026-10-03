@@ -2,7 +2,7 @@ appId: com.constellate.app
 ---
 - launchApp
 - tapOn:
-    text: "Home"
+    id: "home-tab"
 - tapOn:
     id: "sign-out-button"
 - tapOn:
@@ -26,7 +26,7 @@ appId: com.constellate.app
     text: "OK"
 - assertVisible: "Request pending"
 - tapOn:
-    text: "Home"
+    id: "home-tab"
 - tapOn:
     id: "sign-out-button"
 - tapOn:

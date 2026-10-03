@@ -76,7 +76,7 @@ export default function PartnersScreen() {
     return (
       <Card testID="partner-card" onPress={() => navigation.navigate('PartnerDetail' as never, { partnershipId: item.id } as never)}>
         <View style={[commonStyles.rowSpaceBetween, styles.cardHeaderSpacing]}>
-          <Text style={commonStyles.nameText}>{getDisplayName(item)}</Text>
+          <Text style={commonStyles.nameText} testID={`partner-name-${getDisplayName(item)}`}>{getDisplayName(item)}</Text>
           <StatusBadge status={item.status} />
         </View>
 

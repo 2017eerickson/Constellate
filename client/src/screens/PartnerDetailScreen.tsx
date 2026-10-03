@@ -325,6 +325,7 @@ export default function PartnerDetailScreen() {
                   title="Special Dates"
                   onEdit={startEditDates}
                   editDisabled={isEditing}
+                  editTestID="edit-dates-button"
                 />
               )}
             </>
@@ -349,7 +350,7 @@ export default function PartnerDetailScreen() {
                       placeholder={item.date}
                       keyboardType="numbers-and-punctuation"
                     />
-                    <TouchableOpacity onPress={() => handleDeleteDate(item.id)}>
+                    <TouchableOpacity testID="delete-date-button" onPress={() => handleDeleteDate(item.id)}>
                       <MaterialIcons name="delete" size={scale(22)} color={colors.error} />
                     </TouchableOpacity>
                   </View>
@@ -373,10 +374,10 @@ export default function PartnerDetailScreen() {
             <>
               {editingMode === 'dates' && (
                 <View style={styles.dateActions}>
-                  <TouchableOpacity style={styles.cancelIcon} onPress={cancelEditing}>
+                  <TouchableOpacity testID="cancel-dates-button" style={styles.cancelIcon} onPress={cancelEditing}>
                     <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.saveIcon} onPress={handleSaveDates}>
+                  <TouchableOpacity testID="save-dates-button" style={styles.saveIcon} onPress={handleSaveDates}>
                     <MaterialIcons name="save" size={scale(20)} color={colors.white} />
                   </TouchableOpacity>
                 </View>

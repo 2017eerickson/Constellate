@@ -2,7 +2,7 @@ appId: com.constellate.app
 ---
 - launchApp
 - tapOn:
-    text: "Home"
+    id: "home-tab"
 - tapOn:
     id: "sign-out-button"
 - tapOn:
@@ -45,8 +45,10 @@ appId: com.constellate.app
 - assertVisible: "Wants to connect with you"
 - tapOn:
     id: "accept-button"
+- swipe:
+    direction: DOWN
 - tapOn:
-    text: "Home"
+    id: "home-tab"
 - tapOn:
     id: "sign-out-button"
 - tapOn:
@@ -58,5 +60,8 @@ appId: com.constellate.app
 - tapOn:
     id: "email-submit-button"
 - assertVisible: "Partners"
-- assertVisible: "PartnerB"
-- assertVisible: "PartnerC"
+- assertVisible: 
+    id: "partner-name-PartnerC"
+- assertVisible: 
+    id: "partner-name-PartnerB"         
+   
