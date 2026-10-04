@@ -24,6 +24,7 @@ type MainStackParamList = {
   Tabs: undefined;
   Connect: undefined;
   PartnerDetail: { partnershipId: number };
+  Planet: { partnershipId: number };
 };
 
 type TabParamList = {
@@ -92,6 +93,11 @@ function AppNavigator() {
         name="PartnerDetail"
         component={PartnerDetailScreen}
         options={{ headerShown: true, headerTitle: '' }}
+      />
+      <MainStack.Screen
+        name="Planet"
+        component={PlanetScreen}
+        options={{ headerShown: true, headerTitle: '', headerTransparent: true, headerTintColor: '#fff' }}
       />
     </MainStack.Navigator>
   );
