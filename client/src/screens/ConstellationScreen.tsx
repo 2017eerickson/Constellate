@@ -2,7 +2,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { Canvas, Circle, Line, LinearGradient, Rect, vec, Blur } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { FadeIn, FadeOut, runOnJS } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  runOnJS,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getPartnerships } from '../services/partnerships';
@@ -20,6 +27,8 @@ const SOULMATE_GLOW_RADIUS = 36;
 const ORBIT_RADIUS_MIN = SCREEN_W * 0.22;
 const ORBIT_RADIUS_MAX = SCREEN_W * 0.38;
 const TAP_HIT_RADIUS = 30;
+const MIN_SCALE = 1;
+const MAX_SCALE = 3;
 
 type MainStackParamList = {
   Tabs: undefined;
@@ -84,6 +93,14 @@ export default function ConstellationScreen() {
   const [selectedStar, setSelectedStar] = useState<StarData | null>(null);
   const starsRef = useRef<StarData[]>([]);
 
+  // Zoom state
+  const scale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const savedTranslateX = useSharedValue(0);
+  const savedTranslateY = useSharedValue(0);
+
   useEffect(() => {
     getPartnerships()
       .then(setPartnerships)
@@ -117,13 +134,88 @@ export default function ConstellationScreen() {
     [selectedStar, navigation],
   );
 
+  const clampTranslation = () => {
+    'worklet';
+    const maxOffsetX = (SCREEN_W * (scale.value - 1)) / 2;
+    const maxOffsetY = (SCREEN_H * (scale.value - 1)) / 2;
+
+    if (translateX.value > maxOffsetX) {
+      translateX.value = withSpring(maxOffsetX);
+    } else if (translateX.value < -maxOffsetX) {
+      translateX.value = withSpring(-maxOffsetX);
+    }
+
+    if (translateY.value > maxOffsetY) {
+      translateY.value = withSpring(maxOffsetY);
+    } else if (translateY.value < -maxOffsetY) {
+      translateY.value = withSpring(-maxOffsetY);
+    }
+
+    if (scale.value <= 1) {
+      translateX.value = withSpring(0);
+      translateY.value = withSpring(0);
+    }
+  };
+
   const tapGesture = Gesture.Tap().onEnd((e) => {
-    runOnJS(handleTap)(e.x, e.y);
+    const s = scale.value;
+    const tx = translateX.value;
+    const ty = translateY.value;
+    const contentX = (e.x - SCREEN_W / 2) / s + SCREEN_W / 2 - tx / s;
+    const contentY = (e.y - SCREEN_H / 2) / s + SCREEN_H / 2 - ty / s;
+    runOnJS(handleTap)(contentX, contentY);
   });
+
+  const pinchGesture = Gesture.Pinch()
+    .onStart(() => {
+      savedScale.value = scale.value;
+      runOnJS(setSelectedStar)(null);
+    })
+    .onUpdate((e) => {
+      const newScale = savedScale.value * e.scale;
+      scale.value = Math.min(Math.max(newScale, MIN_SCALE * 0.8), MAX_SCALE * 1.1);
+    })
+    .onEnd(() => {
+      if (scale.value < MIN_SCALE) {
+        scale.value = withSpring(MIN_SCALE);
+      } else if (scale.value > MAX_SCALE) {
+        scale.value = withSpring(MAX_SCALE);
+      }
+      savedScale.value = scale.value;
+      clampTranslation();
+    });
+
+  const panGesture = Gesture.Pan()
+    .minPointers(1)
+    .maxPointers(2)
+    .onStart(() => {
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
+    })
+    .onUpdate((e) => {
+      if (scale.value > 1) {
+        translateX.value = savedTranslateX.value + e.translationX;
+        translateY.value = savedTranslateY.value + e.translationY;
+      }
+    })
+    .onEnd(() => {
+      clampTranslation();
+    });
+
+  const composedGesture = Gesture.Simultaneous(tapGesture, pinchGesture, panGesture);
+
+  const animatedZoomStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
+  }));
 
   return (
     <View style={styles.container}>
-      <GestureDetector gesture={tapGesture}>
+      <GestureDetector gesture={composedGesture}>
+        <Animated.View style={[styles.zoomContainer, animatedZoomStyle]}>
         <Canvas style={styles.canvas}>
           {/* Background gradient */}
           <Rect x={0} y={0} width={SCREEN_W} height={SCREEN_H}>
@@ -179,7 +271,6 @@ export default function ConstellationScreen() {
             </React.Fragment>
           ))}
         </Canvas>
-      </GestureDetector>
 
       {/* Tooltip overlay */}
       {selectedStar && (
@@ -199,6 +290,8 @@ export default function ConstellationScreen() {
           <Text style={styles.tooltipRelation}>{selectedStar.relation}</Text>
         </Animated.View>
       )}
+        </Animated.View>
+      </GestureDetector>
     </View>
   );
 }
@@ -207,6 +300,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.skyDark,
+  },
+  zoomContainer: {
+    flex: 1,
   },
   canvas: {
     flex: 1,
