@@ -97,7 +97,7 @@ function AppNavigator() {
       <MainStack.Screen
         name="Planet"
         component={PlanetScreen}
-        options={{ headerShown: true, headerTitle: '', headerTransparent: true, headerTintColor: '#fff' }}
+        options={{ headerShown: true, headerTitle: '', headerTransparent: true, headerTintColor: '#fff', animation: 'fade' }}
       />
     </MainStack.Navigator>
   );

@@ -9,6 +9,8 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,8 +29,7 @@ const SOULMATE_GLOW_RADIUS = 36;
 const ORBIT_RADIUS_MIN = SCREEN_W * 0.22;
 const ORBIT_RADIUS_MAX = SCREEN_W * 0.38;
 const TAP_HIT_RADIUS = 30;
-const MIN_SCALE = 1;
-const MAX_SCALE = 3;
+const ZOOM_THRESHOLD = 2.5;
 
 type MainStackParamList = {
   Tabs: undefined;
@@ -96,10 +97,9 @@ export default function ConstellationScreen() {
   // Zoom state
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const savedTranslateX = useSharedValue(0);
-  const savedTranslateY = useSharedValue(0);
+  const focalX = useSharedValue(0);
+  const focalY = useSharedValue(0);
+  const selectedStarRef = useRef<StarData | null>(null);
 
   useEffect(() => {
     getPartnerships()
@@ -114,6 +114,18 @@ export default function ConstellationScreen() {
     return laid;
   }, [partnerships, user]);
 
+  const navigateToPlanet = useCallback(
+    (partnershipId: number) => {
+      scale.value = 1;
+      focalX.value = 0;
+      focalY.value = 0;
+      setSelectedStar(null);
+      selectedStarRef.current = null;
+      navigation.navigate('Planet', { partnershipId });
+    },
+    [navigation, scale, focalX, focalY],
+  );
+
   const handleTap = useCallback(
     (tapX: number, tapY: number) => {
       const current = starsRef.current;
@@ -121,93 +133,83 @@ export default function ConstellationScreen() {
         const dx = tapX - star.x;
         const dy = tapY - star.y;
         if (Math.sqrt(dx * dx + dy * dy) < TAP_HIT_RADIUS) {
-          if (selectedStar && selectedStar.partnership.id === star.partnership.id) {
-            navigation.navigate('Planet', { partnershipId: star.partnership.id });
-          } else {
-            setSelectedStar(star);
-          }
+          setSelectedStar(star);
+          selectedStarRef.current = star;
           return;
         }
       }
       setSelectedStar(null);
+      selectedStarRef.current = null;
     },
-    [selectedStar, navigation],
+    [],
   );
 
-  const clampTranslation = () => {
-    'worklet';
-    const maxOffsetX = (SCREEN_W * (scale.value - 1)) / 2;
-    const maxOffsetY = (SCREEN_H * (scale.value - 1)) / 2;
-
-    if (translateX.value > maxOffsetX) {
-      translateX.value = withSpring(maxOffsetX);
-    } else if (translateX.value < -maxOffsetX) {
-      translateX.value = withSpring(-maxOffsetX);
-    }
-
-    if (translateY.value > maxOffsetY) {
-      translateY.value = withSpring(maxOffsetY);
-    } else if (translateY.value < -maxOffsetY) {
-      translateY.value = withSpring(-maxOffsetY);
-    }
-
-    if (scale.value <= 1) {
-      translateX.value = withSpring(0);
-      translateY.value = withSpring(0);
-    }
-  };
+  const handleDoubleTap = useCallback(
+    (tapX: number, tapY: number) => {
+      const current = starsRef.current;
+      for (const star of current) {
+        const dx = tapX - star.x;
+        const dy = tapY - star.y;
+        if (Math.sqrt(dx * dx + dy * dy) < TAP_HIT_RADIUS) {
+          setSelectedStar(star);
+          selectedStarRef.current = star;
+          // Animate zoom toward the star
+          const targetFocalX = (SCREEN_W / 2 - star.x) * (ZOOM_THRESHOLD - 1);
+          const targetFocalY = (SCREEN_H / 2 - star.y) * (ZOOM_THRESHOLD - 1);
+          const duration = 500;
+          focalX.value = withTiming(targetFocalX, { duration, easing: Easing.out(Easing.cubic) });
+          focalY.value = withTiming(targetFocalY, { duration, easing: Easing.out(Easing.cubic) });
+          scale.value = withTiming(ZOOM_THRESHOLD, { duration, easing: Easing.out(Easing.cubic) });
+          // Navigate after animation
+          setTimeout(() => navigateToPlanet(star.partnership.id), duration + 50);
+          return;
+        }
+      }
+    },
+    [navigateToPlanet, scale, focalX, focalY],
+  );
 
   const tapGesture = Gesture.Tap().onEnd((e) => {
-    const s = scale.value;
-    const tx = translateX.value;
-    const ty = translateY.value;
-    const contentX = (e.x - SCREEN_W / 2) / s + SCREEN_W / 2 - tx / s;
-    const contentY = (e.y - SCREEN_H / 2) / s + SCREEN_H / 2 - ty / s;
-    runOnJS(handleTap)(contentX, contentY);
+    runOnJS(handleTap)(e.x, e.y);
   });
+
+  const doubleTapGesture = Gesture.Tap()
+    .numberOfTaps(2)
+    .onEnd((e) => {
+      runOnJS(handleDoubleTap)(e.x, e.y);
+    });
 
   const pinchGesture = Gesture.Pinch()
     .onStart(() => {
       savedScale.value = scale.value;
-      runOnJS(setSelectedStar)(null);
     })
     .onUpdate((e) => {
-      const newScale = savedScale.value * e.scale;
-      scale.value = Math.min(Math.max(newScale, MIN_SCALE * 0.8), MAX_SCALE * 1.1);
+      const star = selectedStarRef.current;
+      if (!star) return;
+      const newScale = Math.max(savedScale.value * e.scale, 1);
+      scale.value = newScale;
+      focalX.value = (SCREEN_W / 2 - star.x) * (newScale - 1);
+      focalY.value = (SCREEN_H / 2 - star.y) * (newScale - 1);
     })
     .onEnd(() => {
-      if (scale.value < MIN_SCALE) {
-        scale.value = withSpring(MIN_SCALE);
-      } else if (scale.value > MAX_SCALE) {
-        scale.value = withSpring(MAX_SCALE);
+      const star = selectedStarRef.current;
+      if (!star) return;
+      if (scale.value >= ZOOM_THRESHOLD) {
+        runOnJS(navigateToPlanet)(star.partnership.id);
+      } else {
+        scale.value = withSpring(1);
+        focalX.value = withSpring(0);
+        focalY.value = withSpring(0);
       }
-      savedScale.value = scale.value;
-      clampTranslation();
     });
 
-  const panGesture = Gesture.Pan()
-    .minPointers(1)
-    .maxPointers(2)
-    .onStart(() => {
-      savedTranslateX.value = translateX.value;
-      savedTranslateY.value = translateY.value;
-    })
-    .onUpdate((e) => {
-      if (scale.value > 1) {
-        translateX.value = savedTranslateX.value + e.translationX;
-        translateY.value = savedTranslateY.value + e.translationY;
-      }
-    })
-    .onEnd(() => {
-      clampTranslation();
-    });
-
-  const composedGesture = Gesture.Simultaneous(tapGesture, pinchGesture, panGesture);
+  const tapGestures = Gesture.Exclusive(doubleTapGesture, tapGesture);
+  const composedGesture = Gesture.Simultaneous(tapGestures, pinchGesture);
 
   const animatedZoomStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
+      { translateX: focalX.value },
+      { translateY: focalY.value },
       { scale: scale.value },
     ],
   }));
