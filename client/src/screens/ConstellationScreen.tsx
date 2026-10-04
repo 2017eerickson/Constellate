@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import { Canvas, Circle, Group, Line, LinearGradient, Rect, vec, Blur } from '@shopify/react-native-skia';
+import { Canvas, Circle, Line, LinearGradient, Rect, vec, Blur } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, runOnJS } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getPartnerships } from '../services/partnerships';
@@ -118,7 +118,7 @@ export default function ConstellationScreen() {
   );
 
   const tapGesture = Gesture.Tap().onEnd((e) => {
-    handleTap(e.x, e.y);
+    runOnJS(handleTap)(e.x, e.y);
   });
 
   return (
@@ -138,7 +138,7 @@ export default function ConstellationScreen() {
           {stars
             .filter((s) => !s.isSoulmate)
             .map((star) => (
-              <Group key={`line-${star.partnership.id}`}>
+              <React.Fragment key={`line-${star.partnership.id}`}>
                 {/* Outer glow line */}
                 <Line
                   p1={vec(CENTER.x, CENTER.y)}
@@ -153,12 +153,12 @@ export default function ConstellationScreen() {
                   color={colors.lineMuted}
                   strokeWidth={1.5}
                 />
-              </Group>
+              </React.Fragment>
             ))}
 
           {/* Stars */}
           {stars.map((star) => (
-            <Group key={`star-${star.partnership.id}`}>
+            <React.Fragment key={`star-${star.partnership.id}`}>
               {/* Glow */}
               <Circle
                 cx={star.x}
@@ -176,7 +176,7 @@ export default function ConstellationScreen() {
                 r={star.isSoulmate ? SOULMATE_RADIUS : STAR_RADIUS}
                 color={star.isSoulmate ? colors.soulmateGlow : colors.starCore}
               />
-            </Group>
+            </React.Fragment>
           ))}
         </Canvas>
       </GestureDetector>
