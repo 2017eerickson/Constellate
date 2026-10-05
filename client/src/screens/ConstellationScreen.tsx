@@ -12,7 +12,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getPartnerships } from '../services/partnerships';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +30,7 @@ const ORBIT_RADIUS_MIN = SCREEN_W * 0.22;
 const ORBIT_RADIUS_MAX = SCREEN_W * 0.38;
 const TAP_HIT_RADIUS = 30;
 const ZOOM_THRESHOLD = 2.5;
+const DOUBLE_TAP_ZOOM = 25;
 
 type MainStackParamList = {
   Tabs: undefined;
@@ -97,8 +98,9 @@ export default function ConstellationScreen() {
   // Zoom state
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
-  const focalX = useSharedValue(0);
-  const focalY = useSharedValue(0);
+  const targetX = useSharedValue(SCREEN_W / 2);
+  const targetY = useSharedValue(SCREEN_H / 2);
+  const glowOverlay = useSharedValue(0);
   const selectedStarRef = useRef<StarData | null>(null);
 
   useEffect(() => {
@@ -116,14 +118,21 @@ export default function ConstellationScreen() {
 
   const navigateToPlanet = useCallback(
     (partnershipId: number) => {
-      scale.value = 1;
-      focalX.value = 0;
-      focalY.value = 0;
-      setSelectedStar(null);
-      selectedStarRef.current = null;
       navigation.navigate('Planet', { partnershipId });
     },
-    [navigation, scale, focalX, focalY],
+    [navigation],
+  );
+
+  // Reset zoom/overlay only when this screen regains focus (user navigates back)
+  useFocusEffect(
+    useCallback(() => {
+      scale.value = 1;
+      targetX.value = SCREEN_W / 2;
+      targetY.value = SCREEN_H / 2;
+      glowOverlay.value = 0;
+      setSelectedStar(null);
+      selectedStarRef.current = null;
+    }, [scale, targetX, targetY, glowOverlay]),
   );
 
   const handleTap = useCallback(
@@ -151,22 +160,30 @@ export default function ConstellationScreen() {
         const dx = tapX - star.x;
         const dy = tapY - star.y;
         if (Math.sqrt(dx * dx + dy * dy) < TAP_HIT_RADIUS) {
-          setSelectedStar(star);
+          // Hide tooltip immediately so it doesn't show during zoom
+          setSelectedStar(null);
           selectedStarRef.current = star;
-          // Animate zoom toward the star
-          const targetFocalX = (SCREEN_W / 2 - star.x) * (ZOOM_THRESHOLD - 1);
-          const targetFocalY = (SCREEN_H / 2 - star.y) * (ZOOM_THRESHOLD - 1);
-          const duration = 500;
-          focalX.value = withTiming(targetFocalX, { duration, easing: Easing.out(Easing.cubic) });
-          focalY.value = withTiming(targetFocalY, { duration, easing: Easing.out(Easing.cubic) });
-          scale.value = withTiming(ZOOM_THRESHOLD, { duration, easing: Easing.out(Easing.cubic) });
-          // Navigate after animation
-          setTimeout(() => navigateToPlanet(star.partnership.id), duration + 50);
+          // Step 1: Pan — set focal point instantly, constellation shifts to center the star
+          targetX.value = star.x;
+          targetY.value = star.y;
+          // Step 2: Zoom — delay slightly so the pan reads as intentional, then scale up
+          const panDelay = 200;
+          const zoomDuration = 600;
+          setTimeout(() => {
+            scale.value = withTiming(DOUBLE_TAP_ZOOM, { duration: zoomDuration, easing: Easing.out(Easing.cubic) });
+          }, panDelay);
+          // Step 3: Glow overlay fills the screen in the second half of the zoom
+          const totalDuration = panDelay + zoomDuration;
+          setTimeout(() => {
+            glowOverlay.value = withTiming(1, { duration: zoomDuration * 0.4, easing: Easing.in(Easing.quad) });
+          }, panDelay + zoomDuration * 0.5);
+          // Step 4: Navigate after everything is fully white
+          setTimeout(() => navigateToPlanet(star.partnership.id), totalDuration + 100);
           return;
         }
       }
     },
-    [navigateToPlanet, scale, focalX, focalY],
+    [navigateToPlanet, scale, targetX, targetY, glowOverlay],
   );
 
   const tapGesture = Gesture.Tap().onEnd((e) => {
@@ -182,14 +199,16 @@ export default function ConstellationScreen() {
   const pinchGesture = Gesture.Pinch()
     .onStart(() => {
       savedScale.value = scale.value;
+      const star = selectedStarRef.current;
+      if (star) {
+        targetX.value = star.x;
+        targetY.value = star.y;
+      }
     })
     .onUpdate((e) => {
       const star = selectedStarRef.current;
       if (!star) return;
-      const newScale = Math.max(savedScale.value * e.scale, 1);
-      scale.value = newScale;
-      focalX.value = (SCREEN_W / 2 - star.x) * (newScale - 1);
-      focalY.value = (SCREEN_H / 2 - star.y) * (newScale - 1);
+      scale.value = Math.max(savedScale.value * e.scale, 1);
     })
     .onEnd(() => {
       const star = selectedStarRef.current;
@@ -198,20 +217,29 @@ export default function ConstellationScreen() {
         runOnJS(navigateToPlanet)(star.partnership.id);
       } else {
         scale.value = withSpring(1);
-        focalX.value = withSpring(0);
-        focalY.value = withSpring(0);
+        targetX.value = SCREEN_W / 2;
+        targetY.value = SCREEN_H / 2;
       }
     });
 
   const tapGestures = Gesture.Exclusive(doubleTapGesture, tapGesture);
   const composedGesture = Gesture.Simultaneous(tapGestures, pinchGesture);
 
-  const animatedZoomStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: focalX.value },
-      { translateY: focalY.value },
-      { scale: scale.value },
-    ],
+  const animatedZoomStyle = useAnimatedStyle(() => {
+    // Translate star to center — scale applied after amplifies automatically
+    const tx = SCREEN_W / 2 - targetX.value;
+    const ty = SCREEN_H / 2 - targetY.value;
+    return {
+      transform: [
+        { translateX: tx },
+        { translateY: ty },
+        { scale: scale.value },
+      ],
+    };
+  });
+
+  const glowOverlayStyle = useAnimatedStyle(() => ({
+    opacity: glowOverlay.value,
   }));
 
   return (
@@ -294,6 +322,9 @@ export default function ConstellationScreen() {
       )}
         </Animated.View>
       </GestureDetector>
+
+      {/* Glow overlay — white wash that covers the screen like the star's light consuming everything */}
+      <Animated.View style={[styles.glowOverlay, glowOverlayStyle]} pointerEvents="none" />
     </View>
   );
 }
@@ -308,6 +339,10 @@ const styles = StyleSheet.create({
   },
   canvas: {
     flex: 1,
+  },
+  glowOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#fff',
   },
   tooltip: {
     position: 'absolute',
