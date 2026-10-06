@@ -11,6 +11,7 @@ import {
   Paint,
   Oval,
 } from '@shopify/react-native-skia';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -29,7 +30,7 @@ import type { Partnership } from '../types';
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const PLANET_RADIUS = SCREEN_W * 0.22;
 const PLANET_CX = SCREEN_W / 2;
-const PLANET_CY = SCREEN_H * 0.45;
+const PLANET_CY = SCREEN_H * 0.52;
 
 type MainStackParamList = {
   Planet: { partnershipId: number };
@@ -80,22 +81,51 @@ export default function PlanetScreen() {
   const planetColors = getPlanetColors(partnershipId);
   const isSoulmate = partnership?.relation === 'soulmate';
 
-  const partnerName = partnership
-    ? isSoulmate
-      ? 'You'
-      : partnership.initiator.id === user?.id
-        ? partnership.partner.first_name
-        : partnership.initiator.first_name
-    : '';
+  const [partnerA, partnerB] = (() => {
+    if (!partnership || !user) return ['', ''];
+    if (isSoulmate) return [user.first_name, user.first_name];
+    const isInitiator = partnership.initiator.id === user.id;
+    return isInitiator
+      ? [user.first_name, partnership.partner.first_name]
+      : [user.first_name, partnership.initiator.first_name];
+  })();
 
-  const relationLabel = partnership?.relation || '';
+  const daysInOrbit = (() => {
+    let startDate: string | null = null;
+    if (isSoulmate) {
+      startDate = user?.birthday || user?.created_at || null;
+    } else {
+      startDate = partnership?.anniversary || partnership?.started_at || null;
+    }
+    if (!startDate) return 0;
+    const start = new Date(startDate);
+    const now = new Date();
+    return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  })();
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.name}>{partnerName}</Text>
-        <Text style={styles.relation}>{relationLabel}</Text>
+        <View style={styles.statsColumn}>
+          <View style={styles.statRow}>
+            <MaterialCommunityIcons name="star-four-points" size={moderateScale(14)} color={colors.starGlow} />
+            <Text style={styles.statValue}>{partnership?.stardust ?? 0}</Text>
+          </View>
+          <View style={styles.statRow}>
+            <MaterialCommunityIcons name="star-shooting" size={moderateScale(14)} color={colors.starGlow} />
+            <Text style={styles.statValue}>{partnership?.streak?.current_count ?? 0}</Text>
+          </View>
+          <View style={styles.statRow}>
+            <MaterialCommunityIcons name="satellite-variant" size={moderateScale(14)} color={colors.starGlow} />
+            <Text style={styles.statValue}>0</Text>
+          </View>
+        </View>
+
+        <View style={styles.titleCenter}>
+          <Text style={styles.name}>{partnerA} & {partnerB}</Text>
+          <Text style={styles.daysText}>{daysInOrbit} days in orbit</Text>
+        </View>
       </View>
 
       {/* Planet Canvas */}
@@ -175,21 +205,40 @@ const styles = StyleSheet.create({
   },
   header: {
     position: 'absolute',
-    top: SCREEN_H * 0.12,
+    top: SCREEN_H * 0.15,
     width: '100%',
-    alignItems: 'center',
     zIndex: 10,
+  },
+  statsColumn: {
+    position: 'absolute',
+    left: moderateScale(16),
+    top: 0,
+    gap: moderateScale(6),
+    zIndex: 11,
+  },
+  statRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: moderateScale(4),
+  },
+  statValue: {
+    color: colors.starGlow,
+    fontSize: moderateScale(12),
+    fontWeight: '600',
+  },
+  titleCenter: {
+    alignItems: 'center',
+    width: '100%',
   },
   name: {
     color: colors.white,
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(22),
     fontWeight: '700',
   },
-  relation: {
-    color: colors.starGlow,
-    fontSize: moderateScale(15),
-    marginTop: moderateScale(4),
-    textTransform: 'capitalize',
+  daysText: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: moderateScale(13),
+    marginTop: moderateScale(2),
   },
   canvas: {
     flex: 1,
