@@ -3,8 +3,8 @@ import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import {
   Canvas,
   Circle,
-  Group,
   LinearGradient,
+  Line,
   Rect,
   vec,
   Blur,
@@ -31,6 +31,17 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const PLANET_RADIUS = SCREEN_W * 0.22;
 const PLANET_CX = SCREEN_W / 2;
 const PLANET_CY = SCREEN_H * 0.52;
+const ORBIT_RADIUS = PLANET_RADIUS + moderateScale(40);
+const ORBIT_DOT_SIZE = moderateScale(20);
+const SPIN_RADIUS = PLANET_RADIUS * 0.92;
+
+// 45° orbit line endpoints
+const COS45 = Math.cos(Math.PI / 4);
+const SIN45 = Math.sin(Math.PI / 4);
+const ORBIT_R_X = PLANET_CX + ORBIT_RADIUS * COS45;
+const ORBIT_R_Y = PLANET_CY + ORBIT_RADIUS * SIN45;
+const ORBIT_L_X = PLANET_CX - ORBIT_RADIUS * COS45;
+const ORBIT_L_Y = PLANET_CY - ORBIT_RADIUS * SIN45;
 
 type MainStackParamList = {
   Planet: { partnershipId: number };
@@ -65,6 +76,10 @@ export default function PlanetScreen() {
     );
   }, [rotation]);
 
+  const spinStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: -(rotation.value / 360) * SPIN_RADIUS * 2 }],
+  }));
+
   useEffect(() => {
     getPartnerships()
       .then((ps) => {
@@ -73,10 +88,6 @@ export default function PlanetScreen() {
       })
       .catch(() => {});
   }, [partnershipId]);
-
-  const orbitStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
 
   const planetColors = getPlanetColors(partnershipId);
   const isSoulmate = partnership?.relation === 'soulmate';
@@ -151,6 +162,14 @@ export default function PlanetScreen() {
           </Paint>
         </Circle>
 
+        {/* Orbit line — drawn BEFORE planet so planet body covers the center */}
+        <Line
+          p1={vec(ORBIT_L_X, ORBIT_L_Y)}
+          p2={vec(ORBIT_R_X, ORBIT_R_Y)}
+          strokeWidth={2}
+          color="rgba(180, 160, 220, 0.5)"
+        />
+
         {/* Planet body */}
         <Circle cx={PLANET_CX} cy={PLANET_CY} r={PLANET_RADIUS}>
           <LinearGradient
@@ -160,40 +179,69 @@ export default function PlanetScreen() {
           />
         </Circle>
 
-        {/* Surface band detail */}
-        <Oval
-          x={PLANET_CX - PLANET_RADIUS * 0.7}
-          y={PLANET_CY - PLANET_RADIUS * 0.08}
-          width={PLANET_RADIUS * 1.4}
-          height={PLANET_RADIUS * 0.16}
-          opacity={0.15}
-          color={planetColors[2]}
-        />
-        <Oval
-          x={PLANET_CX - PLANET_RADIUS * 0.6}
-          y={PLANET_CY + PLANET_RADIUS * 0.25}
-          width={PLANET_RADIUS * 1.2}
-          height={PLANET_RADIUS * 0.1}
-          opacity={0.1}
-          color={planetColors[0]}
-        />
-
-        {/* Highlight / light reflection */}
-        <Circle
-          cx={PLANET_CX - PLANET_RADIUS * 0.3}
-          cy={PLANET_CY - PLANET_RADIUS * 0.3}
-          r={PLANET_RADIUS * 0.5}
-          opacity={0.12}
-          color={colors.white}
-        >
-          <Blur blur={15} />
-        </Circle>
       </Canvas>
 
-      {/* Orbiting ring (animated with Reanimated) */}
-      <Animated.View style={[styles.orbitContainer, orbitStyle]}>
-        <View style={[styles.orbitDot, { backgroundColor: planetColors[1] }]} />
-      </Animated.View>
+      {/* Circular mask for spinning surface */}
+      <View style={styles.spinMask}>
+        <Animated.View style={[styles.spinScroll, spinStyle]}>
+          <Canvas style={styles.spinCanvas}>
+            {/* Tile 1 */}
+            <Oval
+              x={SPIN_RADIUS * 0.3}
+              y={SPIN_RADIUS * 0.55}
+              width={SPIN_RADIUS * 1.4}
+              height={SPIN_RADIUS * 0.18}
+              opacity={0.3}
+              color={planetColors[2]}
+            />
+            <Oval
+              x={SPIN_RADIUS * 0.1}
+              y={SPIN_RADIUS * 1.4}
+              width={SPIN_RADIUS * 1.2}
+              height={SPIN_RADIUS * 0.12}
+              opacity={0.2}
+              color={planetColors[0]}
+            />
+            <Oval
+              x={SPIN_RADIUS * 0.6}
+              y={SPIN_RADIUS - SPIN_RADIUS * 0.35}
+              width={SPIN_RADIUS * 0.8}
+              height={SPIN_RADIUS * 0.1}
+              opacity={0.2}
+              color={planetColors[1]}
+            />
+            {/* Tile 2 (offset by SPIN_RADIUS*2 for seamless loop) */}
+            <Oval
+              x={SPIN_RADIUS * 2 + SPIN_RADIUS * 0.3}
+              y={SPIN_RADIUS * 0.55}
+              width={SPIN_RADIUS * 1.4}
+              height={SPIN_RADIUS * 0.18}
+              opacity={0.3}
+              color={planetColors[2]}
+            />
+            <Oval
+              x={SPIN_RADIUS * 2 + SPIN_RADIUS * 0.1}
+              y={SPIN_RADIUS * 1.4}
+              width={SPIN_RADIUS * 1.2}
+              height={SPIN_RADIUS * 0.12}
+              opacity={0.2}
+              color={planetColors[0]}
+            />
+            <Oval
+              x={SPIN_RADIUS * 2 + SPIN_RADIUS * 0.6}
+              y={SPIN_RADIUS - SPIN_RADIUS * 0.35}
+              width={SPIN_RADIUS * 0.8}
+              height={SPIN_RADIUS * 0.1}
+              opacity={0.2}
+              color={planetColors[1]}
+            />
+          </Canvas>
+        </Animated.View>
+      </View>
+
+      {/* Partner dots at orbit endpoints */}
+      <View style={[styles.orbitDot, styles.orbitDotA]} />
+      <View style={[styles.orbitDot, styles.orbitDotB]} />
     </View>
   );
 }
@@ -243,22 +291,37 @@ const styles = StyleSheet.create({
   canvas: {
     flex: 1,
   },
-  orbitContainer: {
+  spinMask: {
     position: 'absolute',
-    width: PLANET_RADIUS * 2 + 80,
-    height: PLANET_RADIUS * 2 + 80,
-    left: PLANET_CX - PLANET_RADIUS - 40,
-    top: PLANET_CY - PLANET_RADIUS - 40,
-    borderRadius: PLANET_RADIUS + 40,
-    borderWidth: 1,
-    borderColor: 'rgba(180, 160, 220, 0.15)',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
+    width: SPIN_RADIUS * 2,
+    height: SPIN_RADIUS * 2,
+    left: PLANET_CX - SPIN_RADIUS,
+    top: PLANET_CY - SPIN_RADIUS,
+    borderRadius: SPIN_RADIUS,
+    overflow: 'hidden',
+  },
+  spinScroll: {
+    width: SPIN_RADIUS * 4,
+    height: SPIN_RADIUS * 2,
+  },
+  spinCanvas: {
+    width: SPIN_RADIUS * 4,
+    height: SPIN_RADIUS * 2,
   },
   orbitDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: -4,
+    position: 'absolute',
+    width: ORBIT_DOT_SIZE,
+    height: ORBIT_DOT_SIZE,
+    borderRadius: ORBIT_DOT_SIZE / 2,
+  },
+  orbitDotA: {
+    backgroundColor: '#FFD700',
+    left: ORBIT_R_X - ORBIT_DOT_SIZE / 2,
+    top: ORBIT_R_Y - ORBIT_DOT_SIZE / 2,
+  },
+  orbitDotB: {
+    backgroundColor: '#87CEEB',
+    left: ORBIT_L_X - ORBIT_DOT_SIZE / 2,
+    top: ORBIT_L_Y - ORBIT_DOT_SIZE / 2,
   },
 });
