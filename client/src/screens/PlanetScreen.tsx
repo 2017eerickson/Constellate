@@ -162,12 +162,30 @@ export default function PlanetScreen() {
           </Paint>
         </Circle>
 
-        {/* Orbit line — drawn BEFORE planet so planet body covers the center */}
+        {/* Orbit line connecting the two dots */}
         <Line
           p1={vec(ORBIT_L_X, ORBIT_L_Y)}
           p2={vec(ORBIT_R_X, ORBIT_R_Y)}
-          strokeWidth={2}
-          color="rgba(180, 160, 220, 0.5)"
+          strokeWidth={1.5}
+          color="rgba(200, 180, 255, 0.4)"
+        />
+
+        {/* Saturn rings — back half (planet will cover the center) */}
+        <Oval
+          x={PLANET_CX - PLANET_RADIUS * 1.55}
+          y={PLANET_CY - PLANET_RADIUS * 0.15}
+          width={PLANET_RADIUS * 3.1}
+          height={PLANET_RADIUS * 0.3}
+          opacity={0.5}
+          color="rgba(255, 255, 255, 0.6)"
+        />
+        <Oval
+          x={PLANET_CX - PLANET_RADIUS * 1.45}
+          y={PLANET_CY + PLANET_RADIUS * 0.05}
+          width={PLANET_RADIUS * 2.9}
+          height={PLANET_RADIUS * 0.22}
+          opacity={0.4}
+          color="rgba(255, 255, 255, 0.5)"
         />
 
         {/* Planet body */}
@@ -178,6 +196,24 @@ export default function PlanetScreen() {
             colors={planetColors}
           />
         </Circle>
+
+        {/* Saturn rings — front half (crossing over the planet) */}
+        <Oval
+          x={PLANET_CX - PLANET_RADIUS * 1.55}
+          y={PLANET_CY - PLANET_RADIUS * 0.15}
+          width={PLANET_RADIUS * 3.1}
+          height={PLANET_RADIUS * 0.3}
+          opacity={0.15}
+          color="rgba(255, 255, 255, 0.4)"
+        />
+        <Oval
+          x={PLANET_CX - PLANET_RADIUS * 1.45}
+          y={PLANET_CY + PLANET_RADIUS * 0.05}
+          width={PLANET_RADIUS * 2.9}
+          height={PLANET_RADIUS * 0.22}
+          opacity={0.12}
+          color="rgba(255, 255, 255, 0.3)"
+        />
 
       </Canvas>
 
