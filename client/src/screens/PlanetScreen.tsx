@@ -187,53 +187,53 @@ export default function PlanetScreen() {
           <Canvas style={styles.spinCanvas}>
             {/* Tile 1 */}
             <Oval
-              x={SPIN_RADIUS * 0.3}
-              y={SPIN_RADIUS * 0.55}
-              width={SPIN_RADIUS * 1.4}
-              height={SPIN_RADIUS * 0.18}
-              opacity={0.3}
-              color={planetColors[2]}
-            />
-            <Oval
-              x={SPIN_RADIUS * 0.1}
-              y={SPIN_RADIUS * 1.4}
-              width={SPIN_RADIUS * 1.2}
-              height={SPIN_RADIUS * 0.12}
-              opacity={0.2}
+              x={SPIN_RADIUS * 0.2}
+              y={SPIN_RADIUS * 0.35}
+              width={SPIN_RADIUS * 1.6}
+              height={SPIN_RADIUS * 0.16}
+              opacity={0.25}
               color={planetColors[0]}
             />
             <Oval
-              x={SPIN_RADIUS * 0.6}
-              y={SPIN_RADIUS - SPIN_RADIUS * 0.35}
-              width={SPIN_RADIUS * 0.8}
-              height={SPIN_RADIUS * 0.1}
-              opacity={0.2}
-              color={planetColors[1]}
+              x={SPIN_RADIUS * 0.45}
+              y={SPIN_RADIUS * 0.9}
+              width={SPIN_RADIUS * 1.0}
+              height={SPIN_RADIUS * 0.14}
+              opacity={0.35}
+              color={planetColors[2]}
+            />
+            <Oval
+              x={SPIN_RADIUS * 0.3}
+              y={SPIN_RADIUS * 1.45}
+              width={SPIN_RADIUS * 1.3}
+              height={SPIN_RADIUS * 0.14}
+              opacity={0.5}
+              color={planetColors[2]}
             />
             {/* Tile 2 (offset by SPIN_RADIUS*2 for seamless loop) */}
             <Oval
-              x={SPIN_RADIUS * 2 + SPIN_RADIUS * 0.3}
-              y={SPIN_RADIUS * 0.55}
-              width={SPIN_RADIUS * 1.4}
-              height={SPIN_RADIUS * 0.18}
-              opacity={0.3}
-              color={planetColors[2]}
-            />
-            <Oval
-              x={SPIN_RADIUS * 2 + SPIN_RADIUS * 0.1}
-              y={SPIN_RADIUS * 1.4}
-              width={SPIN_RADIUS * 1.2}
-              height={SPIN_RADIUS * 0.12}
-              opacity={0.2}
+              x={SPIN_RADIUS * 2 + SPIN_RADIUS * 0.2}
+              y={SPIN_RADIUS * 0.35}
+              width={SPIN_RADIUS * 1.6}
+              height={SPIN_RADIUS * 0.16}
+              opacity={0.25}
               color={planetColors[0]}
             />
             <Oval
-              x={SPIN_RADIUS * 2 + SPIN_RADIUS * 0.6}
-              y={SPIN_RADIUS - SPIN_RADIUS * 0.35}
-              width={SPIN_RADIUS * 0.8}
+              x={SPIN_RADIUS * 2 + SPIN_RADIUS * 0.45}
+              y={SPIN_RADIUS * 0.9}
+              width={SPIN_RADIUS * 1.0}
+              height={SPIN_RADIUS * 0.07}
+              opacity={0.35}
+              color={planetColors[2]}
+            />
+            <Oval
+              x={SPIN_RADIUS * 2 + SPIN_RADIUS * 0.3}
+              y={SPIN_RADIUS * 1.45}
+              width={SPIN_RADIUS * 2}
               height={SPIN_RADIUS * 0.1}
-              opacity={0.2}
-              color={planetColors[1]}
+              opacity={0.5}
+              color={planetColors[2]}
             />
           </Canvas>
         </Animated.View>
