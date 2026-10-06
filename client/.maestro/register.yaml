@@ -1,0 +1,26 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    id: "sign-out-button"
+    optional: true
+- tapOn:
+    id: "toggle-auth-mode"
+- tapOn:
+    id: "first-name-input"
+- inputText: "TestUser"
+- tapOn:
+    id: "email-input"
+- inputText: "testuser@example.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- tapOn: "Not Now"
+- tapOn:
+    id: "onboarding-birthday-input"
+- inputText: "1990-01-15"
+- tapOn:
+    id: "onboarding-submit-button"
+- assertVisible: "Hey, TestUser!"

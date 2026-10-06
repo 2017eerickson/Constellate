@@ -1,0 +1,29 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    id: "email-input"
+- inputText: "userA@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- tapOn: "Not Now"
+- assertVisible: "Hey, PartnerA!"
+- tapOn: 
+    id: 'partners-tab' 
+- tapOn:
+    id: "add-partner-button"
+- tapOn:
+    id: "partner-code-input"
+- inputText: ${PARTNER_B_CODE}
+- tapOn:
+    id: "relation-input"
+- inputText: "romantic"
+- tapOn:
+    id: "connect-button"
+- assertVisible: "Sent!"
+- tapOn:
+    text: "OK"
+- assertVisible: "Request pending"
