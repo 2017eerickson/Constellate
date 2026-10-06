@@ -200,9 +200,12 @@ export default function ConstellationScreen() {
       runOnJS(handleDoubleTap)(e.x, e.y);
     });
 
+  const hideTooltip = useCallback(() => setSelectedStar(null), []);
+
   const pinchGesture = Gesture.Pinch()
     .onStart(() => {
       savedScale.value = scale.value;
+      runOnJS(hideTooltip)();
       if (selectedPartnershipId.value > 0) {
         targetX.value = selectedStarX.value;
         targetY.value = selectedStarY.value;
