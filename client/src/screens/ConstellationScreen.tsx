@@ -30,7 +30,7 @@ const ORBIT_RADIUS_MIN = SCREEN_W * 0.22;
 const ORBIT_RADIUS_MAX = SCREEN_W * 0.38;
 const TAP_HIT_RADIUS = 30;
 const ZOOM_THRESHOLD = 2.5;
-const DOUBLE_TAP_ZOOM = 25;
+const DOUBLE_TAP_ZOOM = 5;
 
 type MainStackParamList = {
   Tabs: undefined;
@@ -101,7 +101,10 @@ export default function ConstellationScreen() {
   const targetX = useSharedValue(SCREEN_W / 2);
   const targetY = useSharedValue(SCREEN_H / 2);
   const glowOverlay = useSharedValue(0);
-  const selectedStarRef = useRef<StarData | null>(null);
+  // Shared values for pinch gesture (worklet-safe, replaces selectedStarRef)
+  const selectedStarX = useSharedValue(0);
+  const selectedStarY = useSharedValue(0);
+  const selectedPartnershipId = useSharedValue(0);
 
   useEffect(() => {
     getPartnerships()
@@ -130,9 +133,11 @@ export default function ConstellationScreen() {
       targetX.value = SCREEN_W / 2;
       targetY.value = SCREEN_H / 2;
       glowOverlay.value = 0;
+      selectedStarX.value = 0;
+      selectedStarY.value = 0;
+      selectedPartnershipId.value = 0;
       setSelectedStar(null);
-      selectedStarRef.current = null;
-    }, [scale, targetX, targetY, glowOverlay]),
+    }, [scale, targetX, targetY, glowOverlay, selectedStarX, selectedStarY, selectedPartnershipId]),
   );
 
   const handleTap = useCallback(
@@ -143,14 +148,16 @@ export default function ConstellationScreen() {
         const dy = tapY - star.y;
         if (Math.sqrt(dx * dx + dy * dy) < TAP_HIT_RADIUS) {
           setSelectedStar(star);
-          selectedStarRef.current = star;
+          selectedStarX.value = star.x;
+          selectedStarY.value = star.y;
+          selectedPartnershipId.value = star.partnership.id;
           return;
         }
       }
       setSelectedStar(null);
-      selectedStarRef.current = null;
+      selectedPartnershipId.value = 0;
     },
-    [],
+    [selectedStarX, selectedStarY, selectedPartnershipId],
   );
 
   const handleDoubleTap = useCallback(
@@ -162,28 +169,25 @@ export default function ConstellationScreen() {
         if (Math.sqrt(dx * dx + dy * dy) < TAP_HIT_RADIUS) {
           // Hide tooltip immediately so it doesn't show during zoom
           setSelectedStar(null);
-          selectedStarRef.current = star;
-          // Step 1: Pan — set focal point instantly, constellation shifts to center the star
+          selectedStarX.value = star.x;
+          selectedStarY.value = star.y;
+          selectedPartnershipId.value = star.partnership.id;
+          // Set focal point and start zoom immediately
           targetX.value = star.x;
           targetY.value = star.y;
-          // Step 2: Zoom — delay slightly so the pan reads as intentional, then scale up
-          const panDelay = 200;
-          const zoomDuration = 600;
+          const duration = 700;
+          scale.value = withTiming(DOUBLE_TAP_ZOOM, { duration, easing: Easing.out(Easing.cubic) });
+          // Glow overlay fills screen in second half of zoom
           setTimeout(() => {
-            scale.value = withTiming(DOUBLE_TAP_ZOOM, { duration: zoomDuration, easing: Easing.out(Easing.cubic) });
-          }, panDelay);
-          // Step 3: Glow overlay fills the screen in the second half of the zoom
-          const totalDuration = panDelay + zoomDuration;
-          setTimeout(() => {
-            glowOverlay.value = withTiming(1, { duration: zoomDuration * 0.4, easing: Easing.in(Easing.quad) });
-          }, panDelay + zoomDuration * 0.5);
-          // Step 4: Navigate after everything is fully white
-          setTimeout(() => navigateToPlanet(star.partnership.id), totalDuration + 100);
+            glowOverlay.value = withTiming(1, { duration: duration * 0.4, easing: Easing.in(Easing.quad) });
+          }, duration * 0.5);
+          // Navigate after fully white
+          setTimeout(() => navigateToPlanet(star.partnership.id), duration + 100);
           return;
         }
       }
     },
-    [navigateToPlanet, scale, targetX, targetY, glowOverlay],
+    [navigateToPlanet, scale, targetX, targetY, glowOverlay, selectedStarX, selectedStarY, selectedPartnershipId],
   );
 
   const tapGesture = Gesture.Tap().onEnd((e) => {
@@ -199,22 +203,19 @@ export default function ConstellationScreen() {
   const pinchGesture = Gesture.Pinch()
     .onStart(() => {
       savedScale.value = scale.value;
-      const star = selectedStarRef.current;
-      if (star) {
-        targetX.value = star.x;
-        targetY.value = star.y;
+      if (selectedPartnershipId.value > 0) {
+        targetX.value = selectedStarX.value;
+        targetY.value = selectedStarY.value;
       }
     })
     .onUpdate((e) => {
-      const star = selectedStarRef.current;
-      if (!star) return;
+      if (selectedPartnershipId.value === 0) return;
       scale.value = Math.max(savedScale.value * e.scale, 1);
     })
     .onEnd(() => {
-      const star = selectedStarRef.current;
-      if (!star) return;
+      if (selectedPartnershipId.value === 0) return;
       if (scale.value >= ZOOM_THRESHOLD) {
-        runOnJS(navigateToPlanet)(star.partnership.id);
+        runOnJS(navigateToPlanet)(selectedPartnershipId.value);
       } else {
         scale.value = withSpring(1);
         targetX.value = SCREEN_W / 2;
@@ -226,9 +227,9 @@ export default function ConstellationScreen() {
   const composedGesture = Gesture.Simultaneous(tapGestures, pinchGesture);
 
   const animatedZoomStyle = useAnimatedStyle(() => {
-    // Translate star to center — scale applied after amplifies automatically
-    const tx = SCREEN_W / 2 - targetX.value;
-    const ty = SCREEN_H / 2 - targetY.value;
+    // Compensate for scale pushing the star away from center
+    const tx = (SCREEN_W / 2 - targetX.value) * scale.value;
+    const ty = (SCREEN_H / 2 - targetY.value) * scale.value;
     return {
       transform: [
         { translateX: tx },
