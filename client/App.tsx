@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -12,6 +13,7 @@ import PartnersScreen from './src/screens/PartnersScreen';
 import ConstellationScreen from './src/screens/ConstellationScreen';
 import ConnectScreen from './src/screens/ConnectScreen';
 import PartnerDetailScreen from './src/screens/PartnerDetailScreen';
+import PlanetScreen from './src/screens/PlanetScreen';
 
 type AuthStackParamList = {
   SignIn: undefined;
@@ -22,6 +24,7 @@ type MainStackParamList = {
   Tabs: undefined;
   Connect: undefined;
   PartnerDetail: { partnershipId: number };
+  Planet: { partnershipId: number };
 };
 
 type TabParamList = {
@@ -91,6 +94,11 @@ function AppNavigator() {
         component={PartnerDetailScreen}
         options={{ headerShown: true, headerTitle: '' }}
       />
+      <MainStack.Screen
+        name="Planet"
+        component={PlanetScreen}
+        options={{ headerShown: true, headerTitle: '', headerTransparent: true, headerTintColor: '#fff', animation: 'fade' }}
+      />
     </MainStack.Navigator>
   );
 }
@@ -101,11 +109,13 @@ export default function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
 
