@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'profile_app',
     'relationship_app',
     'gamification_app',
+    'connection_activities_app',
 ]
 
 AUTH_USER_MODEL = 'user_app.User'
