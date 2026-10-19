@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   Canvas,
@@ -70,6 +70,20 @@ export default function PlanetScreen() {
   const [myMood, setMyMood] = useState('happy');
   const [partnerMood, setPartnerMood] = useState('happy');
   const [moodOverlayVisible, setMoodOverlayVisible] = useState(false);
+  const [partnerTooltipVisible, setPartnerTooltipVisible] = useState(false);
+  const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showPartnerTooltip = useCallback(() => {
+    if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
+    setPartnerTooltipVisible(true);
+    tooltipTimer.current = setTimeout(() => setPartnerTooltipVisible(false), 5000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
+    };
+  }, []);
 
   const rotation = useSharedValue(0);
 
@@ -309,13 +323,21 @@ export default function PlanetScreen() {
       />
 
       {/* Partner star */}
-      <View
+      <Pressable
         style={[
           styles.orbitDot,
           styles.orbitDotB,
           { backgroundColor: MOOD_COLORS[partnerMood] || MOOD_COLORS.happy },
         ]}
+        onPress={showPartnerTooltip}
       />
+
+      {/* Partner mood tooltip */}
+      {partnerTooltipVisible && (
+        <View style={styles.tooltip}>
+          <Text style={styles.tooltipText}>{partnerMood}</Text>
+        </View>
+      )}
 
       <MoodOverlay
         visible={moodOverlayVisible}
@@ -402,5 +424,20 @@ const styles = StyleSheet.create({
   orbitDotB: {
     left: ORBIT_L_X - ORBIT_DOT_SIZE / 2,
     top: ORBIT_L_Y - ORBIT_DOT_SIZE / 2,
+  },
+  tooltip: {
+    position: 'absolute',
+    left: ORBIT_L_X - moderateScale(30),
+    top: ORBIT_L_Y - ORBIT_DOT_SIZE - moderateScale(30),
+    backgroundColor: colors.tooltipBg,
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(6),
+    borderRadius: moderateScale(8),
+  },
+  tooltipText: {
+    color: colors.white,
+    fontSize: moderateScale(13),
+    fontWeight: '600',
+    textTransform: 'capitalize',
   },
 });
