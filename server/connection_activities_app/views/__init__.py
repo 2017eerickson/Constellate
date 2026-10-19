@@ -1,0 +1,1 @@
+from connection_activities_app.views.mood_views import SetMoodView
