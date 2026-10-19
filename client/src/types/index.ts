@@ -42,6 +42,17 @@ export interface Partnership {
   special_dates: SpecialDate[];
 }
 
+export interface MoodPartner {
+  user: number;
+  mood: string;
+  timestamp: string | null;
+}
+
+export interface MoodResponse {
+  initiator: MoodPartner;
+  partner: MoodPartner;
+}
+
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;

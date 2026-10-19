@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   Canvas,
   Circle,
@@ -22,9 +22,11 @@ import Animated, {
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { getPartnerships } from '../services/partnerships';
+import { getMoods, setMood } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
 import { moderateScale } from '../styles/scale';
+import MoodOverlay, { MOOD_COLORS } from '../components/MoodOverlay';
 import type { Partnership } from '../types';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
@@ -65,6 +67,9 @@ export default function PlanetScreen() {
   const { partnershipId } = route.params;
   const { user } = useAuth();
   const [partnership, setPartnership] = useState<Partnership | null>(null);
+  const [myMood, setMyMood] = useState('happy');
+  const [partnerMood, setPartnerMood] = useState('happy');
+  const [moodOverlayVisible, setMoodOverlayVisible] = useState(false);
 
   const rotation = useSharedValue(0);
 
@@ -87,7 +92,25 @@ export default function PlanetScreen() {
         if (found) setPartnership(found);
       })
       .catch(() => {});
-  }, [partnershipId]);
+
+    getMoods(partnershipId)
+      .then((data) => {
+        if (!user) return;
+        const isInitiator = data.initiator.user === user.id;
+        setMyMood(isInitiator ? data.initiator.mood : data.partner.mood);
+        setPartnerMood(isInitiator ? data.partner.mood : data.initiator.mood);
+      })
+      .catch(() => {});
+  }, [partnershipId, user]);
+
+  const handleMoodSelect = async (mood: string) => {
+    setMyMood(mood);
+    try {
+      await setMood(partnershipId, mood);
+    } catch {
+      // revert on failure
+    }
+  };
 
   const planetColors = getPlanetColors(partnershipId);
   const isSoulmate = partnership?.relation === 'soulmate';
@@ -275,9 +298,31 @@ export default function PlanetScreen() {
         </Animated.View>
       </View>
 
-      {/* Partner dots at orbit endpoints */}
-      <View style={[styles.orbitDot, styles.orbitDotA]} />
-      <View style={[styles.orbitDot, styles.orbitDotB]} />
+      {/* My star (tappable) */}
+      <Pressable
+        style={[
+          styles.orbitDot,
+          styles.orbitDotA,
+          { backgroundColor: MOOD_COLORS[myMood] || MOOD_COLORS.happy },
+        ]}
+        onPress={() => setMoodOverlayVisible(true)}
+      />
+
+      {/* Partner star */}
+      <View
+        style={[
+          styles.orbitDot,
+          styles.orbitDotB,
+          { backgroundColor: MOOD_COLORS[partnerMood] || MOOD_COLORS.happy },
+        ]}
+      />
+
+      <MoodOverlay
+        visible={moodOverlayVisible}
+        currentMood={myMood}
+        onSelect={handleMoodSelect}
+        onClose={() => setMoodOverlayVisible(false)}
+      />
     </View>
   );
 }
@@ -351,12 +396,10 @@ const styles = StyleSheet.create({
     borderRadius: ORBIT_DOT_SIZE / 2,
   },
   orbitDotA: {
-    backgroundColor: '#FFD700',
     left: ORBIT_R_X - ORBIT_DOT_SIZE / 2,
     top: ORBIT_R_Y - ORBIT_DOT_SIZE / 2,
   },
   orbitDotB: {
-    backgroundColor: '#87CEEB',
     left: ORBIT_L_X - ORBIT_DOT_SIZE / 2,
     top: ORBIT_L_Y - ORBIT_DOT_SIZE / 2,
   },
