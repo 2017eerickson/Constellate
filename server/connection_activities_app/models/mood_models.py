@@ -31,5 +31,6 @@ class MoodSetting(models.Model):
     mood = models.CharField(
         max_length=20,
         choices=MoodChoices.choices,
+        default=MoodChoices.HAPPY,
     )
     timestamp = models.DateTimeField(auto_now_add=True)
