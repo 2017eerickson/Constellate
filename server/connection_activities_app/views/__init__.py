@@ -1,1 +1,2 @@
 from connection_activities_app.views.mood_views import SetMoodView
+from connection_activities_app.views.affection_views import SendAffectionView
