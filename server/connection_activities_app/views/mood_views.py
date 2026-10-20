@@ -99,10 +99,7 @@ class SetMoodView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        stardust, _ = Stardust.objects.get_or_create(
-            partnership=partnership,
-            user=request.user,
-        )
+        stardust, _ = Stardust.objects.get_or_create(partnership=partnership)
         stardust.total += MOOD_STARDUST_REWARD
         stardust.save()
 
