@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from django.db import models
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -9,8 +8,8 @@ from rest_framework.views import APIView
 
 from connection_activities_app.models import AffectionSending
 from connection_activities_app.serializers import AffectionSendingSerializer
+from connection_activities_app.views.utils import get_partnership
 from gamification_app.models import Stardust
-from relationship_app.models import Partnership
 
 AFFECTION_STARDUST_REWARD = 10
 AFFECTION_COOLDOWN = timedelta(hours=1, minutes=11)
@@ -19,7 +18,7 @@ AFFECTION_COOLDOWN = timedelta(hours=1, minutes=11)
 class SendAffectionView(APIView):
     """
     SUMMARY:        Send an affection to your partner within a partnership.
-    ENDPOINT:       POST /api/v1/activities/<partnership_id>/affection/
+    ENDPOINT:       POST /api/v1/activities/<partnership_id>/affection/send/
     AUTHENTICATION: Bearer <access_token>
     REQUEST BODY:
         {
@@ -37,33 +36,8 @@ class SendAffectionView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def get_partnership(self, request, partnership_id):
-        return Partnership.objects.filter(
-            models.Q(initiator=request.user) | models.Q(partner=request.user),
-            pk=partnership_id,
-        ).first()
-
-    def get(self, request, partnership_id):
-        partnership = self.get_partnership(request, partnership_id)
-
-        if not partnership:
-            return Response(
-                {'error': 'Partnership not found.'},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        unread_affections = AffectionSending.objects.filter(
-            partnership=partnership,
-            read=False,
-        ).exclude(sender=request.user)
-
-        serializer = AffectionSendingSerializer(unread_affections, many=True)
-        response_data = serializer.data
-
-        return Response(response_data)
-
     def post(self, request, partnership_id):
-        partnership = self.get_partnership(request, partnership_id)
+        partnership = get_partnership(request.user, partnership_id)
 
         if not partnership:
             return Response(
@@ -101,3 +75,69 @@ class SendAffectionView(APIView):
         stardust.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class RetrieveAffectionsView(APIView):
+    """
+    SUMMARY:        Get all unread affections sent to the authenticated user.
+    ENDPOINT:       GET /api/v1/activities/<partnership_id>/affection/
+    AUTHENTICATION: Bearer <access_token>
+    REQUEST BODY:   None
+    RETURN VALUE:   [{ "id", "sender", "partnership", "type", "read", "timestamp" }, ...]
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, partnership_id):
+        partnership = get_partnership(request.user, partnership_id)
+
+        if not partnership:
+            return Response(
+                {'error': 'Partnership not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        unread_affections = AffectionSending.objects.filter(
+            partnership=partnership,
+            read=False,
+        ).exclude(sender=request.user)
+
+        serializer = AffectionSendingSerializer(unread_affections, many=True)
+        return Response(serializer.data)
+
+
+class ReadAffectionView(APIView):
+    """
+    SUMMARY:        Mark a specific affection as read.
+    ENDPOINT:       PUT /api/v1/activities/<partnership_id>/affection/<affection_id>/read/
+    AUTHENTICATION: Bearer <access_token>
+    REQUEST BODY:   None
+    RETURN VALUE:   { "id", "sender", "partnership", "type", "read", "timestamp" }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, partnership_id, affection_id):
+        partnership = get_partnership(request.user, partnership_id)
+
+        if not partnership:
+            return Response(
+                {'error': 'Partnership not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        affection = AffectionSending.objects.filter(
+            pk=affection_id,
+            partnership=partnership,
+            read=False,
+        ).exclude(sender=request.user).first()
+
+        if not affection:
+            return Response(
+                {'error': 'Affection not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        affection.read = True
+        affection.save()
+
+        serializer = AffectionSendingSerializer(affection)
+        return Response(serializer.data)
