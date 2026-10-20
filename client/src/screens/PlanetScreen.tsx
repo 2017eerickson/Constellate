@@ -22,13 +22,14 @@ import Animated, {
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { getPartnerships } from '../services/partnerships';
-import { getMoods, setMood, sendAffection, getAffectionCooldown } from '../services/activities';
+import { getMoods, setMood, sendAffection, getAffectionCooldown, getAffections, readAffection } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
 import { moderateScale } from '../styles/scale';
 import MoodOverlay, { MOOD_COLORS } from '../components/MoodOverlay';
 import AffectionOverlay from '../components/AffectionOverlay';
-import type { Partnership, AffectionType } from '../types';
+import AffectionReceivedPopup from '../components/AffectionReceivedPopup';
+import type { Partnership, Affection, AffectionType } from '../types';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const PLANET_RADIUS = SCREEN_W * 0.22;
@@ -73,6 +74,7 @@ export default function PlanetScreen() {
   const [moodOverlayVisible, setMoodOverlayVisible] = useState(false);
   const [affectionOverlayVisible, setAffectionOverlayVisible] = useState(false);
   const [affectionCooldown, setAffectionCooldown] = useState(0);
+  const [unreadAffections, setUnreadAffections] = useState<Affection[]>([]);
   const [partnerTooltipVisible, setPartnerTooltipVisible] = useState(false);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPartnerTap = useRef<number>(0);
@@ -119,6 +121,10 @@ export default function PlanetScreen() {
         setPartnerMood(isInitiator ? data.partner.mood : data.initiator.mood);
       })
       .catch(() => {});
+
+    getAffections(partnershipId)
+      .then((affections) => setUnreadAffections(affections))
+      .catch(() => {});
   }, [partnershipId, user]);
 
   const DOUBLE_TAP_DELAY = 300;
@@ -161,6 +167,15 @@ export default function PlanetScreen() {
       // revert on failure
     }
   };
+
+  const handleDismissAffection = useCallback(async () => {
+    const current = unreadAffections[0];
+    if (!current) return;
+    try {
+      await readAffection(partnershipId, current.id);
+    } catch {}
+    setUnreadAffections((prev) => prev.slice(1));
+  }, [unreadAffections, partnershipId]);
 
   const planetColors = getPlanetColors(partnershipId);
   const isSoulmate = partnership?.relation === 'soulmate';
@@ -388,6 +403,14 @@ export default function PlanetScreen() {
         onSend={handleAffectionSend}
         onClose={() => setAffectionOverlayVisible(false)}
       />
+
+      {unreadAffections.length > 0 && (
+        <AffectionReceivedPopup
+          affection={unreadAffections[0]}
+          partnerName={partnerB}
+          onDismiss={handleDismissAffection}
+        />
+      )}
     </View>
   );
 }
