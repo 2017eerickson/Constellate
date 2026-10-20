@@ -1,4 +1,3 @@
-from django.db import models
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -6,8 +5,8 @@ from rest_framework.views import APIView
 
 from connection_activities_app.models import MoodSetting
 from connection_activities_app.serializers import MoodSettingSerializer
+from connection_activities_app.views.utils import get_partnership
 from gamification_app.models import Stardust
-from relationship_app.models import Partnership
 
 
 MOOD_STARDUST_REWARD = 5
@@ -27,14 +26,8 @@ class SetMoodView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def get_partnership(self, request, partnership_id):
-        return Partnership.objects.filter(
-            models.Q(initiator=request.user) | models.Q(partner=request.user),
-            pk=partnership_id,
-        ).first()
-
     def get(self, request, partnership_id):
-        partnership = self.get_partnership(request, partnership_id)
+        partnership = get_partnership(request.user, partnership_id)
 
         if not partnership:
             return Response(
@@ -55,13 +48,13 @@ class SetMoodView(APIView):
         return Response({
             'initiator': {
                 'user': partnership.initiator_id,
-                'mood': initiator_mood.mood,
-                'timestamp': initiator_mood.timestamp,
+                'mood': initiator_mood.mood if initiator_mood else 'happy',
+                'timestamp': initiator_mood.timestamp if initiator_mood else None,
             },
             'partner': {
                 'user': partnership.partner_id,
-                'mood': partner_mood.mood,
-                'timestamp': partner_mood.timestamp,
+                'mood': partner_mood.mood if partner_mood else 'happy',
+                'timestamp': partner_mood.timestamp if partner_mood else None,
             },
         })
 
@@ -83,7 +76,7 @@ class SetMoodView(APIView):
             }
     """
     def post(self, request, partnership_id):
-        partnership = self.get_partnership(request, partnership_id)
+        partnership = get_partnership(request.user, partnership_id)
 
         if not partnership:
             return Response(

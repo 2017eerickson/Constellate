@@ -41,11 +41,7 @@ class PartnershipSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_stardust(self, obj):
-        request = self.context.get('request')
-        if not request:
-            return None
-        stardust = obj.stardust.filter(user=request.user).first()
-        return stardust.total if stardust else 0
+        return obj.stardust.total
 
 
 class CreateSpecialDateSerializer(serializers.ModelSerializer):

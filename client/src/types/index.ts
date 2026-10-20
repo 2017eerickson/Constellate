@@ -53,6 +53,22 @@ export interface MoodResponse {
   partner: MoodPartner;
 }
 
+export type AffectionType = 'kiss' | 'hug' | 'gratitude' | 'poke' | 'bite' | 'tease';
+
+export interface Affection {
+  id: number;
+  sender: number;
+  partnership: number;
+  type: AffectionType;
+  read: boolean;
+  timestamp: string;
+}
+
+export interface AffectionCooldownError {
+  error: string;
+  remaining_seconds: number;
+}
+
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
