@@ -22,12 +22,13 @@ import Animated, {
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { getPartnerships } from '../services/partnerships';
-import { getMoods, setMood } from '../services/activities';
+import { getMoods, setMood, sendAffection } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
 import { moderateScale } from '../styles/scale';
 import MoodOverlay, { MOOD_COLORS } from '../components/MoodOverlay';
-import type { Partnership } from '../types';
+import AffectionOverlay from '../components/AffectionOverlay';
+import type { Partnership, AffectionType } from '../types';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const PLANET_RADIUS = SCREEN_W * 0.22;
@@ -70,8 +71,11 @@ export default function PlanetScreen() {
   const [myMood, setMyMood] = useState('happy');
   const [partnerMood, setPartnerMood] = useState('happy');
   const [moodOverlayVisible, setMoodOverlayVisible] = useState(false);
+  const [affectionOverlayVisible, setAffectionOverlayVisible] = useState(false);
+  const [affectionCooldown, setAffectionCooldown] = useState(0);
   const [partnerTooltipVisible, setPartnerTooltipVisible] = useState(false);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPartnerTap = useRef<number>(0);
 
   const showPartnerTooltip = useCallback(() => {
     if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
@@ -116,6 +120,35 @@ export default function PlanetScreen() {
       })
       .catch(() => {});
   }, [partnershipId, user]);
+
+  const DOUBLE_TAP_DELAY = 300;
+
+  const handlePartnerStarPress = useCallback(() => {
+    const now = Date.now();
+    if (now - lastPartnerTap.current < DOUBLE_TAP_DELAY) {
+      // Double tap — open affection overlay
+      setPartnerTooltipVisible(false);
+      if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
+      setAffectionOverlayVisible(true);
+    } else {
+      // Single tap — show tooltip
+      showPartnerTooltip();
+    }
+    lastPartnerTap.current = now;
+  }, [showPartnerTooltip]);
+
+  const handleAffectionSend = useCallback(async (type: AffectionType) => {
+    try {
+      await sendAffection(partnershipId, type);
+      // 1h 11m = 4260 seconds
+      setAffectionCooldown(4260);
+    } catch (err: any) {
+      const remaining = err?.response?.data?.remaining_seconds;
+      if (remaining) {
+        setAffectionCooldown(remaining);
+      }
+    }
+  }, [partnershipId]);
 
   const handleMoodSelect = async (mood: string) => {
     setMyMood(mood);
@@ -329,7 +362,7 @@ export default function PlanetScreen() {
           styles.orbitDotB,
           { backgroundColor: MOOD_COLORS[partnerMood] || MOOD_COLORS.happy },
         ]}
-        onPress={showPartnerTooltip}
+        onPress={handlePartnerStarPress}
       />
 
       {/* Partner mood tooltip */}
@@ -344,6 +377,13 @@ export default function PlanetScreen() {
         currentMood={myMood}
         onSelect={handleMoodSelect}
         onClose={() => setMoodOverlayVisible(false)}
+      />
+
+      <AffectionOverlay
+        visible={affectionOverlayVisible}
+        cooldownSeconds={affectionCooldown}
+        onSend={handleAffectionSend}
+        onClose={() => setAffectionOverlayVisible(false)}
       />
     </View>
   );
