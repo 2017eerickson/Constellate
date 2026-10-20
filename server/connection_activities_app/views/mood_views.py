@@ -48,13 +48,13 @@ class SetMoodView(APIView):
         return Response({
             'initiator': {
                 'user': partnership.initiator_id,
-                'mood': initiator_mood.mood,
-                'timestamp': initiator_mood.timestamp,
+                'mood': initiator_mood.mood if initiator_mood else 'happy',
+                'timestamp': initiator_mood.timestamp if initiator_mood else None,
             },
             'partner': {
                 'user': partnership.partner_id,
-                'mood': partner_mood.mood,
-                'timestamp': partner_mood.timestamp,
+                'mood': partner_mood.mood if partner_mood else 'happy',
+                'timestamp': partner_mood.timestamp if partner_mood else None,
             },
         })
 

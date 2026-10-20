@@ -23,3 +23,13 @@ def create_partnership_gamification(sender, instance, created, **kwargs):
 
         Stardust.objects.create(partnership=instance)
         Streak.objects.create(partnership=instance)
+
+
+@receiver(post_save, sender='relationship_app.Partnership')
+def create_partnership_moods(sender, instance, created, **kwargs):
+    if created:
+        from connection_activities_app.models import MoodSetting
+
+        MoodSetting.objects.create(user=instance.initiator, partnership=instance)
+        if instance.initiator != instance.partner:
+            MoodSetting.objects.create(user=instance.partner, partnership=instance)
