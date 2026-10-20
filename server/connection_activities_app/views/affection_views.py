@@ -9,7 +9,6 @@ from rest_framework.views import APIView
 from connection_activities_app.models import AffectionSending
 from connection_activities_app.serializers import AffectionSendingSerializer
 from connection_activities_app.views.utils import get_partnership
-from gamification_app.models import Stardust
 
 AFFECTION_STARDUST_REWARD = 10
 AFFECTION_COOLDOWN = timedelta(hours=1, minutes=11)
@@ -70,7 +69,7 @@ class SendAffectionView(APIView):
         serializer.save()
 
         # Award stardust to the partnership
-        stardust, _ = Stardust.objects.get_or_create(partnership=partnership)
+        stardust = partnership.stardust
         stardust.total += AFFECTION_STARDUST_REWARD
         stardust.save()
 
