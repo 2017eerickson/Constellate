@@ -3,4 +3,5 @@ from connection_activities_app.views.affection_views import (
     SendAffectionView,
     RetrieveAffectionsView,
     ReadAffectionView,
+    AffectionCooldownView,
 )

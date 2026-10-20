@@ -140,3 +140,36 @@ class ReadAffectionView(APIView):
 
         serializer = AffectionSendingSerializer(affection)
         return Response(serializer.data)
+
+
+class AffectionCooldownView(APIView):
+    """
+    SUMMARY:        Get remaining cooldown seconds before the user can send another affection.
+    ENDPOINT:       GET /api/v1/activities/<partnership_id>/affection/cooldown/
+    AUTHENTICATION: Bearer <access_token>
+    REQUEST BODY:   None
+    RETURN VALUE:   { "remaining_seconds": int }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, partnership_id):
+        partnership = get_partnership(request.user, partnership_id)
+
+        if not partnership:
+            return Response(
+                {'error': 'Partnership not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        last_affection = AffectionSending.objects.filter(
+            sender=request.user,
+            partnership=partnership,
+        ).order_by('-timestamp').first()
+
+        remaining = 0
+        if last_affection:
+            elapsed = timezone.now() - last_affection.timestamp
+            if elapsed < AFFECTION_COOLDOWN:
+                remaining = int((AFFECTION_COOLDOWN - elapsed).total_seconds())
+
+        return Response({'remaining_seconds': remaining})

@@ -22,7 +22,7 @@ import Animated, {
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { getPartnerships } from '../services/partnerships';
-import { getMoods, setMood, sendAffection } from '../services/activities';
+import { getMoods, setMood, sendAffection, getAffectionCooldown } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
 import { moderateScale } from '../styles/scale';
@@ -126,16 +126,19 @@ export default function PlanetScreen() {
   const handlePartnerStarPress = useCallback(() => {
     const now = Date.now();
     if (now - lastPartnerTap.current < DOUBLE_TAP_DELAY) {
-      // Double tap — open affection overlay
+      // Double tap — fetch cooldown then open affection overlay
       setPartnerTooltipVisible(false);
       if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
-      setAffectionOverlayVisible(true);
+      getAffectionCooldown(partnershipId)
+        .then((seconds) => setAffectionCooldown(seconds))
+        .catch(() => setAffectionCooldown(0))
+        .finally(() => setAffectionOverlayVisible(true));
     } else {
       // Single tap — show tooltip
       showPartnerTooltip();
     }
     lastPartnerTap.current = now;
-  }, [showPartnerTooltip]);
+  }, [showPartnerTooltip, partnershipId]);
 
   const handleAffectionSend = useCallback(async (type: AffectionType) => {
     try {

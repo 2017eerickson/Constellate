@@ -44,3 +44,12 @@ export async function readAffection(
   );
   return data;
 }
+
+export async function getAffectionCooldown(
+  partnershipId: number,
+): Promise<number> {
+  const { data } = await apiClient.get<{ remaining_seconds: number }>(
+    `/activities/${partnershipId}/affection/cooldown/`,
+  );
+  return data.remaining_seconds;
+}
