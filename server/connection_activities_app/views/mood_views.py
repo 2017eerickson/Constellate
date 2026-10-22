@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from connection_activities_app.models import MoodSetting
 from connection_activities_app.serializers import MoodSettingSerializer
+from connection_activities_app.views.streak_helpers import record_streak_activity
 from connection_activities_app.views.utils import get_partnership
 from gamification_app.models import Stardust
 
@@ -96,4 +97,14 @@ class SetMoodView(APIView):
         stardust.total += MOOD_STARDUST_REWARD
         stardust.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        streak = record_streak_activity(request.user, partnership)
+
+        return Response({
+            **serializer.data,
+            'stardust': stardust.total,
+            'streak': {
+                'current_count': streak.current_count,
+                'longest_count': streak.longest_count,
+                'last_completed_at': streak.last_completed_at,
+            },
+        }, status=status.HTTP_201_CREATED)

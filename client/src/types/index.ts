@@ -64,6 +64,11 @@ export interface Affection {
   timestamp: string;
 }
 
+export interface ActivityResponse {
+  stardust: number;
+  streak: Streak;
+}
+
 export interface AffectionCooldownError {
   error: string;
   remaining_seconds: number;

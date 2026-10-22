@@ -148,11 +148,11 @@ export default function PlanetScreen() {
 
   const handleAffectionSend = useCallback(async (type: AffectionType) => {
     try {
-      await sendAffection(partnershipId, type);
+      const res = await sendAffection(partnershipId, type);
       // 1h 11m = 4260 seconds
       setAffectionCooldown(4260);
       setPartnership((prev) =>
-        prev ? { ...prev, stardust: prev.stardust + 10 } : prev
+        prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
       );
     } catch (err: any) {
       const remaining = err?.response?.data?.remaining_seconds;
@@ -165,9 +165,9 @@ export default function PlanetScreen() {
   const handleMoodSelect = async (mood: string) => {
     setMyMood(mood);
     try {
-      await setMood(partnershipId, mood);
+      const res = await setMood(partnershipId, mood);
       setPartnership((prev) =>
-        prev ? { ...prev, stardust: prev.stardust + 5 } : prev
+        prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
       );
     } catch {
       // revert on failure

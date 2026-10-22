@@ -1,5 +1,5 @@
 import apiClient from '../api/client';
-import { MoodResponse, Affection, AffectionType } from '../types';
+import { MoodResponse, Affection, AffectionType, ActivityResponse } from '../types';
 
 export async function getMoods(partnershipId: number): Promise<MoodResponse> {
   const { data } = await apiClient.get<MoodResponse>(
@@ -11,15 +11,19 @@ export async function getMoods(partnershipId: number): Promise<MoodResponse> {
 export async function setMood(
   partnershipId: number,
   mood: string,
-): Promise<void> {
-  await apiClient.post(`/activities/${partnershipId}/mood/`, { mood });
+): Promise<ActivityResponse> {
+  const { data } = await apiClient.post<ActivityResponse>(
+    `/activities/${partnershipId}/mood/`,
+    { mood },
+  );
+  return data;
 }
 
 export async function sendAffection(
   partnershipId: number,
   type: AffectionType,
-): Promise<Affection> {
-  const { data } = await apiClient.post<Affection>(
+): Promise<Affection & ActivityResponse> {
+  const { data } = await apiClient.post<Affection & ActivityResponse>(
     `/activities/${partnershipId}/affection/send/`,
     { type },
   );
