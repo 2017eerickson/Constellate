@@ -151,6 +151,9 @@ export default function PlanetScreen() {
       await sendAffection(partnershipId, type);
       // 1h 11m = 4260 seconds
       setAffectionCooldown(4260);
+      setPartnership((prev) =>
+        prev ? { ...prev, stardust: prev.stardust + 10 } : prev
+      );
     } catch (err: any) {
       const remaining = err?.response?.data?.remaining_seconds;
       if (remaining) {
@@ -163,6 +166,9 @@ export default function PlanetScreen() {
     setMyMood(mood);
     try {
       await setMood(partnershipId, mood);
+      setPartnership((prev) =>
+        prev ? { ...prev, stardust: prev.stardust + 5 } : prev
+      );
     } catch {
       // revert on failure
     }
