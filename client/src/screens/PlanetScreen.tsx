@@ -22,7 +22,7 @@ import Animated, {
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { getPartnerships } from '../services/partnerships';
-import { getMoods, setMood, sendAffection, getAffectionCooldown, getAffections, readAffection } from '../services/activities';
+import { getMoods, setMood, sendAffection, getAffectionCooldown, getAffections, readAffection, markMoodRead, getUnreadCounts } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
 import { moderateScale } from '../styles/scale';
@@ -76,14 +76,36 @@ export default function PlanetScreen() {
   const [affectionCooldown, setAffectionCooldown] = useState(0);
   const [unreadAffections, setUnreadAffections] = useState<Affection[]>([]);
   const [partnerTooltipVisible, setPartnerTooltipVisible] = useState(false);
+  const [moodUnseen, setMoodUnseen] = useState(false);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPartnerTap = useRef<number>(0);
+
+  // Pulse animation for unseen mood glow
+  const partnerPulse = useSharedValue(0);
+  useEffect(() => {
+    partnerPulse.value = withRepeat(
+      withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
+  }, [partnerPulse]);
+
+  const partnerGlowStyle = useAnimatedStyle(() => ({
+    opacity: 0.4 + partnerPulse.value * 0.5,
+    transform: [{ scale: 1 + partnerPulse.value * 0.4 }],
+  }));
 
   const showPartnerTooltip = useCallback(() => {
     if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
     setPartnerTooltipVisible(true);
     tooltipTimer.current = setTimeout(() => setPartnerTooltipVisible(false), 5000);
-  }, []);
+
+    // Mark mood as read when tooltip is shown
+    if (moodUnseen) {
+      setMoodUnseen(false);
+      markMoodRead(partnershipId).catch(() => {});
+    }
+  }, [moodUnseen, partnershipId]);
 
   useEffect(() => {
     return () => {
@@ -124,6 +146,13 @@ export default function PlanetScreen() {
 
     getAffections(partnershipId)
       .then((affections) => setUnreadAffections(affections))
+      .catch(() => {});
+
+    getUnreadCounts()
+      .then((counts) => {
+        const c = counts[String(partnershipId)];
+        if (c && c.moods > 0) setMoodUnseen(true);
+      })
       .catch(() => {});
   }, [partnershipId, user]);
 
@@ -379,6 +408,19 @@ export default function PlanetScreen() {
         onPress={() => setMoodOverlayVisible(true)}
       />
 
+      {/* Partner star glow (unseen mood) */}
+      {moodUnseen && (
+        <Animated.View
+          style={[
+            styles.orbitGlow,
+            styles.orbitGlowB,
+            { backgroundColor: colors.unreadGlow },
+            partnerGlowStyle,
+          ]}
+          pointerEvents="none"
+        />
+      )}
+
       {/* Partner star */}
       <Pressable
         style={[
@@ -482,6 +524,16 @@ const styles = StyleSheet.create({
   spinCanvas: {
     width: SPIN_RADIUS * 4,
     height: SPIN_RADIUS * 2,
+  },
+  orbitGlow: {
+    position: 'absolute',
+    width: ORBIT_DOT_SIZE * 2.2,
+    height: ORBIT_DOT_SIZE * 2.2,
+    borderRadius: ORBIT_DOT_SIZE * 1.1,
+  },
+  orbitGlowB: {
+    left: ORBIT_L_X - ORBIT_DOT_SIZE * 1.1,
+    top: ORBIT_L_Y - ORBIT_DOT_SIZE * 1.1,
   },
   orbitDot: {
     position: 'absolute',

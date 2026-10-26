@@ -57,3 +57,14 @@ export async function getAffectionCooldown(
   );
   return data.remaining_seconds;
 }
+
+export type UnreadCounts = Record<string, { affections: number; moods: number }>;
+
+export async function getUnreadCounts(): Promise<UnreadCounts> {
+  const { data } = await apiClient.get<UnreadCounts>('/activities/unread-counts/');
+  return data;
+}
+
+export async function markMoodRead(partnershipId: number): Promise<void> {
+  await apiClient.patch(`/activities/${partnershipId}/mood/read/`);
+}

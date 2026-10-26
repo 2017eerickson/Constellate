@@ -25,4 +25,5 @@ export const colors = {
   lineMuted: 'rgba(180, 160, 220, 0.35)',
   lineGlow: 'rgba(180, 160, 220, 0.15)',
   tooltipBg: 'rgba(20, 15, 40, 0.9)',
+  unreadGlow: '#ffffff',
 };
