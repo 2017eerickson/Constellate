@@ -116,7 +116,7 @@ export default function ConstellationScreen() {
 
   // Skia-compatible derived values for the pulse glow
   const pulseOpacity = useDerivedValue(() => 0.3 + pulse.value * 0.5);
-  const pulseRadius = useDerivedValue(() => GLOW_RADIUS + pulse.value * 14);
+  const pulseRadius = useDerivedValue(() => GLOW_RADIUS + pulse.value * 3);
 
   // Zoom state
   const scale = useSharedValue(1);
@@ -342,7 +342,7 @@ export default function ConstellationScreen() {
               color={colors.unreadGlow}
               opacity={pulseOpacity}
             >
-              <Blur blur={8} />
+              <Blur blur={16} />
             </Circle>
           ))}
         </Canvas>
