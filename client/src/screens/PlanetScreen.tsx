@@ -14,6 +14,7 @@ import {
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Animated, {
   useSharedValue,
+  useDerivedValue,
   useAnimatedStyle,
   withRepeat,
   withTiming,
@@ -76,7 +77,7 @@ export default function PlanetScreen() {
   const [affectionCooldown, setAffectionCooldown] = useState(0);
   const [unreadAffections, setUnreadAffections] = useState<Affection[]>([]);
   const [partnerTooltipVisible, setPartnerTooltipVisible] = useState(false);
-  const [moodUnseen, setMoodUnseen] = useState(false);
+  const [moodUnseen, setMoodUnseen] = useState(true); // TODO: revert hardcode
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPartnerTap = useRef<number>(0);
 
@@ -90,10 +91,8 @@ export default function PlanetScreen() {
     );
   }, [partnerPulse]);
 
-  const partnerGlowStyle = useAnimatedStyle(() => ({
-    opacity: 0.4 + partnerPulse.value * 0.5,
-    transform: [{ scale: 1 + partnerPulse.value * 0.4 }],
-  }));
+  const partnerGlowOpacity = useDerivedValue(() => 0.3 + partnerPulse.value * 1.5);
+  const partnerGlowRadius = useDerivedValue(() => ORBIT_DOT_SIZE / 2 + partnerPulse.value * 3);
 
   const showPartnerTooltip = useCallback(() => {
     if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
@@ -338,6 +337,7 @@ export default function PlanetScreen() {
           color="rgba(255, 255, 255, 0.3)"
         />
 
+
       </Canvas>
 
       {/* Circular mask for spinning surface */}
@@ -408,17 +408,21 @@ export default function PlanetScreen() {
         onPress={() => setMoodOverlayVisible(true)}
       />
 
-      {/* Partner star glow (unseen mood) */}
+      {/* Partner star unseen glow */}
       {moodUnseen && (
-        <Animated.View
-          style={[
-            styles.orbitGlow,
-            styles.orbitGlowB,
-            { backgroundColor: colors.unreadGlow },
-            partnerGlowStyle,
-          ]}
-          pointerEvents="none"
-        />
+        <View style={styles.partnerGlowWrap} pointerEvents="none">
+          <Canvas style={styles.partnerGlowCanvas}>
+            <Circle
+              cx={ORBIT_DOT_SIZE * 2}
+              cy={ORBIT_DOT_SIZE * 2}
+              r={partnerGlowRadius}
+              color={colors.unreadGlow}
+              opacity={partnerGlowOpacity}
+            >
+              <Blur blur={16} />
+            </Circle>
+          </Canvas>
+        </View>
       )}
 
       {/* Partner star */}
@@ -525,15 +529,16 @@ const styles = StyleSheet.create({
     width: SPIN_RADIUS * 4,
     height: SPIN_RADIUS * 2,
   },
-  orbitGlow: {
+  partnerGlowWrap: {
     position: 'absolute',
-    width: ORBIT_DOT_SIZE * 2.2,
-    height: ORBIT_DOT_SIZE * 2.2,
-    borderRadius: ORBIT_DOT_SIZE * 1.1,
+    left: ORBIT_L_X - ORBIT_DOT_SIZE * 2,
+    top: ORBIT_L_Y - ORBIT_DOT_SIZE * 2,
+    width: ORBIT_DOT_SIZE * 4,
+    height: ORBIT_DOT_SIZE * 4,
   },
-  orbitGlowB: {
-    left: ORBIT_L_X - ORBIT_DOT_SIZE * 1.1,
-    top: ORBIT_L_Y - ORBIT_DOT_SIZE * 1.1,
+  partnerGlowCanvas: {
+    width: ORBIT_DOT_SIZE * 4,
+    height: ORBIT_DOT_SIZE * 4,
   },
   orbitDot: {
     position: 'absolute',
