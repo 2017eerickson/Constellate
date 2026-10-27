@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@babel/plugin-transform-class-properties": "^8.0.1"
+  }
+}

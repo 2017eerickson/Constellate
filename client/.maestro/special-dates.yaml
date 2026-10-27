@@ -1,0 +1,77 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    id: "home-tab"
+    optional: true
+- tapOn:
+    id: "sign-out-button"
+    optional: true
+- tapOn:
+    id: "email-input"
+- inputText: "userA@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- tapOn: "Not Now"
+- assertVisible: "Hey, PartnerA!"
+
+# Navigate to partner detail
+- tapOn:
+    id: "partners-tab"
+- tapOn:
+    id: "partner-name-PartnerB"
+
+# Verify default special dates created on acceptance
+- assertVisible: "Anniversary"
+
+# Scroll down to the add form
+- swipe:
+    start: "50%, 80%"
+    end: "50%, 20%"
+
+# Add a special date
+- tapOn:
+    id: "add-date-title-input"
+- eraseText: 20
+- inputText: "First Trip"
+- tapOn: "Special Dates"
+- tapOn:
+    id: "add-date-input"
+- eraseText: 20
+- inputText: "2025-06-15"
+- tapOn: "Special Dates"
+- tapOn:
+    id: "add-date-button"
+
+# Scroll up to verify date was added
+- swipe:
+    start: "50%, 20%"
+    end: "50%, 80%"
+- assertVisible: "First Trip"
+
+# Edit the special date
+- tapOn:
+    id: "edit-dates-button"
+# Tap the title input containing "First Trip" text and retype
+- tapOn:
+    text: "First Trip"
+- eraseText: 10
+- inputText: "Our First Trip"
+- tapOn: "Special Dates"
+- tapOn:
+    id: "save-dates-button"
+- assertVisible: "Our First Trip"
+
+# Delete the special date
+- tapOn:
+    id: "edit-dates-button"
+- tapOn:
+    id: "delete-date-button"
+- tapOn: "Delete"
+- tapOn:
+    id: "save-dates-button"
+- assertNotVisible: 
+    text: "Anniversary"

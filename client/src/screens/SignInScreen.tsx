@@ -10,6 +10,10 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { ActionButton } from '../components';
+import { scale, moderateScale } from '../styles/scale';
+import { colors } from '../styles/colors';
+import { commonStyles } from '../styles/common';
 
 export default function SignInScreen() {
   const { signIn, signInWithEmail, register } = useAuth();
@@ -62,32 +66,34 @@ export default function SignInScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={commonStyles.screenCentered}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Text style={styles.title}>Constellate</Text>
-      <Text style={styles.subtitle}>Your relationships, gamified</Text>
+      <Text style={[commonStyles.subtitle, styles.subtitleSpacing]}>Your relationships, gamified</Text>
 
-      <TouchableOpacity
-        style={[styles.googleButton, busy && styles.buttonDisabled]}
+      <ActionButton
+        variant="google"
         onPress={handleGoogleSignIn}
+        text="Sign in with Google"
+        testID="google-signin-button"
+        loadingText="Signing in..."
+        loading={isGoogleSigningIn}
         disabled={busy}
-      >
-        <Text style={styles.googleButtonText}>
-          {isGoogleSigningIn ? 'Signing in...' : 'Sign in with Google'}
-        </Text>
-      </TouchableOpacity>
+        style={styles.googleButton}
+      />
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
         <Text style={styles.dividerText}>or</Text>
         <View style={styles.dividerLine} />
       </View>
-      
+
       {isRegisterMode && (
         <TextInput
-          style={styles.input}
+          style={commonStyles.inputBordered}
           placeholder="First Name"
+          testID="first-name-input"
           value={firstName}
           onChangeText={setFirstName}
           autoCapitalize="words"
@@ -96,8 +102,9 @@ export default function SignInScreen() {
       )}
 
       <TextInput
-        style={styles.input}
+        style={commonStyles.inputBordered}
         placeholder="Email"
+        testID="email-input"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -107,27 +114,27 @@ export default function SignInScreen() {
       />
 
       <TextInput
-        style={styles.input}
+        style={commonStyles.inputBordered}
         placeholder="Password"
+        testID="password-input"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         editable={!busy}
       />
 
-      <TouchableOpacity
-        style={[styles.emailButton, busy && styles.buttonDisabled]}
+      <ActionButton
         onPress={handleEmailSubmit}
+        text={isRegisterMode ? 'Create Account' : 'Sign In'}
+        testID="email-submit-button"
+        loadingText={isRegisterMode ? 'Creating account...' : 'Signing in...'}
+        loading={isSubmitting}
         disabled={busy}
-      >
-        <Text style={styles.emailButtonText}>
-          {isSubmitting
-            ? (isRegisterMode ? 'Creating account...' : 'Signing in...')
-            : (isRegisterMode ? 'Create Account' : 'Sign In')}
-        </Text>
-      </TouchableOpacity>
+        style={styles.emailButton}
+      />
 
       <TouchableOpacity
+        testID="toggle-auth-mode"
         onPress={() => setIsRegisterMode(!isRegisterMode)}
         disabled={busy}
       >
@@ -142,81 +149,46 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 20,
-  },
   title: {
-    fontSize: 36,
+    fontSize: moderateScale(36),
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: moderateScale(8),
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 40,
+  subtitleSpacing: {
+    marginBottom: scale(40),
   },
   googleButton: {
-    backgroundColor: '#4285F4',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 8,
     width: '80%',
-    alignItems: 'center',
-  },
-  googleButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    paddingHorizontal: scale(32),
+    paddingVertical: scale(14),
+    padding: undefined,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '80%',
-    marginVertical: 24,
+    marginVertical: scale(24),
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: colors.borderLight,
   },
   dividerText: {
-    marginHorizontal: 12,
-    color: '#999',
-    fontSize: 14,
-  },
-  input: {
-    width: '80%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 14,
-    fontSize: 16,
-    marginBottom: 12,
+    marginHorizontal: scale(12),
+    color: colors.textMuted,
+    fontSize: moderateScale(14),
   },
   emailButton: {
-    backgroundColor: '#000',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 8,
     width: '80%',
-    alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  emailButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
+    paddingHorizontal: scale(32),
+    paddingVertical: scale(14),
+    marginTop: scale(4),
+    marginBottom: scale(16),
+    padding: undefined,
   },
   toggleText: {
-    color: '#4285F4',
-    fontSize: 14,
+    color: colors.googleBlue,
+    fontSize: moderateScale(14),
   },
 });

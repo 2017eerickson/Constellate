@@ -3,20 +3,12 @@ from django.db import models
 
 
 class Stardust(models.Model):
-    partnership = models.ForeignKey(
+    partnership = models.OneToOneField(
         'relationship_app.Partnership',
         on_delete=models.CASCADE,
         related_name='stardust',
     )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='stardust',
-    )
     total = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        unique_together = ('partnership', 'user')
 
 
 class Streak(models.Model):

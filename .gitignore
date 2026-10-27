@@ -2,3 +2,5 @@
 __pycache__
 postgres_data/
  __pycache__/
+node_modules/__pycache__/
+*.pyc
