@@ -42,6 +42,38 @@ export interface Partnership {
   special_dates: SpecialDate[];
 }
 
+export interface MoodPartner {
+  user: number;
+  mood: string;
+  timestamp: string | null;
+}
+
+export interface MoodResponse {
+  initiator: MoodPartner;
+  partner: MoodPartner;
+}
+
+export type AffectionType = 'kiss' | 'hug' | 'gratitude' | 'poke' | 'bite' | 'tease';
+
+export interface Affection {
+  id: number;
+  sender: number;
+  partnership: number;
+  type: AffectionType;
+  read: boolean;
+  timestamp: string;
+}
+
+export interface ActivityResponse {
+  stardust: number;
+  streak: Streak;
+}
+
+export interface AffectionCooldownError {
+  error: string;
+  remaining_seconds: number;
+}
+
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;

@@ -1,0 +1,16 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    id: "sign-out-button"
+    optional: true
+- tapOn:
+    id: "email-input"
+- inputText: "testuser@example.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- tapOn: "Not Now"
+- assertVisible: "Hey, TestUser!"
