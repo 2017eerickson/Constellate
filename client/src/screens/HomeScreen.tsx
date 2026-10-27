@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
 import { Card, ActionButton } from '../components';
-import { scale, moderateScale } from '../styles/scale';
+import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';
 
+type MainStackParamList = {
+  Tabs: undefined;
+  Settings: undefined;
+};
+
 export default function HomeScreen() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
   async function handleCopy() {
     if (user?.partner_code) {
@@ -19,16 +28,15 @@ export default function HomeScreen() {
     }
   }
 
-  async function handleSignOut() {
-    try {
-      await signOut();
-    } catch {
-      Alert.alert('Error', 'Failed to sign out');
-    }
-  }
-
   return (
     <View style={commonStyles.screenCentered}>
+      <TouchableOpacity
+        style={styles.settingsButton}
+        onPress={() => navigation.navigate('Settings')}
+      >
+        <MaterialCommunityIcons name="cog-outline" size={scale(26)} color={colors.textSecondary} />
+      </TouchableOpacity>
+
       <Text style={styles.greeting}>Hey, {user?.first_name}!</Text>
 
       <Card style={styles.card}>
@@ -44,19 +52,17 @@ export default function HomeScreen() {
           style={styles.copyButton}
         />
       </Card>
-
-      <ActionButton
-        variant="secondary"
-        onPress={handleSignOut}
-        testID="sign-out-button"
-        text="Sign Out"
-        style={styles.signOutButton}
-      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  settingsButton: {
+    position: 'absolute',
+    top: verticalScale(50),
+    right: scale(20),
+    zIndex: 1,
+  },
   greeting: {
     fontSize: moderateScale(28),
     fontWeight: 'bold',
@@ -93,12 +99,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(12),
     paddingVertical: scale(6),
     borderRadius: scale(6),
-    padding: undefined,
-  },
-  signOutButton: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: scale(24),
-    paddingVertical: scale(12),
     padding: undefined,
   },
 });
