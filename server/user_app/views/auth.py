@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -144,3 +145,19 @@ class VerifyEmailView(APIView):
         user.save(update_fields=['is_verified'])
 
         return Response({'message': 'Email verified successfully'})
+
+
+class DeactivateAccountView(APIView):
+    """
+    SUMMARY:        Deactivates the authenticated user's account.
+    ENDPOINT:       PATCH /api/v1/auth/deactivate/
+    AUTHENTICATION: Bearer token (JWT)
+    RETURN VALUE:   200 with success message
+    """
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        user = request.user
+        user.is_active = False
+        user.save(update_fields=['is_active'])
+        return Response({'message': 'Account deactivated successfully'})

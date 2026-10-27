@@ -3,6 +3,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import Constants from 'expo-constants';
 import { useAuth } from '../context/AuthContext';
+import { deactivateAccount } from '../services/auth';
 import { Card, ActionButton, SectionHeader } from '../components';
 import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
@@ -27,12 +28,26 @@ export default function SettingsScreen() {
     }
   }
 
-  function handleDeactivate() {
-    Alert.alert('Deactivate Account', 'This feature is coming soon.');
-  }
-
   function handleDelete() {
-    Alert.alert('Delete Account', 'This feature is coming soon.');
+    Alert.alert(
+      'Delete Account',
+      'Are you sure? This will deactivate your account and sign you out.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deactivateAccount();
+              await signOut();
+            } catch {
+              Alert.alert('Error', 'Failed to delete account');
+            }
+          },
+        },
+      ],
+    );
   }
 
   return (
@@ -65,12 +80,6 @@ export default function SettingsScreen() {
 
       <SectionHeader title="Account" />
       <Card>
-        <ActionButton
-          variant="secondary"
-          onPress={handleDeactivate}
-          text="Deactivate Account"
-          style={styles.accountButton}
-        />
         <ActionButton
           variant="secondary"
           onPress={handleDelete}
@@ -152,9 +161,6 @@ const styles = StyleSheet.create({
     paddingVertical: scale(4),
     borderRadius: scale(6),
     padding: undefined,
-  },
-  accountButton: {
-    marginBottom: scale(10),
   },
   deleteButton: {
     backgroundColor: 'transparent',

@@ -3,6 +3,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from user_app.views import (
     AdminDeleteUserView,
+    DeactivateAccountView,
     ForgotPasswordView,
     GoogleAuthView,
     LoginView,
@@ -25,5 +26,6 @@ urlpatterns = [
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('auth/forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
     path('auth/reset-password/', ResetPasswordView.as_view(), name='reset-password'),
+    path('auth/deactivate/', DeactivateAccountView.as_view(), name='deactivate-account'),
     path('admin/<int:user_id>/', AdminDeleteUserView.as_view(), name='admin-delete-user'),
 ]
