@@ -7,14 +7,17 @@ import Animated, {
   FadeOut,
   runOnJS,
   useSharedValue,
+  useDerivedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
+  withRepeat,
   Easing,
 } from 'react-native-reanimated';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getPartnerships } from '../services/partnerships';
+import { getUnreadCounts, UnreadCounts } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
 import { moderateScale } from '../styles/scale';
@@ -46,11 +49,13 @@ interface StarData {
   isSoulmate: boolean;
   label: string;
   relation: string;
+  hasUnread: boolean;
 }
 
 function layoutStars(
   partnerships: Partnership[],
   userId: number,
+  unreadCounts: UnreadCounts,
 ): StarData[] {
   const soulmate = partnerships.find((p) => p.relation === 'soulmate');
   const others = partnerships.filter(
@@ -67,6 +72,7 @@ function layoutStars(
       isSoulmate: true,
       label: 'You',
       relation: 'soulmate',
+      hasUnread: false,
     });
   }
 
@@ -75,6 +81,7 @@ function layoutStars(
     const angle = (2 * Math.PI * i) / Math.max(count, 1) + Math.PI / 6;
     const radius = ORBIT_RADIUS_MIN + Math.random() * (ORBIT_RADIUS_MAX - ORBIT_RADIUS_MIN);
     const partnerUser = p.initiator.id === userId ? p.partner : p.initiator;
+    const uc = unreadCounts[String(p.id)];
     stars.push({
       partnership: p,
       x: CENTER.x + Math.cos(angle) * radius,
@@ -82,6 +89,7 @@ function layoutStars(
       isSoulmate: false,
       label: partnerUser.first_name || 'Partner',
       relation: p.relation || 'partner',
+      hasUnread: uc ? (uc.affections > 0 || uc.moods > 0) : false,
     });
   });
 
@@ -92,8 +100,23 @@ export default function ConstellationScreen() {
   const { user } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const [partnerships, setPartnerships] = useState<Partnership[]>([]);
+  const [unreadCounts, setUnreadCounts] = useState<UnreadCounts>({});
   const [selectedStar, setSelectedStar] = useState<StarData | null>(null);
   const starsRef = useRef<StarData[]>([]);
+
+  // Pulse animation for unread stars (oscillates 0 → 1 → 0 continuously)
+  const pulse = useSharedValue(0);
+  useEffect(() => {
+    pulse.value = withRepeat(
+      withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
+  }, [pulse]);
+
+  // Skia-compatible derived values for the pulse glow
+  const pulseOpacity = useDerivedValue(() => 0.3 + pulse.value * 0.5);
+  const pulseRadius = useDerivedValue(() => GLOW_RADIUS + pulse.value * 3);
 
   // Zoom state
   const scale = useSharedValue(1);
@@ -106,18 +129,21 @@ export default function ConstellationScreen() {
   const selectedStarY = useSharedValue(0);
   const selectedPartnershipId = useSharedValue(0);
 
-  useEffect(() => {
-    getPartnerships()
-      .then(setPartnerships)
-      .catch(() => {});
+  const fetchData = useCallback(() => {
+    getPartnerships().then(setPartnerships).catch(() => {});
+    getUnreadCounts().then(setUnreadCounts).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const stars = useMemo(() => {
     if (!user || partnerships.length === 0) return [];
-    const laid = layoutStars(partnerships, user.id);
+    const laid = layoutStars(partnerships, user.id, unreadCounts);
     starsRef.current = laid;
     return laid;
-  }, [partnerships, user]);
+  }, [partnerships, user, unreadCounts]);
 
   const navigateToPlanet = useCallback(
     (partnershipId: number) => {
@@ -126,7 +152,7 @@ export default function ConstellationScreen() {
     [navigation],
   );
 
-  // Reset zoom/overlay only when this screen regains focus (user navigates back)
+  // Reset zoom/overlay and refetch unread counts when screen regains focus
   useFocusEffect(
     useCallback(() => {
       scale.value = 1;
@@ -137,6 +163,7 @@ export default function ConstellationScreen() {
       selectedStarY.value = 0;
       selectedPartnershipId.value = 0;
       setSelectedStar(null);
+      getUnreadCounts().then(setUnreadCounts).catch(() => {});
     }, [scale, targetX, targetY, glowOverlay, selectedStarX, selectedStarY, selectedPartnershipId]),
   );
 
@@ -285,7 +312,7 @@ export default function ConstellationScreen() {
           {/* Stars */}
           {stars.map((star) => (
             <React.Fragment key={`star-${star.partnership.id}`}>
-              {/* Glow */}
+              {/* Default glow */}
               <Circle
                 cx={star.x}
                 cy={star.y}
@@ -303,6 +330,20 @@ export default function ConstellationScreen() {
                 color={star.isSoulmate ? colors.soulmateGlow : colors.starCore}
               />
             </React.Fragment>
+          ))}
+
+          {/* Unread pulse glow — separate layer so Skia animates the shared values */}
+          {stars.filter((s) => s.hasUnread).map((star) => (
+            <Circle
+              key={`unread-${star.partnership.id}`}
+              cx={star.x}
+              cy={star.y}
+              r={pulseRadius}
+              color={colors.unreadGlow}
+              opacity={pulseOpacity}
+            >
+              <Blur blur={16} />
+            </Circle>
           ))}
         </Canvas>
 

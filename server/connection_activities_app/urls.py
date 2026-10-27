@@ -2,6 +2,8 @@ from django.urls import path
 
 from connection_activities_app.views import (
     SetMoodView,
+    ReadMoodView,
+    UnreadCountsView,
     SendAffectionView,
     RetrieveAffectionsView,
     ReadAffectionView,
@@ -9,7 +11,9 @@ from connection_activities_app.views import (
 )
 
 urlpatterns = [
+    path('unread-counts/', UnreadCountsView.as_view(), name='unread-counts'),
     path('<int:partnership_id>/mood/', SetMoodView.as_view(), name='set-mood'),
+    path('<int:partnership_id>/mood/read/', ReadMoodView.as_view(), name='read-mood'),
     path('<int:partnership_id>/affection/', RetrieveAffectionsView.as_view(), name='retrieve-affections'),
     path('<int:partnership_id>/affection/send/', SendAffectionView.as_view(), name='send-affection'),
     path('<int:partnership_id>/affection/cooldown/', AffectionCooldownView.as_view(), name='affection-cooldown'),

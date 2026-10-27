@@ -33,4 +33,5 @@ class MoodSetting(models.Model):
         choices=MoodChoices.choices,
         default=MoodChoices.HAPPY,
     )
+    seen = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)

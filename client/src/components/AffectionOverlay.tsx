@@ -5,31 +5,22 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions,
 } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { colors } from '../styles/colors';
 import { moderateScale } from '../styles/scale';
+import GridPickerOverlay from './GridPickerOverlay';
+import type { GridItem } from './GridPickerOverlay';
 import type { AffectionType } from '../types';
 
-const { width: SCREEN_W } = Dimensions.get('window');
-
-const AFFECTION_COLORS: Record<AffectionType, string> = {
-  kiss: '#FF6B8A',
-  hug: '#FFB74D',
-  gratitude: '#A8D88E',
-  poke: '#5DADE2',
-  bite: '#E85D4A',
-  tease: '#C4A6E8',
-};
-
-const AFFECTION_TYPES = Object.keys(AFFECTION_COLORS) as AffectionType[];
-
-const GRID_COLUMNS = 3;
-const GRID_GAP = moderateScale(12);
-const GRID_PADDING = moderateScale(24);
-const ITEM_SIZE =
-  (SCREEN_W - GRID_PADDING * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
+const AFFECTION_ITEMS: GridItem[] = [
+  { key: 'kiss', color: '#FF6B8A' },
+  { key: 'hug', color: '#FFB74D' },
+  { key: 'gratitude', color: '#A8D88E' },
+  { key: 'poke', color: '#5DADE2' },
+  { key: 'bite', color: '#E85D4A' },
+  { key: 'tease', color: '#C4A6E8' },
+];
 
 interface AffectionOverlayProps {
   visible: boolean;
@@ -58,12 +49,10 @@ export default function AffectionOverlay({
 
   const onCooldown = remaining > 0;
 
-  // Sync remaining when cooldownSeconds changes (e.g. after sending)
   useEffect(() => {
     setRemaining(cooldownSeconds);
   }, [cooldownSeconds]);
 
-  // Live countdown tick
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (visible && remaining > 0) {
@@ -82,7 +71,6 @@ export default function AffectionOverlay({
     };
   }, [visible, remaining > 0]);
 
-  // Reset selection when overlay opens
   useEffect(() => {
     if (visible) setSelected(null);
   }, [visible]);
@@ -91,24 +79,23 @@ export default function AffectionOverlay({
     if (selected) onSend(selected);
   };
 
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>
-          <Pressable style={styles.closeBtn} onPress={onClose}>
-            <MaterialCommunityIcons
-              name="close"
-              size={moderateScale(24)}
-              color={colors.white}
-            />
-          </Pressable>
-
-          {onCooldown ? (
+  if (onCooldown) {
+    return (
+      <Modal
+        visible={visible}
+        transparent
+        animationType="slide"
+        onRequestClose={onClose}
+      >
+        <View style={styles.backdrop}>
+          <View style={styles.sheet}>
+            <Pressable style={styles.closeBtn} onPress={onClose}>
+              <MaterialCommunityIcons
+                name="close"
+                size={moderateScale(24)}
+                color={colors.white}
+              />
+            </Pressable>
             <View style={styles.cooldownContainer}>
               <Text style={styles.cooldownTimer}>
                 {formatCountdown(remaining)}
@@ -117,48 +104,29 @@ export default function AffectionOverlay({
                 come back soon to send more affection
               </Text>
             </View>
-          ) : (
-            <>
-              <Text style={styles.title}>Send affection</Text>
-
-              <View style={styles.grid}>
-                {AFFECTION_TYPES.map((type) => {
-                  const isSelected = type === selected;
-                  return (
-                    <Pressable
-                      key={type}
-                      style={[
-                        styles.item,
-                        { backgroundColor: AFFECTION_COLORS[type] },
-                        isSelected && styles.itemSelected,
-                      ]}
-                      onPress={() => setSelected(type)}
-                    >
-                      <Text
-                        style={[
-                          styles.itemLabel,
-                          isSelected && styles.itemLabelSelected,
-                        ]}
-                      >
-                        {type}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              <Pressable
-                style={[styles.sendBtn, !selected && styles.sendBtnDisabled]}
-                onPress={handleSend}
-                disabled={!selected}
-              >
-                <Text style={styles.sendBtnText}>Send</Text>
-              </Pressable>
-            </>
-          )}
+          </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+    );
+  }
+
+  return (
+    <GridPickerOverlay
+      visible={visible}
+      title="Send affection"
+      items={AFFECTION_ITEMS}
+      selectedKey={selected}
+      onSelect={(key) => setSelected(key as AffectionType)}
+      onClose={onClose}
+    >
+      <Pressable
+        style={[styles.sendBtn, !selected && styles.sendBtnDisabled]}
+        onPress={handleSend}
+        disabled={!selected}
+      >
+        <Text style={styles.sendBtnText}>Send</Text>
+      </Pressable>
+    </GridPickerOverlay>
   );
 }
 
@@ -172,46 +140,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.skyDark,
     borderTopLeftRadius: moderateScale(24),
     borderTopRightRadius: moderateScale(24),
-    paddingHorizontal: GRID_PADDING,
+    paddingHorizontal: moderateScale(24),
     paddingBottom: moderateScale(40),
     paddingTop: moderateScale(16),
   },
   closeBtn: {
     alignSelf: 'flex-end',
     padding: moderateScale(8),
-  },
-  title: {
-    color: colors.white,
-    fontSize: moderateScale(20),
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: moderateScale(20),
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: GRID_GAP,
-  },
-  item: {
-    width: ITEM_SIZE,
-    height: ITEM_SIZE * 0.6,
-    borderRadius: moderateScale(12),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  itemSelected: {
-    borderWidth: 3,
-    borderColor: colors.white,
-  },
-  itemLabel: {
-    color: 'rgba(0, 0, 0, 0.7)',
-    fontSize: moderateScale(13),
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
-  itemLabelSelected: {
-    color: '#000',
-    fontWeight: '800',
   },
   sendBtn: {
     marginTop: moderateScale(20),

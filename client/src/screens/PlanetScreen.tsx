@@ -14,6 +14,7 @@ import {
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Animated, {
   useSharedValue,
+  useDerivedValue,
   useAnimatedStyle,
   withRepeat,
   withTiming,
@@ -22,13 +23,14 @@ import Animated, {
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { getPartnerships } from '../services/partnerships';
-import { getMoods, setMood, sendAffection, getAffectionCooldown } from '../services/activities';
+import { getMoods, setMood, sendAffection, getAffectionCooldown, getAffections, readAffection, markMoodRead, getUnreadCounts } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
 import { moderateScale } from '../styles/scale';
 import MoodOverlay, { MOOD_COLORS } from '../components/MoodOverlay';
 import AffectionOverlay from '../components/AffectionOverlay';
-import type { Partnership, AffectionType } from '../types';
+import AffectionReceivedPopup from '../components/AffectionReceivedPopup';
+import type { Partnership, Affection, AffectionType } from '../types';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const PLANET_RADIUS = SCREEN_W * 0.22;
@@ -73,15 +75,36 @@ export default function PlanetScreen() {
   const [moodOverlayVisible, setMoodOverlayVisible] = useState(false);
   const [affectionOverlayVisible, setAffectionOverlayVisible] = useState(false);
   const [affectionCooldown, setAffectionCooldown] = useState(0);
+  const [unreadAffections, setUnreadAffections] = useState<Affection[]>([]);
   const [partnerTooltipVisible, setPartnerTooltipVisible] = useState(false);
+  const [moodUnseen, setMoodUnseen] = useState(true); // TODO: revert hardcode
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPartnerTap = useRef<number>(0);
+
+  // Pulse animation for unseen mood glow
+  const partnerPulse = useSharedValue(0);
+  useEffect(() => {
+    partnerPulse.value = withRepeat(
+      withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
+  }, [partnerPulse]);
+
+  const partnerGlowOpacity = useDerivedValue(() => 0.3 + partnerPulse.value * 1.5);
+  const partnerGlowRadius = useDerivedValue(() => ORBIT_DOT_SIZE / 2 + partnerPulse.value * 3);
 
   const showPartnerTooltip = useCallback(() => {
     if (tooltipTimer.current) clearTimeout(tooltipTimer.current);
     setPartnerTooltipVisible(true);
     tooltipTimer.current = setTimeout(() => setPartnerTooltipVisible(false), 5000);
-  }, []);
+
+    // Mark mood as read when tooltip is shown
+    if (moodUnseen) {
+      setMoodUnseen(false);
+      markMoodRead(partnershipId).catch(() => {});
+    }
+  }, [moodUnseen, partnershipId]);
 
   useEffect(() => {
     return () => {
@@ -119,6 +142,17 @@ export default function PlanetScreen() {
         setPartnerMood(isInitiator ? data.partner.mood : data.initiator.mood);
       })
       .catch(() => {});
+
+    getAffections(partnershipId)
+      .then((affections) => setUnreadAffections(affections))
+      .catch(() => {});
+
+    getUnreadCounts()
+      .then((counts) => {
+        const c = counts[String(partnershipId)];
+        if (c && c.moods > 0) setMoodUnseen(true);
+      })
+      .catch(() => {});
   }, [partnershipId, user]);
 
   const DOUBLE_TAP_DELAY = 300;
@@ -142,9 +176,12 @@ export default function PlanetScreen() {
 
   const handleAffectionSend = useCallback(async (type: AffectionType) => {
     try {
-      await sendAffection(partnershipId, type);
+      const res = await sendAffection(partnershipId, type);
       // 1h 11m = 4260 seconds
       setAffectionCooldown(4260);
+      setPartnership((prev) =>
+        prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
+      );
     } catch (err: any) {
       const remaining = err?.response?.data?.remaining_seconds;
       if (remaining) {
@@ -156,11 +193,23 @@ export default function PlanetScreen() {
   const handleMoodSelect = async (mood: string) => {
     setMyMood(mood);
     try {
-      await setMood(partnershipId, mood);
+      const res = await setMood(partnershipId, mood);
+      setPartnership((prev) =>
+        prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
+      );
     } catch {
       // revert on failure
     }
   };
+
+  const handleDismissAffection = useCallback(async () => {
+    const current = unreadAffections[0];
+    if (!current) return;
+    try {
+      await readAffection(partnershipId, current.id);
+    } catch {}
+    setUnreadAffections((prev) => prev.slice(1));
+  }, [unreadAffections, partnershipId]);
 
   const planetColors = getPlanetColors(partnershipId);
   const isSoulmate = partnership?.relation === 'soulmate';
@@ -288,6 +337,7 @@ export default function PlanetScreen() {
           color="rgba(255, 255, 255, 0.3)"
         />
 
+
       </Canvas>
 
       {/* Circular mask for spinning surface */}
@@ -358,6 +408,23 @@ export default function PlanetScreen() {
         onPress={() => setMoodOverlayVisible(true)}
       />
 
+      {/* Partner star unseen glow */}
+      {moodUnseen && (
+        <View style={styles.partnerGlowWrap} pointerEvents="none">
+          <Canvas style={styles.partnerGlowCanvas}>
+            <Circle
+              cx={ORBIT_DOT_SIZE * 2}
+              cy={ORBIT_DOT_SIZE * 2}
+              r={partnerGlowRadius}
+              color={colors.unreadGlow}
+              opacity={partnerGlowOpacity}
+            >
+              <Blur blur={16} />
+            </Circle>
+          </Canvas>
+        </View>
+      )}
+
       {/* Partner star */}
       <Pressable
         style={[
@@ -388,6 +455,14 @@ export default function PlanetScreen() {
         onSend={handleAffectionSend}
         onClose={() => setAffectionOverlayVisible(false)}
       />
+
+      {unreadAffections.length > 0 && (
+        <AffectionReceivedPopup
+          affection={unreadAffections[0]}
+          partnerName={partnerB}
+          onDismiss={handleDismissAffection}
+        />
+      )}
     </View>
   );
 }
@@ -453,6 +528,17 @@ const styles = StyleSheet.create({
   spinCanvas: {
     width: SPIN_RADIUS * 4,
     height: SPIN_RADIUS * 2,
+  },
+  partnerGlowWrap: {
+    position: 'absolute',
+    left: ORBIT_L_X - ORBIT_DOT_SIZE * 2,
+    top: ORBIT_L_Y - ORBIT_DOT_SIZE * 2,
+    width: ORBIT_DOT_SIZE * 4,
+    height: ORBIT_DOT_SIZE * 4,
+  },
+  partnerGlowCanvas: {
+    width: ORBIT_DOT_SIZE * 4,
+    height: ORBIT_DOT_SIZE * 4,
   },
   orbitDot: {
     position: 'absolute',
