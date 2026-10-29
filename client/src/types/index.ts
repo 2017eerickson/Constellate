@@ -74,6 +74,26 @@ export interface AffectionCooldownError {
   remaining_seconds: number;
 }
 
+export interface JournalQuestion {
+  id: number;
+  label: string;
+  question_text: string;
+}
+
+export interface JournalAnswer {
+  id: number;
+  answer_text: string;
+  created_at: string;
+}
+
+export interface JournalResponse {
+  partnership_question_id: number;
+  question: JournalQuestion;
+  my_answer: JournalAnswer | null;
+  partner_answer: JournalAnswer | null;
+  both_answered: boolean;
+}
+
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
