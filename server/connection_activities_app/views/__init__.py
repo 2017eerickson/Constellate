@@ -5,3 +5,8 @@ from connection_activities_app.views.affection_views import (
     ReadAffectionView,
     AffectionCooldownView,
 )
+from connection_activities_app.views.journal_views import (
+    CurrentQuestionView,
+    SubmitAnswerView,
+    SkipQuestionView,
+)
