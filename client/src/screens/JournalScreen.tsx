@@ -103,7 +103,7 @@ export default function JournalScreen() {
             <Text style={styles.categoryLabel}>{journal.question.label.replace('_', ' ')}</Text>
             <Text style={styles.questionText}>{journal.question.question_text}</Text>
             {!hasAnswered && (
-              <Pressable style={styles.skipButton} onPress={handleSkip}>
+              <Pressable testID="journal-skip-button" style={styles.skipButton} onPress={handleSkip}>
                 <MaterialCommunityIcons name="skip-next" size={moderateScale(16)} color={colors.starGlow} />
                 <Text style={styles.skipText}>Skip</Text>
               </Pressable>
@@ -156,6 +156,7 @@ export default function JournalScreen() {
         {!hasAnswered && !loading && (
           <View style={styles.inputBar}>
             <TextInput
+              testID="journal-input"
               style={styles.textInput}
               placeholder="Type your answer..."
               placeholderTextColor="rgba(255,255,255,0.4)"
@@ -166,6 +167,7 @@ export default function JournalScreen() {
               blurOnSubmit
             />
             <Pressable
+              testID="journal-send-button"
               style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
               onPress={handleSubmit}
               disabled={!inputText.trim() || submitting}

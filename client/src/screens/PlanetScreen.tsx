@@ -265,6 +265,7 @@ export default function PlanetScreen() {
 
         {!isSoulmate && (
           <Pressable
+            testID="journal-button"
             style={styles.journalButton}
             onPress={() => navigation.navigate('Journal', { partnershipId, partnerName: partnerB })}
           >
@@ -412,6 +413,7 @@ export default function PlanetScreen() {
 
       {/* My star (tappable) */}
       <Pressable
+        testID="my-mood-dot"
         style={[
           styles.orbitDot,
           styles.orbitDotA,
@@ -422,7 +424,7 @@ export default function PlanetScreen() {
 
       {/* Partner star unseen glow */}
       {moodUnseen && (
-        <View style={styles.partnerGlowWrap} pointerEvents="none">
+        <View testID="partner-mood-glow" style={styles.partnerGlowWrap} pointerEvents="none">
           <Canvas style={styles.partnerGlowCanvas}>
             <Circle
               cx={ORBIT_DOT_SIZE * 2}
@@ -439,6 +441,7 @@ export default function PlanetScreen() {
 
       {/* Partner star */}
       <Pressable
+        testID="partner-mood-dot"
         style={[
           styles.orbitDot,
           styles.orbitDotB,
@@ -449,7 +452,7 @@ export default function PlanetScreen() {
 
       {/* Partner mood tooltip */}
       {partnerTooltipVisible && (
-        <View style={styles.tooltip}>
+        <View testID="partner-mood-tooltip" style={styles.tooltip}>
           <Text style={styles.tooltipText}>{partnerMood}</Text>
         </View>
       )}
