@@ -38,7 +38,8 @@ class SendAffectionTests(TestCase):
 
     def test_creates_db_record(self):
         """POST creates a new AffectionSending row in the database."""
-        self.client.post(self.url, {'type': 'hug'})
+        resp = self.client.post(self.url, {'type': 'hug'})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertTrue(
             AffectionSending.objects.filter(
                 sender=self.alice, partnership=self.partnership, type='hug',
@@ -53,7 +54,8 @@ class SendAffectionTests(TestCase):
 
     def test_awards_stardust(self):
         """Sending an affection awards 10 stardust."""
-        self.client.post(self.url, {'type': 'gratitude'})
+        resp = self.client.post(self.url, {'type': 'gratitude'})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.partnership.stardust.refresh_from_db()
         self.assertEqual(
             self.partnership.stardust.total, self.initial_stardust + 10,
@@ -66,7 +68,8 @@ class SendAffectionTests(TestCase):
 
     def test_records_streak_activity(self):
         """POST records a StreakActivity for the user."""
-        self.client.post(self.url, {'type': 'bite'})
+        resp = self.client.post(self.url, {'type': 'bite'})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertTrue(
             StreakActivity.objects.filter(
                 streak=self.partnership.streak, user=self.alice,
