@@ -1,0 +1,48 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    id: "home-tab"
+    optional: true
+- tapOn:
+    id: "sign-out-button"
+    optional: true
+- tapOn:
+    id: "email-input"
+- inputText: "userA@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- tapOn: "Not Now"
+- assertVisible: "Hey, PartnerA!"
+
+# Navigate to Planet screen
+- tapOn:
+    id: "partners-tab"
+- tapOn:
+    id: "partner-name-PartnerB"
+- tapOn:
+    id: "visit-planet-button"
+
+# Double-tap partner dot to open affection overlay
+- tapOn:
+    id: "partner-mood-dot"
+- tapOn:
+    id: "partner-mood-dot"
+- extendedWaitUntil:
+    visible: "Send affection"
+    timeout: 5000
+
+# Select an affection type and send
+- tapOn:
+    id: "grid-item-hug"
+- tapOn:
+    id: "affection-send-button"
+
+# Verify overlay closed (back on planet screen)
+- extendedWaitUntil:
+    visible:
+        id: "my-mood-dot"
+    timeout: 3000

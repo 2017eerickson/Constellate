@@ -1,0 +1,44 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    id: "home-tab"
+    optional: true
+- tapOn:
+    id: "sign-out-button"
+    optional: true
+- tapOn:
+    id: "email-input"
+- inputText: "userA@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- tapOn: "Not Now"
+- assertVisible: "Hey, PartnerA!"
+
+# Navigate to Planet screen
+- tapOn:
+    id: "partners-tab"
+- tapOn:
+    id: "partner-name-PartnerB"
+- tapOn:
+    id: "visit-planet-button"
+
+# Open journal
+- extendedWaitUntil:
+    visible:
+        id: "journal-button"
+    timeout: 5000
+- tapOn:
+    id: "journal-button"
+
+# Verify both answers are visible
+- extendedWaitUntil:
+    visible: "This is my test answer for the journal question"
+    timeout: 5000
+- assertVisible: "PartnerB's test answer"
+
+# Verify both answered completion message
+- assertVisible: "Both answered! New question tomorrow."

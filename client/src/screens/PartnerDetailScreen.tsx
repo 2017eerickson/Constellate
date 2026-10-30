@@ -9,7 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
@@ -43,9 +44,14 @@ interface DateEdit {
   date: string;
 }
 
+type MainStackParamList = {
+  Planet: { partnershipId: number };
+};
+
 export default function PartnerDetailScreen() {
   const { user } = useAuth();
   const route = useRoute();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { partnershipId } = route.params as { partnershipId: number };
 
   const [partnership, setPartnership] = useState<Partnership | null>(null);
@@ -317,6 +323,16 @@ export default function PartnerDetailScreen() {
                 </View>
               </Card>
 
+              {/* Visit Planet */}
+              {partnership.status === 'active' && partnership.relation !== 'soulmate' && (
+                <ActionButton
+                  onPress={() => navigation.navigate('Planet', { partnershipId })}
+                  text="Visit Planet"
+                  testID="visit-planet-button"
+                  style={styles.visitPlanetButton}
+                />
+              )}
+
               {/* Special Dates header */}
               {editingMode === 'dates' ? (
                 <SectionHeader title="Special Dates" />
@@ -512,6 +528,10 @@ const styles = StyleSheet.create({
     marginTop: scale(24),
     marginBottom: scale(40),
     paddingHorizontal: scale(20),
+  },
+  visitPlanetButton: {
+    marginBottom: scale(16),
+    marginHorizontal: scale(20),
   },
   addButton: {
     marginTop: scale(4),

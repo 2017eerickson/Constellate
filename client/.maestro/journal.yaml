@@ -1,0 +1,62 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    id: "home-tab"
+    optional: true
+- tapOn:
+    id: "sign-out-button"
+    optional: true
+- tapOn:
+    id: "email-input"
+- inputText: "userA@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- tapOn: "Not Now"
+- assertVisible: "Hey, PartnerA!"
+
+# Navigate to Planet screen
+- tapOn:
+    id: "partners-tab"
+- tapOn:
+    id: "partner-name-PartnerB"
+- tapOn:
+    id: "visit-planet-button"
+
+# Open journal
+- extendedWaitUntil:
+    visible:
+        id: "journal-button"
+    timeout: 5000
+- tapOn:
+    id: "journal-button"
+
+# Verify question card is displayed
+- extendedWaitUntil:
+    visible:
+        id: "journal-skip-button"
+    timeout: 5000
+
+# Test skip — tap skip and verify a new question loads (skip button still present)
+- tapOn:
+    id: "journal-skip-button"
+- extendedWaitUntil:
+    visible:
+        id: "journal-skip-button"
+    timeout: 5000
+
+# Type and submit an answer
+- tapOn:
+    id: "journal-input"
+- inputText: "This is my test answer for the journal question"
+- tapOn:
+    id: "journal-send-button"
+
+# Verify answer bubble appears and waiting message shows
+- extendedWaitUntil:
+    visible: "This is my test answer for the journal question"
+    timeout: 5000
+- assertVisible: "Waiting for PartnerB to answer..."
