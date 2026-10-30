@@ -14,6 +14,8 @@ import ConstellationScreen from './src/screens/ConstellationScreen';
 import ConnectScreen from './src/screens/ConnectScreen';
 import PartnerDetailScreen from './src/screens/PartnerDetailScreen';
 import PlanetScreen from './src/screens/PlanetScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import JournalScreen from './src/screens/JournalScreen';
 
 type AuthStackParamList = {
   SignIn: undefined;
@@ -25,6 +27,8 @@ type MainStackParamList = {
   Connect: undefined;
   PartnerDetail: { partnershipId: number };
   Planet: { partnershipId: number };
+  Journal: { partnershipId: number; partnerName: string };
+  Settings: undefined;
 };
 
 type TabParamList = {
@@ -98,6 +102,16 @@ function AppNavigator() {
         name="Planet"
         component={PlanetScreen}
         options={{ headerShown: true, headerTitle: '', headerTransparent: true, headerTintColor: '#fff', animation: 'fade' }}
+      />
+      <MainStack.Screen
+        name="Journal"
+        component={JournalScreen}
+        options={{ headerShown: true, headerTitle: '', headerTransparent: true, headerTintColor: '#fff' }}
+      />
+      <MainStack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ headerShown: true, headerTitle: 'Settings' }}
       />
     </MainStack.Navigator>
   );

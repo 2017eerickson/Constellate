@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from connection_activities_app.models import MoodSetting, AffectionSending
+from connection_activities_app.models import MoodSetting, AffectionSending, Question, Answer
 
 
 class MoodSettingSerializer(serializers.ModelSerializer):
@@ -15,3 +15,16 @@ class AffectionSendingSerializer(serializers.ModelSerializer):
         model = AffectionSending
         fields = ['id', 'sender', 'partnership', 'type', 'read', 'timestamp']
         read_only_fields = ['id', 'read', 'timestamp']
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ['id', 'label', 'question_text']
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ['id', 'answer_text', 'created_at']
+        read_only_fields = ['id', 'created_at']

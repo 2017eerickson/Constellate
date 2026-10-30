@@ -20,8 +20,9 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getPartnerships } from '../services/partnerships';
 import { getMoods, setMood, sendAffection, getAffectionCooldown, getAffections, readAffection, markMoodRead, getUnreadCounts } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
@@ -50,6 +51,7 @@ const ORBIT_L_Y = PLANET_CY - ORBIT_RADIUS * SIN45;
 
 type MainStackParamList = {
   Planet: { partnershipId: number };
+  Journal: { partnershipId: number; partnerName: string };
 };
 
 const PLANET_COLORS: string[][] = [
@@ -67,6 +69,7 @@ function getPlanetColors(partnershipId: number): string[] {
 
 export default function PlanetScreen() {
   const route = useRoute<RouteProp<MainStackParamList, 'Planet'>>();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { partnershipId } = route.params;
   const { user } = useAuth();
   const [partnership, setPartnership] = useState<Partnership | null>(null);
@@ -259,6 +262,15 @@ export default function PlanetScreen() {
           <Text style={styles.name}>{partnerA} & {partnerB}</Text>
           <Text style={styles.daysText}>{daysInOrbit} days in orbit</Text>
         </View>
+
+        {!isSoulmate && (
+          <Pressable
+            style={styles.journalButton}
+            onPress={() => navigation.navigate('Journal', { partnershipId, partnerName: partnerB })}
+          >
+            <MaterialCommunityIcons name="book-open-variant" size={moderateScale(22)} color={colors.starGlow} />
+          </Pressable>
+        )}
       </View>
 
       {/* Planet Canvas */}
@@ -494,6 +506,13 @@ const styles = StyleSheet.create({
     color: colors.starGlow,
     fontSize: moderateScale(12),
     fontWeight: '600',
+  },
+  journalButton: {
+    position: 'absolute',
+    right: moderateScale(16),
+    top: 0,
+    zIndex: 11,
+    padding: moderateScale(4),
   },
   titleCenter: {
     alignItems: 'center',

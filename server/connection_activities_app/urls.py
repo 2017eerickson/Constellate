@@ -8,6 +8,9 @@ from connection_activities_app.views import (
     RetrieveAffectionsView,
     ReadAffectionView,
     AffectionCooldownView,
+    CurrentQuestionView,
+    SubmitAnswerView,
+    SkipQuestionView,
 )
 
 urlpatterns = [
@@ -18,4 +21,7 @@ urlpatterns = [
     path('<int:partnership_id>/affection/send/', SendAffectionView.as_view(), name='send-affection'),
     path('<int:partnership_id>/affection/cooldown/', AffectionCooldownView.as_view(), name='affection-cooldown'),
     path('<int:partnership_id>/affection/<int:affection_id>/read/', ReadAffectionView.as_view(), name='read-affection'),
+    path('<int:partnership_id>/journal/', CurrentQuestionView.as_view(), name='current-question'),
+    path('<int:partnership_id>/journal/answer/', SubmitAnswerView.as_view(), name='submit-answer'),
+    path('<int:partnership_id>/journal/skip/', SkipQuestionView.as_view(), name='skip-question'),
 ]

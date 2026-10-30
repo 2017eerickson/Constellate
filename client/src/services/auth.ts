@@ -81,6 +81,10 @@ export async function signOut(): Promise<void> {
   }
 }
 
+export async function deactivateAccount(): Promise<void> {
+  await apiClient.patch('/users/auth/deactivate/');
+}
+
 export async function getStoredAuth(): Promise<User | null> {
   const accessToken = await AsyncStorage.getItem('access_token');
   if (!accessToken) {

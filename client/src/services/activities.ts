@@ -1,5 +1,5 @@
 import apiClient from '../api/client';
-import { MoodResponse, Affection, AffectionType, ActivityResponse } from '../types';
+import { MoodResponse, Affection, AffectionType, ActivityResponse, JournalResponse } from '../types';
 
 export async function getMoods(partnershipId: number): Promise<MoodResponse> {
   const { data } = await apiClient.get<MoodResponse>(
@@ -67,4 +67,29 @@ export async function getUnreadCounts(): Promise<UnreadCounts> {
 
 export async function markMoodRead(partnershipId: number): Promise<void> {
   await apiClient.patch(`/activities/${partnershipId}/mood/read/`);
+}
+
+export async function getCurrentQuestion(partnershipId: number): Promise<JournalResponse> {
+  const { data } = await apiClient.get<JournalResponse>(
+    `/activities/${partnershipId}/journal/`,
+  );
+  return data;
+}
+
+export async function submitAnswer(
+  partnershipId: number,
+  answerText: string,
+): Promise<JournalResponse> {
+  const { data } = await apiClient.post<JournalResponse>(
+    `/activities/${partnershipId}/journal/answer/`,
+    { answer_text: answerText },
+  );
+  return data;
+}
+
+export async function skipQuestion(partnershipId: number): Promise<JournalResponse> {
+  const { data } = await apiClient.post<JournalResponse>(
+    `/activities/${partnershipId}/journal/skip/`,
+  );
+  return data;
 }
