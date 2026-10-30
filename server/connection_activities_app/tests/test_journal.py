@@ -85,21 +85,22 @@ class CurrentQuestionTests(TestCase):
         self.assertIsNone(resp.data['my_answer'])
 
     def test_partner_answer_hidden_when_only_partner_answered(self):
-        """partner_answer is null even after partner answers, because user hasn't answered yet."""
+        """partner_answer and my_answer are both null when only partner has answered."""
         _answer_question(self.partnership, self.question, self.bob, 'Bob answer')
         resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertIsNone(resp.data['my_answer'])
         self.assertIsNone(resp.data['partner_answer'])
         self.assertFalse(resp.data['both_answered'])
 
     def test_both_answers_visible_when_both_answered(self):
-        """After both answer, my_answer and partner_answer are populated."""
+        """After both answer, my_answer and partner_answer contain correct text."""
         _answer_question(self.partnership, self.question, self.alice, 'Alice answer')
         _answer_question(self.partnership, self.question, self.bob, 'Bob answer')
         resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertIsNotNone(resp.data['my_answer'])
-        self.assertIsNotNone(resp.data['partner_answer'])
+        self.assertEqual(resp.data['my_answer']['answer_text'], 'Alice answer')
+        self.assertEqual(resp.data['partner_answer']['answer_text'], 'Bob answer')
         self.assertTrue(resp.data['both_answered'])
 
     def test_completed_today_still_visible(self):
@@ -221,7 +222,8 @@ class SubmitAnswerTests(TestCase):
 
     def test_second_answer_completes_question(self):
         """When bob answers after alice, PQ becomes COMPLETED."""
-        self.client.post(self.url, {'answer_text': 'Alice answer'})
+        resp1 = self.client.post(self.url, {'answer_text': 'Alice answer'})
+        self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
         self.client.force_authenticate(user=self.bob)
         resp = self.client.post(self.url, {'answer_text': 'Bob answer'})
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
@@ -232,7 +234,8 @@ class SubmitAnswerTests(TestCase):
 
     def test_stardust_awarded_on_completion(self):
         """Stardust increases by 15 only after both partners answer."""
-        self.client.post(self.url, {'answer_text': 'Alice answer'})
+        resp1 = self.client.post(self.url, {'answer_text': 'Alice answer'})
+        self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
         self.partnership.stardust.refresh_from_db()
         self.assertEqual(self.partnership.stardust.total, self.initial_stardust)
 
@@ -244,7 +247,8 @@ class SubmitAnswerTests(TestCase):
 
     def test_streak_recorded_on_completion(self):
         """StreakActivity is recorded for the second answerer on completion."""
-        self.client.post(self.url, {'answer_text': 'Alice answer'})
+        resp1 = self.client.post(self.url, {'answer_text': 'Alice answer'})
+        self.assertEqual(resp1.status_code, status.HTTP_201_CREATED)
         self.client.force_authenticate(user=self.bob)
         resp = self.client.post(self.url, {'answer_text': 'Bob answer'})
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
@@ -254,15 +258,14 @@ class SubmitAnswerTests(TestCase):
             ).exists()
         )
 
-    def test_partner_answer_hidden_after_first(self):
-        """After alice answers, her response shows partner_answer as null."""
+    def test_completing_answerer_sees_both(self):
+        """When alice completes the question (bob already answered), she sees both answers."""
         _answer_question(self.partnership, self.question, self.bob, 'Bob answer')
         resp = self.client.post(self.url, {'answer_text': 'Alice answer'})
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        # Alice just answered, and bob already answered, so both_answered should be True
-        # and partner_answer should be visible
         self.assertTrue(resp.data['both_answered'])
-        self.assertIsNotNone(resp.data['partner_answer'])
+        self.assertEqual(resp.data['my_answer']['answer_text'], 'Alice answer')
+        self.assertEqual(resp.data['partner_answer']['answer_text'], 'Bob answer')
 
     def test_partner_answer_hidden_when_only_first_answers(self):
         """After only alice answers, partner_answer is null in alice's response."""
@@ -273,38 +276,28 @@ class SubmitAnswerTests(TestCase):
 
     def test_cannot_answer_completed_question(self):
         """Cannot answer a question that is already completed (same day)."""
-        _answer_question(self.partnership, self.question, self.alice, 'Alice')
-        _answer_question(self.partnership, self.question, self.bob, 'Bob')
         self.pq.status = PartnershipQuestion.Status.COMPLETED
         self.pq.completed_at = timezone.now()
         self.pq.save()
-        # A new user trying to POST — the helper returns the completed-today PQ
-        charlie = create_user(email='charlie@example.com')
-        p2 = create_active_partnership(self.alice, charlie)
-        q2 = _create_question(text='Another question?')
-        pq2 = _create_active_pq(p2, q2)
-        pq2.status = PartnershipQuestion.Status.COMPLETED
-        pq2.completed_at = timezone.now()
-        pq2.save()
-        url2 = reverse('submit-answer', args=[p2.pk])
-        resp = self.client.post(url2, {'answer_text': 'Late answer'})
+        # get_or_assign returns the completed-today PQ, view rejects with "not active"
+        resp = self.client.post(self.url, {'answer_text': 'Late answer'})
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(resp.data['error'], 'This question is no longer active.')
 
-    def test_cannot_answer_skipped_question(self):
-        """Cannot answer a question that was skipped."""
+    def test_answer_after_skip_goes_to_new_question(self):
+        """After a question is skipped, answering submits to the newly assigned question."""
         self.pq.status = PartnershipQuestion.Status.SKIPPED
         self.pq.completed_at = timezone.now()
         self.pq.save()
-        # get_or_assign_current_question will assign a NEW active PQ since this one is skipped
-        # So we can't directly test "answering a skipped question" via the endpoint —
-        # the helper would return a new active one. Instead, verify the skip happened.
-        # This is inherently tested by the skip flow. Let's test via a completed-today scenario.
-        # Mark it back as completed today to trigger the "not active" guard:
-        self.pq.status = PartnershipQuestion.Status.COMPLETED
-        self.pq.save()
-        resp = self.client.post(self.url, {'answer_text': 'Late answer'})
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        # get_or_assign assigns a new active PQ since the old one is skipped
+        resp = self.client.post(self.url, {'answer_text': 'Answer to new question'})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        # The answer should be for a different question than the skipped one
+        answered_pq_id = resp.data['partnership_question_id']
+        self.assertNotEqual(answered_pq_id, self.pq.pk)
+        # The skipped PQ should still be skipped
+        self.pq.refresh_from_db()
+        self.assertEqual(self.pq.status, PartnershipQuestion.Status.SKIPPED)
 
     def test_nonexistent_partnership(self):
         """POST to a non-existent partnership returns 404."""
