@@ -142,10 +142,18 @@ class SubmitAnswerView(APIView):
             stardust.total += JOURNAL_STARDUST_REWARD
             stardust.save()
 
-        return Response(
-            build_journal_response(pq, request.user, partnership),
-            status=status.HTTP_201_CREATED,
-        )
+        streak = partnership.streak
+        stardust_obj, _ = Stardust.objects.get_or_create(partnership=partnership)
+
+        response_data = build_journal_response(pq, request.user, partnership)
+        response_data['stardust'] = stardust_obj.total
+        response_data['streak'] = {
+            'current_count': streak.current_count,
+            'longest_count': streak.longest_count,
+            'last_completed_at': streak.last_completed_at,
+        }
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class SkipQuestionView(APIView):
