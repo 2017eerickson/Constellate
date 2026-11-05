@@ -125,6 +125,8 @@ class SubmitAnswerView(APIView):
             answer_text=answer_text,
         )
 
+        record_streak_activity(request.user, partnership)
+
         # Check if both partners have now answered
         answer_count = Answer.objects.filter(
             partnership=partnership,
@@ -139,8 +141,6 @@ class SubmitAnswerView(APIView):
             stardust, _ = Stardust.objects.get_or_create(partnership=partnership)
             stardust.total += JOURNAL_STARDUST_REWARD
             stardust.save()
-
-            record_streak_activity(request.user, partnership)
 
         return Response(
             build_journal_response(pq, request.user, partnership),
