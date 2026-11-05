@@ -89,7 +89,7 @@ export default function AffectionOverlay({
       >
         <View style={styles.backdrop}>
           <View style={styles.sheet}>
-            <Pressable style={styles.closeBtn} onPress={onClose}>
+            <Pressable testID="affection-cooldown-close" style={styles.closeBtn} onPress={onClose}>
               <MaterialCommunityIcons
                 name="close"
                 size={moderateScale(24)}
@@ -120,6 +120,7 @@ export default function AffectionOverlay({
       onClose={onClose}
     >
       <Pressable
+        testID="affection-send-button"
         style={[styles.sendBtn, !selected && styles.sendBtnDisabled]}
         onPress={handleSend}
         disabled={!selected}

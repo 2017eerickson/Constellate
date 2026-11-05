@@ -98,7 +98,8 @@ class SetMoodPostTests(TestCase):
 
     def test_set_mood_creates_db_record(self):
         """POST creates a new MoodSetting row in the database."""
-        self.client.post(self.url, {'mood': 'calm'})
+        resp = self.client.post(self.url, {'mood': 'calm'})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertTrue(
             MoodSetting.objects.filter(
                 user=self.alice, partnership=self.partnership, mood='calm',
@@ -107,7 +108,8 @@ class SetMoodPostTests(TestCase):
 
     def test_set_mood_awards_stardust(self):
         """Setting a mood awards 5 stardust to the partnership."""
-        self.client.post(self.url, {'mood': 'loved'})
+        resp = self.client.post(self.url, {'mood': 'loved'})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.partnership.stardust.refresh_from_db()
         self.assertEqual(
             self.partnership.stardust.total, self.initial_stardust + 5,
@@ -115,7 +117,8 @@ class SetMoodPostTests(TestCase):
 
     def test_set_mood_records_streak_activity(self):
         """POST records a StreakActivity for the user."""
-        self.client.post(self.url, {'mood': 'grateful'})
+        resp = self.client.post(self.url, {'mood': 'grateful'})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertTrue(
             StreakActivity.objects.filter(
                 streak=self.partnership.streak, user=self.alice,
@@ -196,7 +199,7 @@ class ReadMoodTests(TestCase):
         )
         resp = self.client.patch(self.url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertGreaterEqual(resp.data['marked'], 1)
+        self.assertEqual(resp.data['marked'], 1)
         mood.refresh_from_db()
         self.assertTrue(mood.seen)
 
@@ -269,7 +272,7 @@ class UnreadCountsTests(TestCase):
         )
         resp = self.client.get(self.url)
         pid = str(self.partnership.pk)
-        self.assertGreaterEqual(resp.data[pid]['moods'], 1)
+        self.assertEqual(resp.data[pid]['moods'], 1)
 
     def test_excludes_own_items(self):
         """User's own sent affections and moods are not counted."""
@@ -280,10 +283,9 @@ class UnreadCountsTests(TestCase):
             user=self.alice, partnership=self.partnership, mood='stressed',
         )
         resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
         pid = str(self.partnership.pk)
-        # Partnership should be absent (zero counts) or have 0 for both
-        if pid in resp.data:
-            self.assertEqual(resp.data[pid]['affections'], 0)
+        self.assertNotIn(pid, resp.data)
 
     def test_zero_counts_omitted(self):
         """Partnerships with zero unread items are not in the response."""

@@ -31,7 +31,7 @@ export default function AffectionReceivedPopup({
     <Modal visible transparent animationType="none" onRequestClose={onDismiss}>
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          <Pressable style={styles.closeBtn} onPress={onDismiss}>
+          <Pressable testID="affection-popup-dismiss" style={styles.closeBtn} onPress={onDismiss}>
             <MaterialCommunityIcons
               name="close"
               size={moderateScale(22)}

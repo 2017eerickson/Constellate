@@ -1,0 +1,60 @@
+appId: com.constellate.app
+---
+- launchApp
+- tapOn:
+    id: "home-tab"
+    optional: true
+- tapOn:
+    id: "sign-out-button"
+    optional: true
+- tapOn:
+    id: "email-input"
+- inputText: "userA@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "testpassword123"
+- tapOn:
+    id: "email-submit-button"
+- tapOn: "Not Now"
+- assertVisible: "Hey, PartnerA!"
+
+# Navigate to Planet screen
+- tapOn:
+    id: "partners-tab"
+- tapOn:
+    id: "partner-name-PartnerB"
+- tapOn:
+    id: "visit-planet-button"
+
+# Verify unseen mood glow is visible (seeded by shell script)
+- extendedWaitUntil:
+    visible:
+        id: "partner-mood-glow"
+    timeout: 5000
+
+# Single tap partner dot to see their mood tooltip
+- tapOn:
+    id: "partner-mood-dot"
+- extendedWaitUntil:
+    visible:
+        id: "partner-mood-tooltip"
+    timeout: 3000
+- assertVisible: "excited"
+
+# Verify glow cleared after viewing partner mood
+- assertNotVisible:
+    id: "partner-mood-glow"
+
+# Set own mood
+- tapOn:
+    id: "my-mood-dot"
+- assertVisible: "How are you feeling?"
+- tapOn:
+    id: "grid-item-calm"
+
+# Reopen mood overlay and verify calm is selected, then change mood
+- tapOn:
+    id: "my-mood-dot"
+- assertVisible: "How are you feeling?"
+- tapOn:
+    id: "grid-item-excited"

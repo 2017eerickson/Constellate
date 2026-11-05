@@ -68,6 +68,7 @@ export default function GridPickerOverlay({
               return (
                 <Pressable
                   key={key}
+                  testID={`grid-item-${key}`}
                   style={[
                     styles.item,
                     { backgroundColor: color },
