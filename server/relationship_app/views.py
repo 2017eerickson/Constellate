@@ -109,7 +109,6 @@ class ConnectView(generics.CreateAPIView):
             existing.anniversary = anniversary
             existing.ended_at = None
             existing.save()
-            existing.special_dates.all().delete()
             partnership = existing
         else:
             partnership = Partnership.objects.create(
@@ -240,14 +239,15 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
+            if new_status == PartnershipStatus.ENDED:
+                partnership.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
             was_pending = partnership.status == PartnershipStatus.PENDING
             partnership.status = new_status
 
             if new_status == PartnershipStatus.ACTIVE and was_pending:
                 create_default_special_dates(partnership)
-
-            if new_status == PartnershipStatus.ENDED:
-                partnership.ended_at = timezone.now()
 
         if new_relation:
             partnership.relation = new_relation
@@ -268,8 +268,8 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
         if partnership.status == PartnershipStatus.PENDING:
             partnership.delete()
         elif partnership.status == PartnershipStatus.ENDED:
-            pass
-        else:
+            partnership.delete()
+        elif partnership.status == PartnershipStatus.PAUSED:
             partnership.status = PartnershipStatus.ENDED
             partnership.ended_at = timezone.now()
             partnership.save()
