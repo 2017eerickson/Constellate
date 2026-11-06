@@ -109,6 +109,7 @@ class SetMoodView(APIView):
                 'longest_count': streak.longest_count,
                 'last_completed_at': streak.last_completed_at,
             },
+            'streak_incremented': streak.incremented,
         }, status=status.HTTP_201_CREATED)
 
 

@@ -67,6 +67,7 @@ export interface Affection {
 export interface ActivityResponse {
   stardust: number;
   streak: Streak;
+  streak_incremented: boolean;
 }
 
 export interface AffectionCooldownError {

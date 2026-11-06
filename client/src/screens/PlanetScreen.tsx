@@ -182,14 +182,13 @@ export default function PlanetScreen() {
 
   const handleAffectionSend = useCallback(async (type: AffectionType) => {
     try {
-      const prevStreak = partnership?.streak?.current_count ?? 0;
       const res = await sendAffection(partnershipId, type);
       // 1h 11m = 4260 seconds
       setAffectionCooldown(4260);
       setPartnership((prev) =>
         prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
       );
-      if (res.streak.current_count > prevStreak) {
+      if (res.streak_incremented) {
         prevStreakRef.current = res.streak.current_count;
         setStreakPopupVisible(true);
       }
@@ -204,12 +203,11 @@ export default function PlanetScreen() {
   const handleMoodSelect = async (mood: string) => {
     setMyMood(mood);
     try {
-      const prevStreak = partnership?.streak?.current_count ?? 0;
       const res = await setMood(partnershipId, mood);
       setPartnership((prev) =>
         prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
       );
-      if (res.streak.current_count > prevStreak) {
+      if (res.streak_incremented) {
         prevStreakRef.current = res.streak.current_count;
         setStreakPopupVisible(true);
       }
