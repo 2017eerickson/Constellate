@@ -205,6 +205,7 @@ export default function PlanetScreen() {
     setMyMood(mood);
     try {
       const res = await setMood(partnershipId, mood);
+      setMoodOverlayVisible(false);
       setPartnership((prev) =>
         prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
       );
