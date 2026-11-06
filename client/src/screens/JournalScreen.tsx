@@ -20,21 +20,27 @@ import { getCurrentQuestion, submitAnswer, skipQuestion } from '../services/acti
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
 import { moderateScale, verticalScale } from '../styles/scale';
+import ActivityPopup from '../components/ActivityPopup';
 import type { JournalResponse } from '../types';
 
 type ParamList = {
-  Journal: { partnershipId: number; partnerName: string };
+  Journal: { partnershipId: number; partnerName: string; currentStreakCount: number; currentStardust: number };
 };
 
 export default function JournalScreen() {
   const route = useRoute<RouteProp<ParamList, 'Journal'>>();
-  const { partnershipId, partnerName } = route.params;
+  const { partnershipId, partnerName, currentStreakCount, currentStardust } = route.params;
   const { user } = useAuth();
 
   const [journal, setJournal] = useState<JournalResponse | null>(null);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [streakPopupVisible, setStreakPopupVisible] = useState(false);
+  const prevStreakRef = useRef<number>(currentStreakCount);
+  const [stardustPopupVisible, setStardustPopupVisible] = useState(false);
+  const stardustEarnedRef = useRef<number>(0);
+  const pendingStreakRef = useRef<boolean>(false);
   const scrollRef = useRef<ScrollView>(null);
 
   const fetchQuestion = useCallback(async () => {
@@ -58,15 +64,32 @@ export default function JournalScreen() {
     setSubmitting(true);
     try {
       const data = await submitAnswer(partnershipId, inputText.trim());
+      const earned = (data.stardust ?? 0) - currentStardust;
       setJournal(data);
       setInputText('');
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+      if (data.streak_incremented) {
+        prevStreakRef.current = data.streak!.current_count;
+        pendingStreakRef.current = true;
+      }
+      if (earned > 0) {
+        stardustEarnedRef.current = earned;
+        setStardustPopupVisible(true);
+      }
     } catch {
       // silent
     } finally {
       setSubmitting(false);
     }
   }, [inputText, partnershipId, submitting]);
+
+  const handleStardustDismiss = useCallback(() => {
+    setStardustPopupVisible(false);
+    if (pendingStreakRef.current) {
+      pendingStreakRef.current = false;
+      setStreakPopupVisible(true);
+    }
+  }, []);
 
   const handleSkip = useCallback(async () => {
     try {
@@ -181,6 +204,20 @@ export default function JournalScreen() {
           </View>
         )}
       </KeyboardAvoidingView>
+
+      <ActivityPopup
+        visible={stardustPopupVisible}
+        title={`✨ +${stardustEarnedRef.current} Stardust`}
+        subtitle="Keep connecting to earn more"
+        onDismiss={handleStardustDismiss}
+      />
+
+      <ActivityPopup
+        visible={streakPopupVisible}
+        title={`🔥 ${prevStreakRef.current}-Day Streak ⭐`}
+        subtitle="Your stars are aligning"
+        onDismiss={() => setStreakPopupVisible(false)}
+      />
     </View>
   );
 }

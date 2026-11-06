@@ -32,7 +32,7 @@ class StreakActivity(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    last_activity_at = models.DateTimeField(auto_now=True)
+    last_activity_at = models.DateTimeField()
 
     class Meta:
         unique_together = ('streak', 'user')

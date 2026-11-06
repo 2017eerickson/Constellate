@@ -67,6 +67,7 @@ export interface Affection {
 export interface ActivityResponse {
   stardust: number;
   streak: Streak;
+  streak_incremented: boolean;
 }
 
 export interface AffectionCooldownError {
@@ -92,6 +93,9 @@ export interface JournalResponse {
   my_answer: JournalAnswer | null;
   partner_answer: JournalAnswer | null;
   both_answered: boolean;
+  stardust?: number;
+  streak?: Streak;
+  streak_incremented?: boolean;
 }
 
 export interface AuthContextType {

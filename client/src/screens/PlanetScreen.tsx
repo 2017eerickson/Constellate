@@ -31,6 +31,7 @@ import { moderateScale } from '../styles/scale';
 import MoodOverlay, { MOOD_COLORS } from '../components/MoodOverlay';
 import AffectionOverlay from '../components/AffectionOverlay';
 import AffectionReceivedPopup from '../components/AffectionReceivedPopup';
+import ActivityPopup from '../components/ActivityPopup';
 import type { Partnership, Affection, AffectionType } from '../types';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
@@ -51,7 +52,7 @@ const ORBIT_L_Y = PLANET_CY - ORBIT_RADIUS * SIN45;
 
 type MainStackParamList = {
   Planet: { partnershipId: number };
-  Journal: { partnershipId: number; partnerName: string };
+  Journal: { partnershipId: number; partnerName: string; currentStreakCount: number; currentStardust: number };
 };
 
 const PLANET_COLORS: string[][] = [
@@ -83,6 +84,11 @@ export default function PlanetScreen() {
   const [moodUnseen, setMoodUnseen] = useState(true); // TODO: revert hardcode
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPartnerTap = useRef<number>(0);
+  const [streakPopupVisible, setStreakPopupVisible] = useState(false);
+  const prevStreakRef = useRef<number>(0);
+  const [stardustPopupVisible, setStardustPopupVisible] = useState(false);
+  const stardustEarnedRef = useRef<number>(0);
+  const pendingStreakRef = useRef<boolean>(false);
 
   // Pulse animation for unseen mood glow
   const partnerPulse = useSharedValue(0);
@@ -182,28 +188,51 @@ export default function PlanetScreen() {
       const res = await sendAffection(partnershipId, type);
       // 1h 11m = 4260 seconds
       setAffectionCooldown(4260);
+      setAffectionOverlayVisible(false);
+      const earned = res.stardust - (partnership?.stardust ?? 0);
       setPartnership((prev) =>
         prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
       );
+      if (res.streak_incremented) {
+        prevStreakRef.current = res.streak.current_count;
+        pendingStreakRef.current = true;
+      }
+      stardustEarnedRef.current = earned;
+      setStardustPopupVisible(true);
     } catch (err: any) {
       const remaining = err?.response?.data?.remaining_seconds;
       if (remaining) {
         setAffectionCooldown(remaining);
       }
     }
-  }, [partnershipId]);
+  }, [partnershipId, partnership]);
 
   const handleMoodSelect = async (mood: string) => {
     setMyMood(mood);
     try {
       const res = await setMood(partnershipId, mood);
+      setMoodOverlayVisible(false);
+      const earned = res.stardust - (partnership?.stardust ?? 0);
       setPartnership((prev) =>
         prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
       );
+      if (res.streak_incremented) {
+        prevStreakRef.current = res.streak.current_count;
+        pendingStreakRef.current = true;
+      }
+      stardustEarnedRef.current = earned;
+      setStardustPopupVisible(true);
     } catch {
       // revert on failure
     }
   };
+  const handleStardustDismiss = useCallback(() => {
+    setStardustPopupVisible(false);
+    if (pendingStreakRef.current) {
+      pendingStreakRef.current = false;
+      setStreakPopupVisible(true);
+    }
+  }, []);
 
   const handleDismissAffection = useCallback(async () => {
     const current = unreadAffections[0];
@@ -267,7 +296,7 @@ export default function PlanetScreen() {
           <Pressable
             testID="journal-button"
             style={styles.journalButton}
-            onPress={() => navigation.navigate('Journal', { partnershipId, partnerName: partnerB })}
+            onPress={() => navigation.navigate('Journal', { partnershipId, partnerName: partnerB, currentStreakCount: partnership?.streak?.current_count ?? 0, currentStardust: partnership?.stardust ?? 0 })}
           >
             <MaterialCommunityIcons name="book-open-variant" size={moderateScale(22)} color={colors.starGlow} />
           </Pressable>
@@ -478,6 +507,20 @@ export default function PlanetScreen() {
           onDismiss={handleDismissAffection}
         />
       )}
+
+      <ActivityPopup
+        visible={stardustPopupVisible}
+        title={`✨ +${stardustEarnedRef.current} Stardust`}
+        subtitle="Keep connecting to earn more"
+        onDismiss={handleStardustDismiss}
+      />
+
+      <ActivityPopup
+        visible={streakPopupVisible}
+        title={`🔥 ${prevStreakRef.current}-Day Streak ⭐`}
+        subtitle="Your stars are aligning"
+        onDismiss={() => setStreakPopupVisible(false)}
+      />
     </View>
   );
 }
