@@ -21,6 +21,7 @@ def record_streak_activity(user, partnership):
     StreakActivity.objects.update_or_create(
         streak=streak,
         user=user,
+        defaults={'last_activity_at': timezone.now()}
     )
 
     # Check if both partners were active today
