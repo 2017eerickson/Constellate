@@ -92,6 +92,8 @@ export interface JournalResponse {
   my_answer: JournalAnswer | null;
   partner_answer: JournalAnswer | null;
   both_answered: boolean;
+  stardust?: number;
+  streak?: Streak;
 }
 
 export interface AuthContextType {

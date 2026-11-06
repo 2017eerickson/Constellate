@@ -20,21 +20,24 @@ import { getCurrentQuestion, submitAnswer, skipQuestion } from '../services/acti
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
 import { moderateScale, verticalScale } from '../styles/scale';
+import ActivityPopup from '../components/ActivityPopup';
 import type { JournalResponse } from '../types';
 
 type ParamList = {
-  Journal: { partnershipId: number; partnerName: string };
+  Journal: { partnershipId: number; partnerName: string; currentStreakCount: number };
 };
 
 export default function JournalScreen() {
   const route = useRoute<RouteProp<ParamList, 'Journal'>>();
-  const { partnershipId, partnerName } = route.params;
+  const { partnershipId, partnerName, currentStreakCount } = route.params;
   const { user } = useAuth();
 
   const [journal, setJournal] = useState<JournalResponse | null>(null);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [streakPopupVisible, setStreakPopupVisible] = useState(false);
+  const prevStreakRef = useRef<number>(currentStreakCount);
   const scrollRef = useRef<ScrollView>(null);
 
   const fetchQuestion = useCallback(async () => {
@@ -61,6 +64,10 @@ export default function JournalScreen() {
       setJournal(data);
       setInputText('');
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+      if (data.streak && data.streak.current_count > prevStreakRef.current) {
+        prevStreakRef.current = data.streak.current_count;
+        setStreakPopupVisible(true);
+      }
     } catch {
       // silent
     } finally {
@@ -181,6 +188,13 @@ export default function JournalScreen() {
           </View>
         )}
       </KeyboardAvoidingView>
+
+      <ActivityPopup
+        visible={streakPopupVisible}
+        title={`🔥 ${prevStreakRef.current}-Day Streak ⭐`}
+        subtitle="Your stars are aligning"
+        onDismiss={() => setStreakPopupVisible(false)}
+      />
     </View>
   );
 }
