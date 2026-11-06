@@ -64,8 +64,8 @@ export default function JournalScreen() {
       setJournal(data);
       setInputText('');
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-      if (data.streak && data.streak.current_count > prevStreakRef.current) {
-        prevStreakRef.current = data.streak.current_count;
+      if (data.streak_incremented) {
+        prevStreakRef.current = data.streak!.current_count;
         setStreakPopupVisible(true);
       }
     } catch {

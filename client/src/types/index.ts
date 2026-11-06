@@ -94,6 +94,7 @@ export interface JournalResponse {
   both_answered: boolean;
   stardust?: number;
   streak?: Streak;
+  streak_incremented?: boolean;
 }
 
 export interface AuthContextType {

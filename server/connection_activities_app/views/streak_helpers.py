@@ -36,11 +36,14 @@ def record_streak_activity(user, partnership):
         streak.last_completed_at and streak.last_completed_at.date() == today
     )
 
+    streak.incremented = False
+
     if both_active and not already_completed_today:
         streak.current_count += 1
         if streak.current_count > streak.longest_count:
             streak.longest_count = streak.current_count
         streak.last_completed_at = timezone.now()
+        streak.incremented = True
         streak.save()
 
     return streak
