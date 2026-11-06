@@ -52,7 +52,7 @@ const ORBIT_L_Y = PLANET_CY - ORBIT_RADIUS * SIN45;
 
 type MainStackParamList = {
   Planet: { partnershipId: number };
-  Journal: { partnershipId: number; partnerName: string; currentStreakCount: number };
+  Journal: { partnershipId: number; partnerName: string; currentStreakCount: number; currentStardust: number };
 };
 
 const PLANET_COLORS: string[][] = [
@@ -86,6 +86,9 @@ export default function PlanetScreen() {
   const lastPartnerTap = useRef<number>(0);
   const [streakPopupVisible, setStreakPopupVisible] = useState(false);
   const prevStreakRef = useRef<number>(0);
+  const [stardustPopupVisible, setStardustPopupVisible] = useState(false);
+  const stardustEarnedRef = useRef<number>(0);
+  const pendingStreakRef = useRef<boolean>(false);
 
   // Pulse animation for unseen mood glow
   const partnerPulse = useSharedValue(0);
@@ -186,13 +189,16 @@ export default function PlanetScreen() {
       // 1h 11m = 4260 seconds
       setAffectionCooldown(4260);
       setAffectionOverlayVisible(false);
+      const earned = res.stardust - (partnership?.stardust ?? 0);
       setPartnership((prev) =>
         prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
       );
       if (res.streak_incremented) {
         prevStreakRef.current = res.streak.current_count;
-        setStreakPopupVisible(true);
+        pendingStreakRef.current = true;
       }
+      stardustEarnedRef.current = earned;
+      setStardustPopupVisible(true);
     } catch (err: any) {
       const remaining = err?.response?.data?.remaining_seconds;
       if (remaining) {
@@ -206,17 +212,27 @@ export default function PlanetScreen() {
     try {
       const res = await setMood(partnershipId, mood);
       setMoodOverlayVisible(false);
+      const earned = res.stardust - (partnership?.stardust ?? 0);
       setPartnership((prev) =>
         prev ? { ...prev, stardust: res.stardust, streak: res.streak } : prev
       );
       if (res.streak_incremented) {
         prevStreakRef.current = res.streak.current_count;
-        setStreakPopupVisible(true);
+        pendingStreakRef.current = true;
       }
+      stardustEarnedRef.current = earned;
+      setStardustPopupVisible(true);
     } catch {
       // revert on failure
     }
   };
+  const handleStardustDismiss = useCallback(() => {
+    setStardustPopupVisible(false);
+    if (pendingStreakRef.current) {
+      pendingStreakRef.current = false;
+      setStreakPopupVisible(true);
+    }
+  }, []);
 
   const handleDismissAffection = useCallback(async () => {
     const current = unreadAffections[0];
@@ -280,7 +296,7 @@ export default function PlanetScreen() {
           <Pressable
             testID="journal-button"
             style={styles.journalButton}
-            onPress={() => navigation.navigate('Journal', { partnershipId, partnerName: partnerB, currentStreakCount: partnership?.streak?.current_count ?? 0 })}
+            onPress={() => navigation.navigate('Journal', { partnershipId, partnerName: partnerB, currentStreakCount: partnership?.streak?.current_count ?? 0, currentStardust: partnership?.stardust ?? 0 })}
           >
             <MaterialCommunityIcons name="book-open-variant" size={moderateScale(22)} color={colors.starGlow} />
           </Pressable>
@@ -491,6 +507,13 @@ export default function PlanetScreen() {
           onDismiss={handleDismissAffection}
         />
       )}
+
+      <ActivityPopup
+        visible={stardustPopupVisible}
+        title={`✨ +${stardustEarnedRef.current} Stardust`}
+        subtitle="Keep connecting to earn more"
+        onDismiss={handleStardustDismiss}
+      />
 
       <ActivityPopup
         visible={streakPopupVisible}
