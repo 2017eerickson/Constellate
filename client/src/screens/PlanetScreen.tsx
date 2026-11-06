@@ -205,7 +205,7 @@ export default function PlanetScreen() {
         setAffectionCooldown(remaining);
       }
     }
-  }, [partnershipId]);
+  }, [partnershipId, partnership]);
 
   const handleMoodSelect = async (mood: string) => {
     setMyMood(mood);
