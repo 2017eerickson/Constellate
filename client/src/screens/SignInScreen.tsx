@@ -3,6 +3,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -14,12 +15,14 @@ import { ActionButton } from '../components';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function SignInScreen() {
   const { signIn, signInWithEmail, register } = useAuth();
   const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -56,7 +59,7 @@ export default function SignInScreen() {
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Something went wrong';
-      Alert.alert(isRegisterMode ? 'Registration Failed' : 'Sign In Failed', message);
+      Alert.alert(isRegisterMode ? 'Registration Failed' : 'Sign In Failed', (error as { status: number }).status === 400 ? 'Password is too weak. Password must be 8 characters long and it cant only contain numbers' : message);
     } finally {
       setIsSubmitting(false);
     }
@@ -100,29 +103,42 @@ export default function SignInScreen() {
           editable={!busy}
         />
       )}
+      <View style={{ position: 'relative', width: '80%' }}>
+        <TextInput
+          style={commonStyles.inputBordered}
+          placeholder="Email"
+          testID="email-input"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={!busy}
+        />
+      </View>
+      <View style={{ position: 'relative', width: '80%' }}>
+        <TextInput
+          style={commonStyles.inputBordered}
+          placeholder="Password"
+          testID="password-input"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!showPassword}
+          editable={!busy}
+        />
+        <Pressable
+          onPress={() => setShowPassword(!showPassword)}
+          disabled={busy}
+          style={{ position: 'absolute', right: 10, top: 12 }}
+        >
+          <Ionicons
+              name={showPassword ? 'eye' : 'eye-off'}
+              size={24}
+              color={colors.neutral}
+            />
+        </Pressable>
 
-      <TextInput
-        style={commonStyles.inputBordered}
-        placeholder="Email"
-        testID="email-input"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        editable={!busy}
-      />
-
-      <TextInput
-        style={commonStyles.inputBordered}
-        placeholder="Password"
-        testID="password-input"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        editable={!busy}
-      />
-
+      </View>
       <ActionButton
         onPress={handleEmailSubmit}
         text={isRegisterMode ? 'Create Account' : 'Sign In'}

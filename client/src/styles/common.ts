@@ -56,7 +56,7 @@ export const commonStyles = StyleSheet.create({
     marginBottom: scale(10),
   },
   inputBordered: {
-    width: '80%',
+    width: '100%',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: scale(8),
