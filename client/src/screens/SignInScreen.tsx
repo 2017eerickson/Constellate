@@ -59,7 +59,9 @@ export default function SignInScreen() {
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Something went wrong';
-      Alert.alert(isRegisterMode ? 'Registration Failed' : 'Sign In Failed', (error as { status: number }).status === 400 ? 'Password is too weak. Password must be 8 characters long and it cant only contain numbers' : message);
+      Alert.alert(isRegisterMode ? 'Registration Failed' : 'Sign In Failed', 
+        (error as { status: number }).status === 400 ? 'Password is too weak. Password must be 8 characters long and it cant only contain numbers' 
+        : (error as { status: number }).status === 401 ? 'Username or password is incorrect' : message);
     } finally {
       setIsSubmitting(false);
     }
@@ -93,6 +95,7 @@ export default function SignInScreen() {
       </View>
 
       {isRegisterMode && (
+      <View style={{ position: 'relative', width: '80%' }}>
         <TextInput
           style={commonStyles.inputBordered}
           placeholder="First Name"
@@ -102,6 +105,7 @@ export default function SignInScreen() {
           autoCapitalize="words"
           editable={!busy}
         />
+      </View>
       )}
       <View style={{ position: 'relative', width: '80%' }}>
         <TextInput
@@ -129,7 +133,7 @@ export default function SignInScreen() {
         <Pressable
           onPress={() => setShowPassword(!showPassword)}
           disabled={busy}
-          style={{ position: 'absolute', right: 10, top: 12 }}
+          style={{ position: 'absolute', justifyContent: 'center' , right: scale(12), top: 0, bottom: 0 }}
         >
           <Ionicons
               name={showPassword ? 'eye' : 'eye-off'}
