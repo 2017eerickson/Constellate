@@ -174,16 +174,18 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
             "relation": str,
             "streak": dict | null,
             "stardust": int,
+            "anniversary": str | null,
             "started_at": str,
             "ended_at": str | null
             "special_dates": list,  — list of special dates (e.g. anniversaries, birthdays) in ISO 8601 format
         }
 
-    PATCH — Update partnership status and/or relation
+    PATCH — Update partnership status, anniversary and/or relation
     REQUEST BODY:
         {
             "status": str    (optional) — "active" | "paused" | "ended"
             "relation": str  (optional) — free-text label (max 50 chars)
+            "anniversary": str | null  (optional) — date in ISO 8601 format
         }
     RETURN VALUE:
         Same as GET
@@ -220,8 +222,9 @@ class PartnershipDetailView(generics.RetrieveUpdateDestroyAPIView):
 
         new_status = serializer.validated_data.get('status')
         new_relation = serializer.validated_data.get('relation')
+        new_aniversary = serializer.validated_data.get('anniversary')
 
-        if not new_status and not new_relation:
+        if not new_status and not new_relation and not new_aniversary:
             return Response(
                 {'error': 'No fields to update.'},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -344,3 +347,12 @@ class SpecialDateDetailView(generics.RetrieveUpdateDestroyAPIView):
             models.Q(partnership__initiator=self.request.user)
             | models.Q(partnership__partner=self.request.user),
         )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        if (
+            instance.title.lower() == 'anniversary'
+            and 'date' in serializer.validated_data
+        ):
+            instance.partnership.anniversary = instance.date
+            instance.partnership.save(update_fields=['anniversary'])

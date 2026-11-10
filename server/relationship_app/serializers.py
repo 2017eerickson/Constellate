@@ -29,6 +29,7 @@ class PartnershipSerializer(serializers.ModelSerializer):
     partner = UserSerializer(read_only=True)
     streak = StreakSerializer(read_only=True)
     stardust = serializers.SerializerMethodField()
+    anniversary = serializers.DateField(format='%Y-%m-%d', required=False, allow_null=True)
     special_dates = SpecialDateSerializer(many=True, read_only=True)
 
     class Meta:
