@@ -2,6 +2,7 @@ from django.urls import path
 
 from relationship_app.views import (
     ConnectView,
+    MetamourLinksView,
     PartnershipDetailView,
     PartnershipListView,
     SpecialDateDetailView,
@@ -10,6 +11,7 @@ from relationship_app.views import (
 
 urlpatterns = [
     path('connect/', ConnectView.as_view(), name='partnership-connect'),
+    path('metamour-links/', MetamourLinksView.as_view(), name='metamour-links'),
     path('', PartnershipListView.as_view(), name='partnership-list'),
     path('<int:pk>/', PartnershipDetailView.as_view(), name='partnership-detail'),
     path(
