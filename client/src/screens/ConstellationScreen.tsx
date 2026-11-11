@@ -16,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { getPartnerships } from '../services/partnerships';
+import { getMetamours, getPartnerships } from '../services/partnerships';
 import { getUnreadCounts, UnreadCounts } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
@@ -100,6 +100,7 @@ export default function ConstellationScreen() {
   const { user } = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const [partnerships, setPartnerships] = useState<Partnership[]>([]);
+  const [metamours, setMetamours] = useState<number[][]>([]);
   const [unreadCounts, setUnreadCounts] = useState<UnreadCounts>({});
   const [selectedStar, setSelectedStar] = useState<StarData | null>(null);
   const starsRef = useRef<StarData[]>([]);
@@ -132,7 +133,10 @@ export default function ConstellationScreen() {
   const fetchData = useCallback(() => {
     getPartnerships().then(setPartnerships).catch(() => {});
     getUnreadCounts().then(setUnreadCounts).catch(() => {});
+    getMetamours().then(setMetamours).catch(() => {});
   }, []);
+
+  console.log(metamours);
 
   useEffect(() => {
     fetchData();
@@ -144,6 +148,19 @@ export default function ConstellationScreen() {
     starsRef.current = laid;
     return laid;
   }, [partnerships, user, unreadCounts]);
+
+  // TODO: metamour constellation layout — commented out for MVP
+  // const userPkToStar = useMemo(() => {
+  //   const map = new Map<number, StarData>();
+  //   for (const s of stars) {
+  //     if (s.isSoulmate || !user) continue;
+  //     const partnerPk = s.partnership.initiator.id === user.id
+  //       ? s.partnership.partner.id
+  //       : s.partnership.initiator.id;
+  //     map.set(partnerPk, s);
+  //   }
+  //   return map;
+  // }, [stars, user]);
 
   const navigateToPlanet = useCallback(
     (partnershipId: number) => {
@@ -287,6 +304,19 @@ export default function ConstellationScreen() {
             />
           </Rect>
 
+          {/* TODO: metamour constellation lines — commented out for MVP */}
+          {/* {metamours.map(([pkA, pkB]) => {
+            const a = userPkToStar.get(pkA);
+            const b = userPkToStar.get(pkB);
+            if (!a || !b) return null;
+            return (
+              <React.Fragment key={`meta-${pkA}-${pkB}`}>
+                <Line p1={vec(a.x, a.y)} p2={vec(b.x, b.y)} color={colors.lineGlow} strokeWidth={4} />
+                <Line p1={vec(a.x, a.y)} p2={vec(b.x, b.y)} color={colors.lineMuted} strokeWidth={1} />
+              </React.Fragment>
+            );
+          })} */}
+
           {/* Lines from each partner star to center soulmate */}
           {stars
             .filter((s) => !s.isSoulmate)
@@ -306,6 +336,7 @@ export default function ConstellationScreen() {
                   color={colors.lineMuted}
                   strokeWidth={1.5}
                 />
+                
               </React.Fragment>
             ))}
 

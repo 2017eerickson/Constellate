@@ -80,3 +80,10 @@ export async function updatePartnership(
   );
   return data;
 }
+
+export async function getMetamours(): Promise<number[][]> {
+  const { data } = await apiClient.get<number[][]>(
+    `/relationships/metamour-links/`,
+  );
+  return data;
+}

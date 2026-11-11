@@ -3,6 +3,7 @@ from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from datetime import date
 
@@ -356,3 +357,38 @@ class SpecialDateDetailView(generics.RetrieveUpdateDestroyAPIView):
         ):
             instance.partnership.anniversary = instance.date
             instance.partnership.save(update_fields=['anniversary'])
+
+
+class MetamourLinksView(APIView):
+    """
+    SUMMARY:        Returns pairs of the user's active partners who are also
+                    actively partnered with each other (metamour links).
+    ENDPOINT:       GET /api/v1/relationships/metamour-links/
+    AUTHENTICATION: Bearer <access_token>
+    RETURN VALUE:   [[pk_a, pk_b], ...]
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        initiated = Partnership.objects.filter(
+            initiator=user, status=PartnershipStatus.ACTIVE ,
+        ).exclude(relation=RelationType.SOULMATE).values_list('partner_id', flat=True)
+
+        received = Partnership.objects.filter(
+            partner=user, status=PartnershipStatus.ACTIVE,
+        ).exclude(relation=RelationType.SOULMATE).values_list('initiator_id', flat=True)
+
+        partner_ids = set(initiated) | set(received)
+
+        if len(partner_ids) < 1:
+            return Response([])
+
+        cross_links = Partnership.objects.filter(
+            initiator_id__in=partner_ids,
+            partner_id__in=partner_ids,
+            status=PartnershipStatus.ACTIVE,
+        ).exclude(relation=RelationType.SOULMATE).values_list('initiator_id', 'partner_id')
+
+        return Response([list(pair) for pair in cross_links])
