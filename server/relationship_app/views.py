@@ -373,7 +373,7 @@ class MetamourLinksView(APIView):
         user = request.user
 
         initiated = Partnership.objects.filter(
-            initiator=user, status=PartnershipStatus.ACTIVE,
+            initiator=user, status=PartnershipStatus.ACTIVE ,
         ).exclude(relation=RelationType.SOULMATE).values_list('partner_id', flat=True)
 
         received = Partnership.objects.filter(
@@ -382,7 +382,7 @@ class MetamourLinksView(APIView):
 
         partner_ids = set(initiated) | set(received)
 
-        if len(partner_ids) < 2:
+        if len(partner_ids) < 1:
             return Response([])
 
         cross_links = Partnership.objects.filter(
