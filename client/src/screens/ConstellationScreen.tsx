@@ -136,8 +136,6 @@ export default function ConstellationScreen() {
     getMetamours().then(setMetamours).catch(() => {});
   }, []);
 
-  console.log(metamours);
-
   useEffect(() => {
     fetchData();
   }, [fetchData]);
