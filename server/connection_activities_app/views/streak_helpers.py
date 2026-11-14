@@ -25,12 +25,19 @@ def record_streak_activity(user, partnership):
     )
 
     # Check if both partners were active today
-    both_active = (
-        StreakActivity.objects.filter(
+    is_soulmate = partnership.initiator_id == partnership.partner_id
+    if is_soulmate:
+        both_active = StreakActivity.objects.filter(
             streak=streak,
             last_activity_at__date=today,
-        ).count() == 2
-    )
+        ).exists()
+    else:
+        both_active = (
+            StreakActivity.objects.filter(
+                streak=streak,
+                last_activity_at__date=today,
+            ).count() == 2
+        )
 
     already_completed_today = (
         streak.last_completed_at and streak.last_completed_at.date() == today
