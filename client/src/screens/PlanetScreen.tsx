@@ -292,15 +292,13 @@ export default function PlanetScreen() {
           <Text style={styles.daysText}>{daysInOrbit} days in orbit</Text>
         </View>
 
-        {!isSoulmate && (
-          <Pressable
-            testID="journal-button"
-            style={styles.journalButton}
-            onPress={() => navigation.navigate('Journal', { partnershipId, partnerName: partnerB, currentStreakCount: partnership?.streak?.current_count ?? 0, currentStardust: partnership?.stardust ?? 0 })}
-          >
-            <MaterialCommunityIcons name="book-open-variant" size={moderateScale(22)} color={colors.starGlow} />
-          </Pressable>
-        )}
+        <Pressable
+          testID="journal-button"
+          style={styles.journalButton}
+          onPress={() => navigation.navigate('Journal', { partnershipId, partnerName: isSoulmate ? 'You' : partnerB, currentStreakCount: partnership?.streak?.current_count ?? 0, currentStardust: partnership?.stardust ?? 0 })}
+        >
+          <MaterialCommunityIcons name="book-open-variant" size={moderateScale(22)} color={colors.starGlow} />
+        </Pressable>
       </View>
 
       {/* Planet Canvas */}

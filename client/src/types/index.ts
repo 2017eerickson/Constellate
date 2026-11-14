@@ -93,6 +93,7 @@ export interface JournalResponse {
   my_answer: JournalAnswer | null;
   partner_answer: JournalAnswer | null;
   both_answered: boolean;
+  is_soulmate?: boolean;
   stardust?: number;
   streak?: Streak;
   streak_incremented?: boolean;

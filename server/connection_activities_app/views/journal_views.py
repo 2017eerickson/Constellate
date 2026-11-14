@@ -23,24 +23,30 @@ def build_journal_response(pq, request_user, partnership):
         user=request_user,
     ).first()
 
-    partner_user = (
-        partnership.partner if partnership.initiator == request_user
-        else partnership.initiator
-    )
-    partner_answer = Answer.objects.filter(
-        partnership=partnership,
-        question=pq.question,
-        user=partner_user,
-    ).first()
+    is_soulmate = partnership.initiator_id == partnership.partner_id
 
-    both_answered = my_answer is not None and partner_answer is not None
+    if is_soulmate:
+        both_answered = my_answer is not None
+        partner_answer = None
+    else:
+        partner_user = (
+            partnership.partner if partnership.initiator == request_user
+            else partnership.initiator
+        )
+        partner_answer = Answer.objects.filter(
+            partnership=partnership,
+            question=pq.question,
+            user=partner_user,
+        ).first()
+        both_answered = my_answer is not None and partner_answer is not None
 
     return {
         'partnership_question_id': pq.id,
         'question': QuestionSerializer(pq.question).data,
         'my_answer': AnswerSerializer(my_answer).data if my_answer else None,
-        'partner_answer': AnswerSerializer(partner_answer).data if both_answered else None,
+        'partner_answer': AnswerSerializer(partner_answer).data if both_answered and partner_answer else None,
         'both_answered': both_answered,
+        'is_soulmate': is_soulmate,
     }
 
 
@@ -127,13 +133,14 @@ class SubmitAnswerView(APIView):
 
         streak = record_streak_activity(request.user, partnership)
 
-        # Check if both partners have now answered
+        # Check if question should be completed
+        is_soulmate = partnership.initiator_id == partnership.partner_id
         answer_count = Answer.objects.filter(
             partnership=partnership,
             question=pq.question,
         ).count()
 
-        if answer_count >= 2:
+        if is_soulmate or answer_count >= 2:
             pq.status = PartnershipQuestion.Status.COMPLETED
             pq.completed_at = timezone.now()
             pq.save()
