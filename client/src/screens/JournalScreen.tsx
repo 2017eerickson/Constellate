@@ -159,7 +159,7 @@ export default function JournalScreen() {
             </View>
           )}
 
-          {hasAnswered && !bothAnswered && (
+          {hasAnswered && !bothAnswered && !journal?.is_soulmate && (
             <View style={styles.partnerBubbleRow}>
               <View style={[styles.partnerBubble, styles.waitingBubble]}>
                 <Text style={styles.waitingText}>Waiting for {partnerName} to answer...</Text>
@@ -170,7 +170,9 @@ export default function JournalScreen() {
           {bothAnswered && (
             <View style={styles.completedRow}>
               <MaterialCommunityIcons name="star-four-points" size={moderateScale(14)} color={colors.starGlow} />
-              <Text style={styles.completedText}>Both answered! New question tomorrow.</Text>
+              <Text style={styles.completedText}>
+                {journal?.is_soulmate ? 'Answered! New question tomorrow.' : 'Both answered! New question tomorrow.'}
+              </Text>
             </View>
           )}
         </ScrollView>

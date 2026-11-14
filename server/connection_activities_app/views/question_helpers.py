@@ -13,6 +13,15 @@ CATEGORY_ORDER = [
     'growth',
 ]
 
+SOULMATE_CATEGORY_ORDER = [
+    'self_worth',
+    'emotional_awareness',
+    'needs_boundaries',
+    'identity_values',
+    'nonmonogamy_journey',
+    'self_care_joy',
+]
+
 
 def get_or_assign_current_question(partnership):
     """
@@ -46,7 +55,11 @@ def get_or_assign_current_question(partnership):
     if recent_completed:
         return recent_completed
 
-    # 3. Determine next category index
+    # 3. Pick category list based on partnership type
+    is_soulmate = partnership.initiator_id == partnership.partner_id
+    categories = SOULMATE_CATEGORY_ORDER if is_soulmate else CATEGORY_ORDER
+
+    # 4. Determine next category index
     last_pq = PartnershipQuestion.objects.filter(
         partnership=partnership,
         status__in=[
@@ -55,20 +68,23 @@ def get_or_assign_current_question(partnership):
         ],
     ).order_by('-assigned_at').first()
 
-    next_index = (last_pq.category_order_index + 1) % len(CATEGORY_ORDER) if last_pq else 0
+    next_index = (last_pq.category_order_index + 1) % len(categories) if last_pq else 0
 
-    # 4. Get already-used question IDs
+    # 5. Get already-used question IDs
     used_ids = set(
         PartnershipQuestion.objects.filter(partnership=partnership)
         .values_list('question_id', flat=True)
     )
 
-    # 5. Try each category starting from next_index
-    for offset in range(len(CATEGORY_ORDER)):
-        cat_index = (next_index + offset) % len(CATEGORY_ORDER)
-        category = CATEGORY_ORDER[cat_index]
+    # 6. Try each category starting from next_index
+    for offset in range(len(categories)):
+        cat_index = (next_index + offset) % len(categories)
+        category = categories[cat_index]
 
-        available = Question.objects.filter(label=category).exclude(id__in=used_ids)
+        available = Question.objects.filter(
+            label=category,
+            is_soulmate=is_soulmate,
+        ).exclude(id__in=used_ids)
 
         if available.exists():
             question = available.order_by('?').first()
@@ -78,7 +94,7 @@ def get_or_assign_current_question(partnership):
                 category_order_index=cat_index,
             )
 
-    # 6. All 60 exhausted — reset tracking and start over
+    # 7. All questions exhausted — reset tracking and start over
     PartnershipQuestion.objects.filter(partnership=partnership).delete()
 
     return get_or_assign_current_question(partnership)
