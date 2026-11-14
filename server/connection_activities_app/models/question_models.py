@@ -5,6 +5,7 @@ from django.db import models
 class Question(models.Model):
     label = models.CharField(max_length=50)
     question_text = models.TextField()
+    is_soulmate = models.BooleanField(default=False)
 
     def __str__(self):
         return f"[{self.label}] {self.question_text}"
