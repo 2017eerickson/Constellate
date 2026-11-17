@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { useFonts, PoiretOne_400Regular } from '@expo-google-fonts/poiret-one';
+import { useFonts, SyneMono_400Regular } from '@expo-google-fonts/syne-mono';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -119,7 +119,7 @@ function AppNavigator() {
 }
 
 export default function App() {
-  const [fontsLoaded] = useFonts({ PoiretOne_400Regular });
+  const [fontsLoaded] = useFonts({ SyneMono_400Regular });
 
   useEffect(() => {
     configureGoogleSignIn();

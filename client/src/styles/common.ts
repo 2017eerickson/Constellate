@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { scale, moderateScale, verticalScale } from './scale';
 import { colors } from './colors';
+import { APP_FONT } from './fonts';
 
 export const commonStyles = StyleSheet.create({
   // Screen containers
@@ -49,6 +50,7 @@ export const commonStyles = StyleSheet.create({
 
   // Inputs
   input: {
+    fontFamily: APP_FONT,
     backgroundColor: colors.cardBg,
     borderRadius: scale(8),
     padding: scale(12),

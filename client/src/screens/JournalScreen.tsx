@@ -19,6 +19,7 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 import { getCurrentQuestion, submitAnswer, skipQuestion } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
+import { APP_FONT } from '../styles/fonts';
 import { moderateScale, verticalScale } from '../styles/scale';
 import ActivityPopup from '../components/ActivityPopup';
 import type { JournalResponse } from '../types';
@@ -351,6 +352,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
+    fontFamily: APP_FONT,
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: moderateScale(20),
     paddingHorizontal: moderateScale(16),

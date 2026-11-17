@@ -34,6 +34,7 @@ import {
 } from '../components';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
+import { APP_FONT } from '../styles/fonts';
 import { commonStyles } from '../styles/common';
 
 type EditingMode = 'none' | 'partnership' | 'dates';
@@ -258,7 +259,7 @@ export default function PartnerDetailScreen() {
                         style={styles.cancelIcon}
                         onPress={cancelEditing}
                       >
-                        <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
+                        <MaterialIcons name="close" size={scale(20)} color={colors.white} />
                       </TouchableOpacity>
                       <TouchableOpacity
                         testID="save-partnership-button"
@@ -298,6 +299,7 @@ export default function PartnerDetailScreen() {
                       setItems={setStatusItems}
                       style={styles.dropdown}
                       dropDownContainerStyle={styles.dropdownContainer}
+                      textStyle={{ fontFamily: APP_FONT }}
                       listMode="SCROLLVIEW"
                     />
                   </>
@@ -391,7 +393,7 @@ export default function PartnerDetailScreen() {
               {editingMode === 'dates' && (
                 <View style={styles.dateActions}>
                   <TouchableOpacity testID="cancel-dates-button" style={styles.cancelIcon} onPress={cancelEditing}>
-                    <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
+                    <MaterialIcons name="close" size={scale(20)} color={colors.white} />
                   </TouchableOpacity>
                   <TouchableOpacity testID="save-dates-button" style={styles.saveIcon} onPress={handleSaveDates}>
                     <MaterialIcons name="save" size={scale(20)} color={colors.white} />
@@ -404,6 +406,7 @@ export default function PartnerDetailScreen() {
                 <TextInput
                   style={commonStyles.input}
                   placeholder="Title (e.g. First Trip)"
+                  placeholderTextColor={colors.textSecondary}
                   testID="add-date-title-input"
                   value={title}
                   onChangeText={setTitle}
@@ -411,6 +414,7 @@ export default function PartnerDetailScreen() {
                 <TextInput
                   style={commonStyles.input}
                   placeholder="Date YYYY-MM-DD"
+                  placeholderTextColor={colors.textSecondary}
                   testID="add-date-input"
                   value={date}
                   onChangeText={setDate}
@@ -445,12 +449,12 @@ const styles = StyleSheet.create({
     gap: scale(8),
   },
   cancelIcon: {
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.error,
     borderRadius: scale(6),
     padding: scale(6),
   },
   saveIcon: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.success,
     borderRadius: scale(6),
     padding: scale(6),
   },
@@ -458,6 +462,7 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   editInput: {
+    fontFamily: APP_FONT,
     backgroundColor: colors.background,
     borderRadius: scale(8),
     padding: scale(10),
@@ -496,6 +501,7 @@ const styles = StyleSheet.create({
   },
   dateEditInput: {
     flex: 1,
+    fontFamily: APP_FONT,
     backgroundColor: colors.background,
     borderRadius: scale(6),
     padding: scale(8),
@@ -503,6 +509,7 @@ const styles = StyleSheet.create({
   },
   dateEditInputSmall: {
     width: scale(110),
+    fontFamily: APP_FONT,
     backgroundColor: colors.background,
     borderRadius: scale(6),
     padding: scale(8),

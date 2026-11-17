@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
+import { StyleSheet, TextStyle, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
 import AppText from './AppText';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
@@ -12,6 +12,7 @@ interface ActionButtonProps {
   disabled?: boolean;
   variant?: 'primary' | 'secondary' | 'google';
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   testID?: string;
 }
 
@@ -23,6 +24,7 @@ export default function ActionButton({
   disabled = false,
   variant = 'primary',
   style,
+  textStyle,
   testID,
 }: ActionButtonProps) {
   return (
@@ -42,6 +44,7 @@ export default function ActionButton({
         style={[
           styles.text,
           variant === 'secondary' && styles.secondaryText,
+          textStyle,
         ]}
       >
         {loading && loadingText ? loadingText : text}

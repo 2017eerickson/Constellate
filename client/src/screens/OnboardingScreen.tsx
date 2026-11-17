@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { ActionButton, AppText as Text, LandingBackground } from '../components';
 import { scale, moderateScale } from '../styles/scale';
+import { APP_FONT } from '../styles/fonts';
 import { commonStyles } from '../styles/common';
 
 export default function OnboardingScreen() {
@@ -122,6 +123,7 @@ const styles = StyleSheet.create({
     marginBottom: scale(16),
   },
   frostedInput: {
+    fontFamily: APP_FONT,
     backgroundColor: 'rgba(255,255,255,0.15)',
     borderColor: 'rgba(255,255,255,0.3)',
     color: '#fff',

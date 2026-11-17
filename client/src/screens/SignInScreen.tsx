@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { ActionButton, AppText as Text, LandingBackground } from '../components';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
+import { APP_FONT } from '../styles/fonts';
 import { commonStyles } from '../styles/common';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -212,7 +213,6 @@ const styles = StyleSheet.create({
   },
   subtitleSpacing: {
     fontSize: moderateScale(17.6),
-    fontWeight: 'bold',
     color: '#fff',
     marginBottom: scale(40),
   },
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.15)',
     borderColor: 'rgba(255,255,255,0.3)',
     color: '#fff',
-    fontFamily: 'PoiretOne_400Regular',
+    fontFamily: APP_FONT,
   },
   emailButton: {
     width: '80%',

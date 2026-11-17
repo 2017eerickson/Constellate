@@ -51,10 +51,17 @@ export default function ConnectScreen() {
     if (!partnerCode.trim()) return;
     setConnecting(true);
     try {
+      // Convert MM-DD-YYYY to YYYY-MM-DD for the backend
+      let formattedAnniversary: string | undefined;
+      const raw = anniversary.trim();
+      if (raw) {
+        const [mm, dd, yyyy] = raw.split('-');
+        formattedAnniversary = `${yyyy}-${mm}-${dd}`;
+      }
       await connectPartner(
         partnerCode.trim(),
         relation.trim() || undefined,
-        anniversary.trim() || undefined,
+        formattedAnniversary,
       );
       setPartnerCode('');
       setRelation('');
@@ -157,6 +164,7 @@ export default function ConnectScreen() {
         <TextInput
           style={commonStyles.input}
           placeholder="Partner code"
+          placeholderTextColor={colors.textSecondary}
           testID="partner-code-input"
           value={partnerCode}
           onChangeText={setPartnerCode}
@@ -166,6 +174,7 @@ export default function ConnectScreen() {
         <TextInput
           style={commonStyles.input}
           placeholder="romantic, platonic, metamour..."
+          placeholderTextColor={colors.textSecondary}
           testID="relation-input"
           value={relation}
           onChangeText={setRelation}
@@ -173,10 +182,19 @@ export default function ConnectScreen() {
         />
         <TextInput
           style={commonStyles.input}
-          placeholder="Anniversary YYYY-MM-DD (optional)"
+          placeholder="Anniversary MM-DD-YYYY (optional)"
+          placeholderTextColor={colors.textSecondary}
           testID="anniversary-input"
           value={anniversary}
-          onChangeText={setAnniversary}
+          onChangeText={(text) => {
+            const digits = text.replace(/\D/g, '');
+            let formatted = digits;
+            if (digits.length > 2) formatted = digits.slice(0, 2) + '-' + digits.slice(2);
+            if (digits.length > 4) formatted = digits.slice(0, 2) + '-' + digits.slice(2, 4) + '-' + digits.slice(4, 8);
+            setAnniversary(formatted);
+          }}
+          keyboardType="number-pad"
+          maxLength={10}
           keyboardType="numbers-and-punctuation"
         />
         <ActionButton
