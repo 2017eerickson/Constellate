@@ -53,9 +53,11 @@ export default function PartnersScreen() {
   }
 
   const soulmate = partnerships.find((p) => p.relation === 'soulmate');
-  const active = partnerships.filter(
-    (p) => p.relation !== 'soulmate' && (p.status === 'active' || p.status === 'paused'),
-  );
+  const active = partnerships
+    .filter(
+      (p) => p.relation !== 'soulmate' && (p.status === 'active' || p.status === 'paused'),
+    )
+    .sort((a, b) => getDaysInOrbit(b) - getDaysInOrbit(a));
 
   function getDisplayName(partnership: Partnership): string {
     const other =
