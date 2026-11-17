@@ -5,19 +5,20 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFonts, Megrim_400Regular } from '@expo-google-fonts/megrim';
 import { useAuth } from '../context/AuthContext';
-import { ActionButton, LandingBackground } from '../components';
+import { ActionButton, AppText as Text, LandingBackground } from '../components';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function SignInScreen() {
+  const [fontsLoaded] = useFonts({ Megrim_400Regular });
   const { signIn, signInWithEmail, register } = useAuth();
   const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,7 +76,12 @@ export default function SignInScreen() {
       style={[commonStyles.screenCentered, styles.transparent]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Constellate</Text>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>Constellate</Text>
+        <Text style={[styles.title, styles.titleShadow1]}>Constellate</Text>
+        <Text style={[styles.title, styles.titleShadow2]}>Constellate</Text>
+        <Text style={[styles.title, styles.titleShadow3]}>Constellate</Text>
+      </View>
       <Text style={[commonStyles.subtitle, styles.subtitleSpacing, styles.lightText]}>Your relationships, gamified</Text>
 
       <ActionButton
@@ -177,16 +183,37 @@ const styles = StyleSheet.create({
   transparent: {
     backgroundColor: 'transparent',
   },
-  title: {
-    fontSize: moderateScale(36),
-    fontWeight: 'bold',
+  titleContainer: {
+    position: 'relative',
     marginBottom: moderateScale(8),
+  },
+  title: {
+    fontSize: moderateScale(58.4),
+    fontFamily: 'Megrim_400Regular',
     color: '#fff',
+  },
+  titleShadow1: {
+    position: 'absolute',
+    left: 0.8,
+    top: 0,
+  },
+  titleShadow2: {
+    position: 'absolute',
+    left: 0,
+    top: 0.8,
+  },
+  titleShadow3: {
+    position: 'absolute',
+    left: 0.8,
+    top: 0.8,
   },
   lightText: {
     color: 'rgba(255,255,255,0.8)',
   },
   subtitleSpacing: {
+    fontSize: moderateScale(17.6),
+    fontWeight: 'bold',
+    color: '#fff',
     marginBottom: scale(40),
   },
   googleButton: {
@@ -215,6 +242,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.15)',
     borderColor: 'rgba(255,255,255,0.3)',
     color: '#fff',
+    fontFamily: 'PoiretOne_400Regular',
   },
   emailButton: {
     width: '80%',

@@ -4,11 +4,11 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { AppText as Text } from '../components';
 import {
   acceptPartnership,
   connectPartner,

@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
+import { StyleSheet, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
+import AppText from './AppText';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 
@@ -37,14 +38,14 @@ export default function ActionButton({
       onPress={onPress}
       disabled={loading || disabled}
     >
-      <Text
+      <AppText
         style={[
           styles.text,
           variant === 'secondary' && styles.secondaryText,
         ]}
       >
         {loading && loadingText ? loadingText : text}
-      </Text>
+      </AppText>
     </TouchableOpacity>
   );
 }

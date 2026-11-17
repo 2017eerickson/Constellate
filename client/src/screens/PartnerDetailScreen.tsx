@@ -4,12 +4,12 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { AppText as Text } from '../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { MaterialIcons } from '@expo/vector-icons';

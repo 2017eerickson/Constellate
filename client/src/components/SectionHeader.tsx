@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ViewStyle, StyleProp } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ViewStyle, StyleProp } from 'react-native';
+import { default as Text } from './AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';

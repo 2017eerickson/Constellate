@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View, ViewStyle, StyleProp } from 'react-native';
+import { StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
+import { default as Text } from './AppText';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 

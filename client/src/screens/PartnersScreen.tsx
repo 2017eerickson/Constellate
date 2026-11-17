@@ -3,10 +3,10 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { AppText as Text } from '../components';
 import { useAuth } from '../context/AuthContext';
 import { getPartnerships } from '../services/partnerships';
 import { Partnership } from '../types';

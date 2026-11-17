@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
-import { Card, ActionButton } from '../components';
+import { AppText as Text, Card, ActionButton } from '../components';
 import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';

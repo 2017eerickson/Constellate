@@ -4,11 +4,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   TextInput,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { ActionButton, LandingBackground } from '../components';
+import { ActionButton, AppText as Text, LandingBackground } from '../components';
 import { scale, moderateScale } from '../styles/scale';
 import { commonStyles } from '../styles/common';
 
