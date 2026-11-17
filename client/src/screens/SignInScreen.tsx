@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { ActionButton } from '../components';
+import { ActionButton, LandingBackground } from '../components';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';
@@ -70,12 +70,13 @@ export default function SignInScreen() {
   const busy = isGoogleSigningIn || isSubmitting;
 
   return (
+    <LandingBackground>
     <KeyboardAvoidingView
-      style={commonStyles.screenCentered}
+      style={[commonStyles.screenCentered, styles.transparent]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Text style={styles.title}>Constellate</Text>
-      <Text style={[commonStyles.subtitle, styles.subtitleSpacing]}>Your relationships, gamified</Text>
+      <Text style={[commonStyles.subtitle, styles.subtitleSpacing, styles.lightText]}>Your relationships, gamified</Text>
 
       <ActionButton
         variant="google"
@@ -97,8 +98,9 @@ export default function SignInScreen() {
       {isRegisterMode && (
       <View style={{ position: 'relative', width: '80%' }}>
         <TextInput
-          style={commonStyles.inputBordered}
+          style={[commonStyles.inputBordered, styles.frostedInput]}
           placeholder="First Name"
+          placeholderTextColor="rgba(255,255,255,0.5)"
           testID="first-name-input"
           value={firstName}
           onChangeText={setFirstName}
@@ -109,8 +111,9 @@ export default function SignInScreen() {
       )}
       <View style={{ position: 'relative', width: '80%' }}>
         <TextInput
-          style={commonStyles.inputBordered}
+          style={[commonStyles.inputBordered, styles.frostedInput]}
           placeholder="Email"
+          placeholderTextColor="rgba(255,255,255,0.5)"
           testID="email-input"
           value={email}
           onChangeText={setEmail}
@@ -122,8 +125,9 @@ export default function SignInScreen() {
       </View>
       <View style={{ position: 'relative', width: '80%' }}>
         <TextInput
-          style={commonStyles.inputBordered}
+          style={[commonStyles.inputBordered, styles.frostedInput]}
           placeholder="Password"
+          placeholderTextColor="rgba(255,255,255,0.5)"
           testID="password-input"
           value={password}
           onChangeText={setPassword}
@@ -165,14 +169,22 @@ export default function SignInScreen() {
         </Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
+    </LandingBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  transparent: {
+    backgroundColor: 'transparent',
+  },
   title: {
     fontSize: moderateScale(36),
     fontWeight: 'bold',
     marginBottom: moderateScale(8),
+    color: '#fff',
+  },
+  lightText: {
+    color: 'rgba(255,255,255,0.8)',
   },
   subtitleSpacing: {
     marginBottom: scale(40),
@@ -192,12 +204,17 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.borderLight,
+    backgroundColor: 'rgba(255,255,255,0.3)',
   },
   dividerText: {
     marginHorizontal: scale(12),
-    color: colors.textMuted,
+    color: 'rgba(255,255,255,0.6)',
     fontSize: moderateScale(14),
+  },
+  frostedInput: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(255,255,255,0.3)',
+    color: '#fff',
   },
   emailButton: {
     width: '80%',
@@ -208,7 +225,7 @@ const styles = StyleSheet.create({
     padding: undefined,
   },
   toggleText: {
-    color: colors.googleBlue,
+    color: 'rgba(255,255,255,0.8)',
     fontSize: moderateScale(14),
   },
 });
