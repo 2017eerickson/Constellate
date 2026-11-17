@@ -97,7 +97,13 @@ function AppNavigator() {
       <MainStack.Screen
         name="PartnerDetail"
         component={PartnerDetailScreen}
-        options={{ headerShown: true, headerTitle: '' }}
+        options={{
+          headerShown: true,
+          headerTitle: '',
+          headerTransparent: true,
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontFamily: 'SyneMono_400Regular' },
+        }}
       />
       <MainStack.Screen
         name="Planet"
