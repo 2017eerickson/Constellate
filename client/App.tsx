@@ -52,9 +52,9 @@ function MainTabs() {
         tabBarStyle: { paddingBottom: 8, paddingTop: 8, height: 60 },
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarButtonTestID: 'home-tab' }} />
       <Tab.Screen name="Constellation" component={ConstellationScreen} options={{ tabBarButtonTestID: 'constellation-tab' }} />
       <Tab.Screen name="Partners" component={PartnersScreen} options={{ tabBarButtonTestID: 'partners-tab' }}   />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarButtonTestID: 'home-tab' }} />
     </Tab.Navigator>
   );
 }

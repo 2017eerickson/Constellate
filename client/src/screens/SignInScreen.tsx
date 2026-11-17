@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     marginBottom: moderateScale(8),
   },
   title: {
-    fontSize: moderateScale(58.4),
+    fontSize: moderateScale(50.4),
     fontFamily: 'Megrim_400Regular',
     color: '#fff',
   },
