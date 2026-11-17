@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
-import { Card, ActionButton } from '../components';
+import { AppText as Text, Card, ActionButton } from '../components';
+import { getPartnerships } from '../services/partnerships';
 import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';
@@ -13,12 +15,27 @@ import { commonStyles } from '../styles/common';
 type MainStackParamList = {
   Tabs: undefined;
   Settings: undefined;
+  Connect: undefined;
 };
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [hasPending, setHasPending] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+
+  useFocusEffect(
+    useCallback(() => {
+      getPartnerships()
+        .then((data) => {
+          const incoming = data.some(
+            (p) => p.status === 'pending' && p.partner.id === user?.id,
+          );
+          setHasPending(incoming);
+        })
+        .catch(() => {});
+    }, [user?.id]),
+  );
 
   async function handleCopy() {
     if (user?.partner_code) {
@@ -29,12 +46,16 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={commonStyles.screenCentered}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: scale(20) }}>
+      <LinearGradient
+        colors={['#0a0a1a', '#1a1030', '#2a1545']}
+        style={StyleSheet.absoluteFill}
+      />
       <TouchableOpacity
         style={styles.settingsButton}
         onPress={() => navigation.navigate('Settings')}
       >
-        <MaterialCommunityIcons name="cog-outline" size={scale(26)} color={colors.textSecondary} />
+        <MaterialCommunityIcons name="cog-outline" size={scale(26)} color={colors.white} />
       </TouchableOpacity>
 
       <Text style={styles.greeting}>Hey, {user?.first_name}!</Text>
@@ -52,6 +73,16 @@ export default function HomeScreen() {
           style={styles.copyButton}
         />
       </Card>
+
+      <View style={styles.addButtonWrapper}>
+        <ActionButton
+          onPress={() => navigation.navigate('Connect')}
+          text="+ Add a Partner"
+          testID="add-partner-button"
+          style={styles.addButton}
+        />
+        {hasPending && <View style={styles.activityDot} />}
+      </View>
     </View>
   );
 }
@@ -67,6 +98,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(28),
     fontWeight: 'bold',
     marginBottom: scale(40),
+    color: colors.white,
   },
   card: {
     padding: scale(24),
@@ -93,6 +125,30 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(12),
     paddingBottom: scale(8),
     color: colors.textMuted,
+  },
+  addButtonWrapper: {
+    width: '80%',
+    position: 'relative',
+  },
+  addButton: {
+    borderRadius: scale(12),
+    padding: scale(16),
+    borderWidth: 1,
+    borderColor: colors.white,
+  },
+  activityDot: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: scale(12),
+    height: scale(12),
+    borderRadius: scale(6),
+    backgroundColor: colors.error,
+    shadowColor: colors.error,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 8,
+    elevation: 10,
   },
   copyButton: {
     marginLeft: scale(12),

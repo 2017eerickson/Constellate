@@ -3,10 +3,11 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { AppText as Text } from '../components';
 import { useAuth } from '../context/AuthContext';
 import { getPartnerships } from '../services/partnerships';
 import { Partnership } from '../types';
@@ -18,7 +19,7 @@ import {
   StatDisplay,
   StatusBadge,
 } from '../components';
-import { scale, moderateScale } from '../styles/scale';
+import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';
 
@@ -53,9 +54,11 @@ export default function PartnersScreen() {
   }
 
   const soulmate = partnerships.find((p) => p.relation === 'soulmate');
-  const active = partnerships.filter(
-    (p) => p.relation !== 'soulmate' && (p.status === 'active' || p.status === 'paused'),
-  );
+  const active = partnerships
+    .filter(
+      (p) => p.relation !== 'soulmate' && (p.status === 'active' || p.status === 'paused'),
+    )
+    .sort((a, b) => getDaysInOrbit(b) - getDaysInOrbit(a));
 
   function getDisplayName(partnership: Partnership): string {
     const other =
@@ -93,8 +96,12 @@ export default function PartnersScreen() {
 
   return (
     <LoadingState loading={loading} error={error}>
-      <View style={commonStyles.screenList}>
-        <Text style={commonStyles.listScreenTitle}>Partners</Text>
+      <View style={{ flex: 1 }}>
+        <LinearGradient
+          colors={['#0a0a1a', '#1a1030', '#2a1545']}
+          style={StyleSheet.absoluteFill}
+        />
+        <Text style={[commonStyles.listScreenTitle, { color: colors.white, paddingTop: verticalScale(60) }]}>Partners</Text>
 
         <FlatList
           data={active}
@@ -105,7 +112,7 @@ export default function PartnersScreen() {
           }
           ListHeaderComponent={
             soulmate ? (
-              <Card variant="soulmate" testID="soulmate-card">
+              <Card variant="soulmate" testID="soulmate-card" onPress={() => navigation.navigate('Planet' as never, { partnershipId: soulmate.id } as never)}>
                 <Text style={styles.soulmateName}>You</Text>
                 <Text style={styles.soulmateHint}>Your personal journey</Text>
                 <StatDisplay stats={[
@@ -153,5 +160,7 @@ const styles = StyleSheet.create({
     marginHorizontal: scale(20),
     marginTop: scale(8),
     marginBottom: scale(20),
+    borderWidth: 1,
+    borderColor: colors.white,
   },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { default as Text } from './AppText';
 import { moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 

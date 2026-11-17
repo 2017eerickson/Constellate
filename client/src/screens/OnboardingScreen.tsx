@@ -4,12 +4,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   TextInput,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { ActionButton } from '../components';
+import { ActionButton, AppText as Text, LandingBackground } from '../components';
 import { scale, moderateScale } from '../styles/scale';
+import { APP_FONT } from '../styles/fonts';
 import { commonStyles } from '../styles/common';
 
 export default function OnboardingScreen() {
@@ -26,14 +26,17 @@ export default function OnboardingScreen() {
       return;
     }
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
-      Alert.alert('Invalid Date', 'Please enter your birthday as YYYY-MM-DD');
+    if (!/^\d{2}-\d{2}-\d{4}$/.test(birthday)) {
+      Alert.alert('Invalid Date', 'Please enter your birthday as MM-DD-YYYY');
       return;
     }
 
+    const [mm, dd, yyyy] = birthday.split('-');
+    const formattedBirthday = `${yyyy}-${mm}-${dd}`;
+
     setIsSubmitting(true);
     try {
-      await completeOnboarding(birthday, needsName ? firstName.trim() : undefined);
+      await completeOnboarding(formattedBirthday, needsName ? firstName.trim() : undefined);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Something went wrong';
       Alert.alert('Error', message);
@@ -43,19 +46,21 @@ export default function OnboardingScreen() {
   }
 
   return (
+    <LandingBackground>
     <KeyboardAvoidingView
-      style={commonStyles.screenCentered}
+      style={[commonStyles.screenCentered, styles.transparent]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={[commonStyles.screenTitle, styles.titleSpacing]}>
+      <Text style={[commonStyles.screenTitle, styles.titleSpacing, styles.whiteText]}>
         {needsName ? 'Welcome!' : `Welcome, ${user?.first_name}!`}
       </Text>
-      <Text style={[commonStyles.subtitle, styles.subtitleSpacing]}>Let's get to know you</Text>
+      <Text style={[commonStyles.subtitle, styles.subtitleSpacing, styles.lightText]}>Let's get to know you</Text>
 
       {needsName && (
         <TextInput
-          style={[commonStyles.inputBordered, styles.inputOverride]}
+          style={[commonStyles.inputBordered, styles.inputOverride, styles.frostedInput]}
           placeholder="First Name"
+          placeholderTextColor="rgba(255,255,255,0.5)"
           testID="onboarding-name-input"
           value={firstName}
           onChangeText={setFirstName}
@@ -65,12 +70,19 @@ export default function OnboardingScreen() {
       )}
 
       <TextInput
-        style={[commonStyles.inputBordered, styles.inputOverride]}
-        placeholder="YYYY-MM-DD"
+        style={[commonStyles.inputBordered, styles.inputOverride, styles.frostedInput]}
+        placeholder="MM-DD-YYYY"
+        placeholderTextColor="rgba(255,255,255,0.5)"
         testID="onboarding-birthday-input"
         value={birthday}
-        onChangeText={setBirthday}
-        keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
+        onChangeText={(text) => {
+          const digits = text.replace(/\D/g, '');
+          let formatted = digits;
+          if (digits.length > 2) formatted = digits.slice(0, 2) + '-' + digits.slice(2);
+          if (digits.length > 4) formatted = digits.slice(0, 2) + '-' + digits.slice(2, 4) + '-' + digits.slice(4, 8);
+          setBirthday(formatted);
+        }}
+        keyboardType="number-pad"
         maxLength={10}
         editable={!isSubmitting}
       />
@@ -85,10 +97,20 @@ export default function OnboardingScreen() {
         style={styles.button}
       />
     </KeyboardAvoidingView>
+    </LandingBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  transparent: {
+    backgroundColor: 'transparent',
+  },
+  whiteText: {
+    color: '#fff',
+  },
+  lightText: {
+    color: 'rgba(255,255,255,0.8)',
+  },
   titleSpacing: {
     marginBottom: moderateScale(8),
   },
@@ -99,6 +121,12 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(18),
     textAlign: 'center',
     marginBottom: scale(16),
+  },
+  frostedInput: {
+    fontFamily: APP_FONT,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(255,255,255,0.3)',
+    color: '#fff',
   },
   button: {
     paddingHorizontal: scale(32),

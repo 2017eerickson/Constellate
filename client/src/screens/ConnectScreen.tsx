@@ -4,11 +4,12 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
+import { AppText as Text } from '../components';
 import {
   acceptPartnership,
   connectPartner,
@@ -17,7 +18,7 @@ import {
 } from '../services/partnerships';
 import { Partnership } from '../types';
 import { ActionButton, Card, EmptyState, SectionHeader } from '../components';
-import { scale, moderateScale } from '../styles/scale';
+import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';
 
@@ -51,10 +52,17 @@ export default function ConnectScreen() {
     if (!partnerCode.trim()) return;
     setConnecting(true);
     try {
+      // Convert MM-DD-YYYY to YYYY-MM-DD for the backend
+      let formattedAnniversary: string | undefined;
+      const raw = anniversary.trim();
+      if (raw) {
+        const [mm, dd, yyyy] = raw.split('-');
+        formattedAnniversary = `${yyyy}-${mm}-${dd}`;
+      }
       await connectPartner(
         partnerCode.trim(),
         relation.trim() || undefined,
-        anniversary.trim() || undefined,
+        formattedAnniversary,
       );
       setPartnerCode('');
       setRelation('');
@@ -150,13 +158,18 @@ export default function ConnectScreen() {
   }
 
   return (
-    <View style={commonStyles.screenList}>
-      <Text style={commonStyles.listScreenTitle}>Connect</Text>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#0a0a1a', '#1a1030', '#2a1545']}
+        style={StyleSheet.absoluteFill}
+      />
+      <Text style={[commonStyles.listScreenTitle, { color: colors.white, paddingTop: verticalScale(60) }]}>Connect</Text>
 
       <Card style={styles.formCard}>
         <TextInput
           style={commonStyles.input}
           placeholder="Partner code"
+          placeholderTextColor={colors.textSecondary}
           testID="partner-code-input"
           value={partnerCode}
           onChangeText={setPartnerCode}
@@ -166,6 +179,7 @@ export default function ConnectScreen() {
         <TextInput
           style={commonStyles.input}
           placeholder="romantic, platonic, metamour..."
+          placeholderTextColor={colors.textSecondary}
           testID="relation-input"
           value={relation}
           onChangeText={setRelation}
@@ -173,10 +187,19 @@ export default function ConnectScreen() {
         />
         <TextInput
           style={commonStyles.input}
-          placeholder="Anniversary YYYY-MM-DD (optional)"
+          placeholder="Anniversary MM-DD-YYYY (optional)"
+          placeholderTextColor={colors.textSecondary}
           testID="anniversary-input"
           value={anniversary}
-          onChangeText={setAnniversary}
+          onChangeText={(text) => {
+            const digits = text.replace(/\D/g, '');
+            let formatted = digits;
+            if (digits.length > 2) formatted = digits.slice(0, 2) + '-' + digits.slice(2);
+            if (digits.length > 4) formatted = digits.slice(0, 2) + '-' + digits.slice(2, 4) + '-' + digits.slice(4, 8);
+            setAnniversary(formatted);
+          }}
+          keyboardType="number-pad"
+          maxLength={10}
           keyboardType="numbers-and-punctuation"
         />
         <ActionButton

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import Constants from 'expo-constants';
 import { useAuth } from '../context/AuthContext';
 import { deactivateAccount } from '../services/auth';
-import { Card, ActionButton, SectionHeader } from '../components';
+import { AppText as Text, Card, ActionButton, SectionHeader } from '../components';
 import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 

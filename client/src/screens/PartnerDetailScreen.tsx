@@ -4,12 +4,13 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { AppText as Text } from '../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -32,8 +33,9 @@ import {
   StatDisplay,
   StatusBadge,
 } from '../components';
-import { scale, moderateScale } from '../styles/scale';
+import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
+import { APP_FONT } from '../styles/fonts';
 import { commonStyles } from '../styles/common';
 
 type EditingMode = 'none' | 'partnership' | 'dates';
@@ -202,7 +204,10 @@ export default function PartnerDetailScreen() {
     if (!title.trim() || !date.trim()) return;
     setAdding(true);
     try {
-      await createSpecialDate(partnershipId, title.trim(), date.trim());
+      // Convert MM-DD-YYYY to YYYY-MM-DD for the backend
+      const [mm, dd, yyyy] = date.trim().split('-');
+      const formattedDate = `${yyyy}-${mm}-${dd}`;
+      await createSpecialDate(partnershipId, title.trim(), formattedDate);
       setTitle('');
       setDate('');
       fetchData();
@@ -239,7 +244,11 @@ export default function PartnerDetailScreen() {
   }
 
   return (
-    <View style={commonStyles.screenBase}>
+    <View style={{ flex: 1 }}>
+        <LinearGradient
+          colors={['#0a0a1a', '#1a1030', '#2a1545']}
+          style={StyleSheet.absoluteFill}
+        />
         <FlatList
           data={specialDates}
           keyExtractor={(item) => item.id.toString()}
@@ -258,7 +267,7 @@ export default function PartnerDetailScreen() {
                         style={styles.cancelIcon}
                         onPress={cancelEditing}
                       >
-                        <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
+                        <MaterialIcons name="close" size={scale(20)} color={colors.white} />
                       </TouchableOpacity>
                       <TouchableOpacity
                         testID="save-partnership-button"
@@ -298,6 +307,7 @@ export default function PartnerDetailScreen() {
                       setItems={setStatusItems}
                       style={styles.dropdown}
                       dropDownContainerStyle={styles.dropdownContainer}
+                      textStyle={{ fontFamily: APP_FONT }}
                       listMode="SCROLLVIEW"
                     />
                   </>
@@ -335,10 +345,11 @@ export default function PartnerDetailScreen() {
 
               {/* Special Dates header */}
               {editingMode === 'dates' ? (
-                <SectionHeader title="Special Dates" />
+                <SectionHeader title="Special Dates" titleStyle={{ color: colors.white }} />
               ) : (
                 <SectionHeader
                   title="Special Dates"
+                  titleStyle={{ color: colors.white }}
                   onEdit={startEditDates}
                   editDisabled={isEditing}
                   editTestID="edit-dates-button"
@@ -378,7 +389,7 @@ export default function PartnerDetailScreen() {
               <Card style={styles.dateCard}>
                 <View style={styles.dateRow}>
                   <Text style={styles.dateTitle}>{item.title}</Text>
-                  <Text style={styles.dateValue}>{item.date}</Text>
+                  <Text style={styles.dateValue}>{item.date.split('-').slice(1).concat(item.date.split('-')[0]).join('-')}</Text>
                 </View>
               </Card>
             );
@@ -391,7 +402,7 @@ export default function PartnerDetailScreen() {
               {editingMode === 'dates' && (
                 <View style={styles.dateActions}>
                   <TouchableOpacity testID="cancel-dates-button" style={styles.cancelIcon} onPress={cancelEditing}>
-                    <MaterialIcons name="close" size={scale(20)} color={colors.textSecondary} />
+                    <MaterialIcons name="close" size={scale(20)} color={colors.white} />
                   </TouchableOpacity>
                   <TouchableOpacity testID="save-dates-button" style={styles.saveIcon} onPress={handleSaveDates}>
                     <MaterialIcons name="save" size={scale(20)} color={colors.white} />
@@ -400,21 +411,30 @@ export default function PartnerDetailScreen() {
               )}
 
               <View style={styles.addForm}>
-                <SectionHeader title="Add a Special Date" style={{ paddingHorizontal: 0 }} />
+                <SectionHeader title="Add a Special Date" titleStyle={{ color: colors.white }} style={{ paddingHorizontal: 0 }} />
                 <TextInput
                   style={commonStyles.input}
                   placeholder="Title (e.g. First Trip)"
+                  placeholderTextColor={colors.textSecondary}
                   testID="add-date-title-input"
                   value={title}
                   onChangeText={setTitle}
                 />
                 <TextInput
                   style={commonStyles.input}
-                  placeholder="Date YYYY-MM-DD"
+                  placeholder="Date MM-DD-YYYY"
+                  placeholderTextColor={colors.textSecondary}
                   testID="add-date-input"
                   value={date}
-                  onChangeText={setDate}
-                  keyboardType="numbers-and-punctuation"
+                  onChangeText={(text) => {
+                    const digits = text.replace(/\D/g, '');
+                    let formatted = digits;
+                    if (digits.length > 2) formatted = digits.slice(0, 2) + '-' + digits.slice(2);
+                    if (digits.length > 4) formatted = digits.slice(0, 2) + '-' + digits.slice(2, 4) + '-' + digits.slice(4, 8);
+                    setDate(formatted);
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={10}
                 />
                 <ActionButton
                   onPress={handleAddDate}
@@ -434,7 +454,7 @@ export default function PartnerDetailScreen() {
 
 const styles = StyleSheet.create({
   topCard: {
-    marginTop: scale(20),
+    marginTop: verticalScale(110),
     marginBottom: scale(24),
   },
   cardHeaderSpacing: {
@@ -445,12 +465,12 @@ const styles = StyleSheet.create({
     gap: scale(8),
   },
   cancelIcon: {
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.error,
     borderRadius: scale(6),
     padding: scale(6),
   },
   saveIcon: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.success,
     borderRadius: scale(6),
     padding: scale(6),
   },
@@ -458,6 +478,7 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   editInput: {
+    fontFamily: APP_FONT,
     backgroundColor: colors.background,
     borderRadius: scale(8),
     padding: scale(10),
@@ -496,6 +517,7 @@ const styles = StyleSheet.create({
   },
   dateEditInput: {
     flex: 1,
+    fontFamily: APP_FONT,
     backgroundColor: colors.background,
     borderRadius: scale(6),
     padding: scale(8),
@@ -503,6 +525,7 @@ const styles = StyleSheet.create({
   },
   dateEditInputSmall: {
     width: scale(110),
+    fontFamily: APP_FONT,
     backgroundColor: colors.background,
     borderRadius: scale(6),
     padding: scale(8),
@@ -532,8 +555,12 @@ const styles = StyleSheet.create({
   visitPlanetButton: {
     marginBottom: scale(16),
     marginHorizontal: scale(20),
+    borderWidth: 1,
+    borderColor: colors.white,
   },
   addButton: {
     marginTop: scale(4),
+    borderWidth: 1,
+    borderColor: colors.white,
   },
 });

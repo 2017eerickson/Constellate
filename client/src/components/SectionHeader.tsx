@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ViewStyle, StyleProp } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ViewStyle, TextStyle, StyleProp } from 'react-native';
+import { default as Text } from './AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
@@ -10,12 +11,13 @@ interface SectionHeaderProps {
   editDisabled?: boolean;
   editTestID?: string;
   style?: StyleProp<ViewStyle>;
+  titleStyle?: StyleProp<TextStyle>;
 }
 
-export default function SectionHeader({ title, onEdit, editDisabled = false, editTestID, style }: SectionHeaderProps) {
+export default function SectionHeader({ title, onEdit, editDisabled = false, editTestID, style, titleStyle }: SectionHeaderProps) {
   return (
     <View style={[styles.container, style]}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, titleStyle]}>{title}</Text>
       {onEdit && (
         <TouchableOpacity
           onPress={onEdit}

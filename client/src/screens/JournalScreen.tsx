@@ -6,11 +6,11 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
 import { Canvas, Rect, LinearGradient, vec } from '@shopify/react-native-skia';
+import { AppText as Text } from '../components';
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -19,6 +19,7 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 import { getCurrentQuestion, submitAnswer, skipQuestion } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
+import { APP_FONT } from '../styles/fonts';
 import { moderateScale, verticalScale } from '../styles/scale';
 import ActivityPopup from '../components/ActivityPopup';
 import type { JournalResponse } from '../types';
@@ -351,12 +352,16 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
+    fontFamily: APP_FONT,
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: moderateScale(20),
     paddingHorizontal: moderateScale(16),
-    paddingVertical: moderateScale(10),
+    paddingTop: moderateScale(10),
+    paddingBottom: moderateScale(10),
     color: colors.white,
     fontSize: moderateScale(15),
+    lineHeight: moderateScale(20),
+    textAlignVertical: 'center',
     maxHeight: verticalScale(120),
   },
   sendButton: {

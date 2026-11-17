@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useFonts, SyneMono_400Regular } from '@expo-google-fonts/syne-mono';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -51,9 +52,9 @@ function MainTabs() {
         tabBarStyle: { paddingBottom: 8, paddingTop: 8, height: 60 },
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarButtonTestID: 'home-tab' }} />
       <Tab.Screen name="Constellation" component={ConstellationScreen} options={{ tabBarButtonTestID: 'constellation-tab' }} />
       <Tab.Screen name="Partners" component={PartnersScreen} options={{ tabBarButtonTestID: 'partners-tab' }}   />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarButtonTestID: 'home-tab' }} />
     </Tab.Navigator>
   );
 }
@@ -96,7 +97,13 @@ function AppNavigator() {
       <MainStack.Screen
         name="PartnerDetail"
         component={PartnerDetailScreen}
-        options={{ headerShown: true, headerTitle: '' }}
+        options={{
+          headerShown: true,
+          headerTitle: '',
+          headerTransparent: true,
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontFamily: 'SyneMono_400Regular' },
+        }}
       />
       <MainStack.Screen
         name="Planet"
@@ -118,9 +125,19 @@ function AppNavigator() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({ SyneMono_400Regular });
+
   useEffect(() => {
     configureGoogleSignIn();
   }, []);
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

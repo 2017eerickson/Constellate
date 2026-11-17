@@ -5,19 +5,21 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFonts, Megrim_400Regular } from '@expo-google-fonts/megrim';
 import { useAuth } from '../context/AuthContext';
-import { ActionButton } from '../components';
+import { ActionButton, AppText as Text, LandingBackground } from '../components';
 import { scale, moderateScale } from '../styles/scale';
 import { colors } from '../styles/colors';
+import { APP_FONT } from '../styles/fonts';
 import { commonStyles } from '../styles/common';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function SignInScreen() {
+  const [fontsLoaded] = useFonts({ Megrim_400Regular });
   const { signIn, signInWithEmail, register } = useAuth();
   const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,12 +72,18 @@ export default function SignInScreen() {
   const busy = isGoogleSigningIn || isSubmitting;
 
   return (
+    <LandingBackground>
     <KeyboardAvoidingView
-      style={commonStyles.screenCentered}
+      style={[commonStyles.screenCentered, styles.transparent]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Constellate</Text>
-      <Text style={[commonStyles.subtitle, styles.subtitleSpacing]}>Your relationships, gamified</Text>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>Constellate</Text>
+        <Text style={[styles.title, styles.titleShadow1]}>Constellate</Text>
+        <Text style={[styles.title, styles.titleShadow2]}>Constellate</Text>
+        <Text style={[styles.title, styles.titleShadow3]}>Constellate</Text>
+      </View>
+      <Text style={[commonStyles.subtitle, styles.subtitleSpacing, styles.lightText]}>Your relationships, gamified</Text>
 
       <ActionButton
         variant="google"
@@ -97,8 +105,9 @@ export default function SignInScreen() {
       {isRegisterMode && (
       <View style={{ position: 'relative', width: '80%' }}>
         <TextInput
-          style={commonStyles.inputBordered}
+          style={[commonStyles.inputBordered, styles.frostedInput]}
           placeholder="First Name"
+          placeholderTextColor="rgba(255,255,255,0.5)"
           testID="first-name-input"
           value={firstName}
           onChangeText={setFirstName}
@@ -109,8 +118,9 @@ export default function SignInScreen() {
       )}
       <View style={{ position: 'relative', width: '80%' }}>
         <TextInput
-          style={commonStyles.inputBordered}
+          style={[commonStyles.inputBordered, styles.frostedInput]}
           placeholder="Email"
+          placeholderTextColor="rgba(255,255,255,0.5)"
           testID="email-input"
           value={email}
           onChangeText={setEmail}
@@ -122,8 +132,9 @@ export default function SignInScreen() {
       </View>
       <View style={{ position: 'relative', width: '80%' }}>
         <TextInput
-          style={commonStyles.inputBordered}
+          style={[commonStyles.inputBordered, styles.frostedInput]}
           placeholder="Password"
+          placeholderTextColor="rgba(255,255,255,0.5)"
           testID="password-input"
           value={password}
           onChangeText={setPassword}
@@ -165,16 +176,44 @@ export default function SignInScreen() {
         </Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
+    </LandingBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: moderateScale(36),
-    fontWeight: 'bold',
+  transparent: {
+    backgroundColor: 'transparent',
+  },
+  titleContainer: {
+    position: 'relative',
     marginBottom: moderateScale(8),
   },
+  title: {
+    fontSize: moderateScale(50.4),
+    fontFamily: 'Megrim_400Regular',
+    color: '#fff',
+  },
+  titleShadow1: {
+    position: 'absolute',
+    left: 0.8,
+    top: 0,
+  },
+  titleShadow2: {
+    position: 'absolute',
+    left: 0,
+    top: 0.8,
+  },
+  titleShadow3: {
+    position: 'absolute',
+    left: 0.8,
+    top: 0.8,
+  },
+  lightText: {
+    color: 'rgba(255,255,255,0.8)',
+  },
   subtitleSpacing: {
+    fontSize: moderateScale(17.6),
+    color: '#fff',
     marginBottom: scale(40),
   },
   googleButton: {
@@ -192,12 +231,18 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.borderLight,
+    backgroundColor: 'rgba(255,255,255,0.3)',
   },
   dividerText: {
     marginHorizontal: scale(12),
-    color: colors.textMuted,
+    color: 'rgba(255,255,255,0.6)',
     fontSize: moderateScale(14),
+  },
+  frostedInput: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(255,255,255,0.3)',
+    color: '#fff',
+    fontFamily: APP_FONT,
   },
   emailButton: {
     width: '80%',
@@ -208,7 +253,7 @@ const styles = StyleSheet.create({
     padding: undefined,
   },
   toggleText: {
-    color: colors.googleBlue,
+    color: 'rgba(255,255,255,0.8)',
     fontSize: moderateScale(14),
   },
 });

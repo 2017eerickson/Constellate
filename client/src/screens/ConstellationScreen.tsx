@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import { Canvas, Circle, Line, LinearGradient, Rect, vec, Blur } from '@shopify/react-native-skia';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import { AppText as Text } from '../components';
+import { Canvas, Circle, Line, vec, Blur } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   FadeIn,
@@ -20,6 +21,7 @@ import { getMetamours, getPartnerships } from '../services/partnerships';
 import { getUnreadCounts, UnreadCounts } from '../services/activities';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
+import LandingBackground from '../components/LandingBackground';
 import { moderateScale } from '../styles/scale';
 import type { Partnership } from '../types';
 
@@ -289,19 +291,11 @@ export default function ConstellationScreen() {
   }));
 
   return (
+    <LandingBackground>
     <View style={styles.container}>
       <GestureDetector gesture={composedGesture}>
         <Animated.View style={[styles.zoomContainer, animatedZoomStyle]}>
         <Canvas style={styles.canvas}>
-          {/* Background gradient */}
-          <Rect x={0} y={0} width={SCREEN_W} height={SCREEN_H}>
-            <LinearGradient
-              start={vec(SCREEN_W / 2, 0)}
-              end={vec(SCREEN_W / 2, SCREEN_H)}
-              colors={[colors.skyPurple, colors.skyDark]}
-            />
-          </Rect>
-
           {/* TODO: metamour constellation lines — commented out for MVP */}
           {/* {metamours.map(([pkA, pkB]) => {
             const a = userPkToStar.get(pkA);
@@ -400,13 +394,13 @@ export default function ConstellationScreen() {
       {/* Glow overlay — white wash that covers the screen like the star's light consuming everything */}
       <Animated.View style={[styles.glowOverlay, glowOverlayStyle]} pointerEvents="none" />
     </View>
+    </LandingBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.skyDark,
   },
   zoomContainer: {
     flex: 1,
