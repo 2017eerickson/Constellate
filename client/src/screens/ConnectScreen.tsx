@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { AppText as Text } from '../components';
 import {
@@ -17,7 +18,7 @@ import {
 } from '../services/partnerships';
 import { Partnership } from '../types';
 import { ActionButton, Card, EmptyState, SectionHeader } from '../components';
-import { scale, moderateScale } from '../styles/scale';
+import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';
 
@@ -157,8 +158,12 @@ export default function ConnectScreen() {
   }
 
   return (
-    <View style={commonStyles.screenList}>
-      <Text style={commonStyles.listScreenTitle}>Connect</Text>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={['#0a0a1a', '#1a1030', '#2a1545']}
+        style={StyleSheet.absoluteFill}
+      />
+      <Text style={[commonStyles.listScreenTitle, { color: colors.white, paddingTop: verticalScale(60) }]}>Connect</Text>
 
       <Card style={styles.formCard}>
         <TextInput

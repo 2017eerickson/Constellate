@@ -356,9 +356,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: moderateScale(20),
     paddingHorizontal: moderateScale(16),
-    paddingVertical: moderateScale(10),
+    paddingTop: moderateScale(10),
+    paddingBottom: moderateScale(10),
     color: colors.white,
     fontSize: moderateScale(15),
+    lineHeight: moderateScale(20),
+    textAlignVertical: 'center',
     maxHeight: verticalScale(120),
   },
   sendButton: {
