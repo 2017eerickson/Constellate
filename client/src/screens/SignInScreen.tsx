@@ -60,10 +60,24 @@ export default function SignInScreen() {
         await signInWithEmail(email.trim(), password);
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Something went wrong';
-      Alert.alert(isRegisterMode ? 'Registration Failed' : 'Sign In Failed', 
-        (error as { status: number }).status === 400 ? 'Password is too weak. Password must be 8 characters long and it cant only contain numbers' 
-        : (error as { status: number }).status === 401 ? 'Username or password is incorrect' : message);
+      const axiosError = error as { status?: number; response?: { data?: Record<string, string[]> } };
+      let alertMessage = error instanceof Error ? error.message : 'Something went wrong';
+      const alertTitle = isRegisterMode ? 'Registration Failed' : 'Sign In Failed';
+
+      if (axiosError.status === 401) {
+        alertMessage = 'Username or password is incorrect';
+      } else if (axiosError.status === 400 && axiosError.response?.data) {
+        const errors = axiosError.response.data;
+        if (errors.email) {
+          alertMessage = errors.email.join(' ');
+        } else if (errors.password) {
+          alertMessage = errors.password.join(' ');
+        } else {
+          alertMessage = Object.values(errors).flat().join(' ');
+        }
+      }
+
+      Alert.alert(alertTitle, alertMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -12,13 +12,13 @@ import { useAuth } from '../context/AuthContext';
 import { getPartnerships } from '../services/partnerships';
 import { Partnership } from '../types';
 import {
-  ActionButton,
   Card,
   EmptyState,
   LoadingState,
   StatDisplay,
   StatusBadge,
 } from '../components';
+import AddPartnerButton from '../components/AddPartnerButton';
 import { scale, moderateScale, verticalScale } from '../styles/scale';
 import { colors } from '../styles/colors';
 import { commonStyles } from '../styles/common';
@@ -123,12 +123,7 @@ export default function PartnersScreen() {
             ) : null
           }
           ListFooterComponent={
-            <ActionButton
-              onPress={() => navigation.navigate('Connect' as never)}
-              text="+ Add a Partner"
-              testID="add-partner-button"
-              style={styles.addButton}
-            />
+            <AddPartnerButton style={styles.addButton} />
           }
           ListEmptyComponent={
             <EmptyState message="No active partnerships yet" />
@@ -155,12 +150,8 @@ const styles = StyleSheet.create({
     marginBottom: scale(4),
   },
   addButton: {
-    borderRadius: scale(12),
-    padding: scale(16),
     marginHorizontal: scale(20),
     marginTop: scale(8),
     marginBottom: scale(20),
-    borderWidth: 1,
-    borderColor: colors.white,
   },
 });

@@ -212,7 +212,8 @@ export default function ConnectScreen() {
         />
       </Card>
 
-      <SectionHeader title="Pending" />
+      <SectionHeader title="Pending" titleStyle={{ color:'white' }} />
+
       {fetchError && (
         <Text style={[commonStyles.errorText, styles.errorSpacing]}>Something went wrong. Pull down to refresh.</Text>
       )}
